@@ -1,0 +1,43 @@
+{
+    "site": {
+        "async": "",
+        "application": "main",
+        "theme": "default",
+        "explainOnSelect": "",
+        "multilanguage": "",
+        "emailContact": "me@arnaud-nicolas.fr",
+        "translateURL": false,
+        "defaultLanguage": "fr",
+        "currentLanguage": "fr",
+        "template404": "template.404.tpl",
+        "backoffice": "admin",
+        "session": "php_fw",
+        "inlineHTMLCode": ""
+    },
+    "server": {
+        "smtp": ""
+    },
+    "db": {
+        "default":
+        {
+            "handler":"core\\db\\handler\\MysqlHandler",
+            "host":"localhost",
+            "user":"root",
+            "password":"",
+            "name":"fwphp"
+        }
+    },
+    "application":
+    {
+        "debug":true
+    },
+    "authentification":
+    {
+        "tableName": "%s_user",
+        "tableId": "id_user",
+        "fieldPassword": "password_user",
+        "fieldLogin": "login_user",
+        "fieldPermissions": "permissions_user",
+        "useGroup": ""
+    }
+}

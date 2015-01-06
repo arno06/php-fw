@@ -1,0 +1,17 @@
+[
+    {
+        "default":true,
+        "label":"Users",
+        "controller":"user",
+        "action":"listing",
+        "parameters":{
+            "order":"name_user",
+            "by":"asc"
+        }
+    },
+    {
+        "label":"Language",
+        "controller":"language",
+        "action":"listing"
+    }
+]

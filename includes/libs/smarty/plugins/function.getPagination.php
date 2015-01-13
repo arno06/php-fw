@@ -1,4 +1,7 @@
 <?php
+use core\application\Core;
+use core\application\Dictionary;
+
 function smarty_function_getPagination($params, &$smarty)
 {
 	$test = false;

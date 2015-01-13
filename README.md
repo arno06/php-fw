@@ -1,4 +1,14 @@
-#todo
+# namespaces
+namespace | contexte | description
+--------------|------------|--------------
+core\\ *{subPackage}* \ |Global |Classes & interfaces du package core
+lib\\ *{package}* \\ *{subPackage}* |Global |Classes & interfaces des packages secondaire
+app\\ *{appName}* \\models |Application |Modèles de l'application *appName*
+app\\ *{appName}* \\controllers\\ front |Application|Controllers de front de l'application *appName*
+app\\ *{appName}* \\controllers\\ back |Application |Controllers de back de l'application *appName*
+app\\ *{appName}* \\src\\ *{subPackage}* |Application |Classes & interfaces de l'application *{appName}*
+
+# todo
     v2
         Form:
             getInput
@@ -47,7 +57,7 @@
             "label":"Datepicker",
             "tag":"datepicker"
         }
-    UPLOAD
+    UPLOAD  
         {
             "label":"Fichier",
             "tag":"upload"
@@ -71,7 +81,7 @@
             }
         }
     CHECKBOXGROUP
-        {
+        `{
             "label":"Checkboxgroup",
             "tag":"checkboxgroup",
             "height":"200px",
@@ -83,4 +93,4 @@
                 "name":"field_name",
                 "value":"field_name_id"
             }
-        }
+        }`

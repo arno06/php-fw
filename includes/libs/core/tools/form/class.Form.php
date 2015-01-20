@@ -1127,8 +1127,7 @@ namespace core\tools\form
 			if(!isset($pData["options"])||!is_array($pData["options"]))
 				return "";
 			$style = "overflow:auto;";
-			if(isset($pData["attributes"]["value"]))
-				if(isset($pData["height"]))
+			if(isset($pData["height"]))
 					$style .= "height:".$pData["height"].";";
 			if(isset($pData["width"]))
 				$style .= "width:".$pData["width"].";";
@@ -1138,10 +1137,12 @@ namespace core\tools\form
 			if(isset($pData["display"])&&$pData["display"]=="block")
 				$style = " style='display:block;'";
 			$values = array();
-
-			for($i = 0, $max = count($pData["attributes"]["value"]);$i<$max;$i++)			{
-				array_push($values, $pData["attributes"]["value"][$i]);
+			if(isset($pData["attributes"]["value"])) {
+				for ($i = 0, $max = count($pData["attributes"]["value"]); $i < $max; $i++) {
+					array_push($values, $pData["attributes"]["value"][$i]);
+				}
 			}
+
 			if(!empty($pData["options"]))
 			{
 				foreach($pData["options"] as $opt)

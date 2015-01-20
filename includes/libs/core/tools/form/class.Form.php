@@ -1124,38 +1124,43 @@ namespace core\tools\form
 
 		static private function checkboxgroup($pName, $pId,$pData, $pRequire = "")
 		{
-			$values = array();
-			if(isset($pData["attributes"]["value"]))
-			{
-				for($i = 0, $max = count($pData["attributes"]["value"]);$i<$max;$i++)
-					array_push($values, $pData["attributes"]["value"][$i]);
-			}
+			if(!isset($pData["options"])||!is_array($pData["options"]))
+				return "";
 			$style = "overflow:auto;";
-			if(isset($pData["height"]))
-				$style .= "height:".$pData["height"].";";
+			if(isset($pData["attributes"]["value"]))
+				if(isset($pData["height"]))
+					$style .= "height:".$pData["height"].";";
 			if(isset($pData["width"]))
 				$style .= "width:".$pData["width"].";";
-			$component = "<div style='".$style."' class='checkboxgroup'><table cellpadding='0' cellspacing='0'>";
-			$ct = 0;
+			$group = "<div class='checkboxgroup' style='".$style."'>";
+			$i = 0;
+			$style = "";
+			if(isset($pData["display"])&&$pData["display"]=="block")
+				$style = " style='display:block;'";
+			$values = array();
+
+			for($i = 0, $max = count($pData["attributes"]["value"]);$i<$max;$i++)			{
+				array_push($values, $pData["attributes"]["value"][$i]);
+			}
 			if(!empty($pData["options"]))
 			{
 				foreach($pData["options"] as $opt)
 				{
 					$value = $opt["value"];
-					$label = $opt["name"];
+					$label = $opt["label"];
+					$i++;
 					$defaultChecked = $opt["checked"];
-					$ct++;
 					$c = "";
 					if($defaultChecked || in_array($value, $values))
 						$c = " checked";
-					$component .= "<tr><td><input type='checkbox' name='".$pName."[]' id='".$pName."_".$ct."' value='".$value."'".$c."/></td><td>&nbsp;&nbsp;<label for='".$pName."_".$ct."'>".$label."</label></td></tr>";
+					$group .= "<span class='checkbox'><input type='checkbox' name='".$pName."[]' id='".$pName."_".$i."' value='".$value."'".$c."/>&nbsp;&nbsp;<label for='".$pName."_".$i."'>".$label."</label></span>";
 				}
 			}
 			else
-				$component .= "<tr class='empty'><td>".Dictionary::term("global.forms.noAvailableValue")."</td></tr>";
-			$component .= '</table></div>';
+				$group .= "<span class='empty'>".Dictionary::term("global.forms.noAvailableValue")."</span>";
+			$group .= '</div>';
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
-			$input .= self::getComponent($component);
+			$input .= self::getComponent($group);
 			return $input;
 		}
 

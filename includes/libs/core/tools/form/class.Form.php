@@ -485,7 +485,10 @@ namespace core\tools\form
 				}
 
 				if($data["require"]==false&&empty($this->post[$name]))
+				{
+					$this->applyModifiers($data["outputModifiers"], $name);
 					continue;
+				}
 				if($data["require"]==true&&empty($data["regExp"]))
 				{
 					trigger_error("Les champs obligatoires doivent nécessairement renseigner une expression réguliére &agrave; respecter !<br/>Formulaire <b>".$this->name."</b> champ <b>".$name."</b>", E_USER_ERROR);

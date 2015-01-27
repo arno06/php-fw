@@ -22,19 +22,19 @@
                 </div>
             </div>
 			<div class="debug_buttons">
-				<div rel="trace">
+				<div rel="trace" class="messages">
 					<span>&nbsp;</span>Traces&nbsp; <span class="count">({$count.trace})</span>
 				</div>
-                <div rel="notice">
+				<div rel="notice" class="messages">
 					<span>&nbsp;</span>Notices <span class="count">({$count.notice})</span>
 				</div>
-				<div rel="warning">
+				<div rel="warning" class="messages">
 					<span>&nbsp;</span>Warnings <span class="count">({$count.warning})</span>
 				</div>
-				<div rel="error">
+				<div rel="error" class="messages">
 					<span>&nbsp;</span>Erreurs & Exceptions <span class="count">({$count.error})</span>
 				</div>
-				<div rel="query">
+				<div rel="query" class="messages">
 					<span>&nbsp;</span>Requ&ecirc;tes SQL <span class="count">({$count.query})</span>
 				</div>
 				<div rel="cookie" class="vars disabled">

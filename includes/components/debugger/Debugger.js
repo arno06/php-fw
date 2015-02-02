@@ -95,9 +95,28 @@ var Debugger =
 	{
 		e.preventDefault();
 		var t = e.target.nodeName.toLowerCase()!="div" ? e.target.parentNode : e.target;
-        t.classList.toggle("disabled");
+		if (!t.toggle_alone) {
+			t.toggle_alone = false;
+		}
+
+		if (e.altKey) {
+			if (!t.toggle_alone) {
+				t.parentElement.querySelectorAll('.messages').forEach(function(el){
+					el.classList.add('disabled');
+				});
+				t.toggle_alone = true;
+			} else {
+				t.parentElement.querySelectorAll('.messages').forEach(function(el){
+					el.classList.remove('disabled');
+				});
+				t.toggle_alone = false;
+			}
+
+			t.classList.remove('disabled');
+		} else {
+			t.classList.toggle("disabled");
+		}
 		Debugger.updateConsole();
-	}
-};
+	}};
 NodeList.prototype.forEach = Array.prototype.forEach;
 window.addEventListener("load", Debugger.__init);

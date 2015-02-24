@@ -720,9 +720,8 @@ namespace core\tools\form
 						break;
 					case self::TAG_UPLOAD:
 						trace("you must handle upload");
-						Autoload::addScript("Uploader");
+						Autoload::addComponent("Uploader");
 						Autoload::addScript("M4Tween");
-						Autoload::addStyle('includes/components/uploader/Uploader.css', false);
 						$this->hasUpload = true;
 						break;
 					case self::TAG_INPUT:
@@ -733,9 +732,8 @@ namespace core\tools\form
 						if(isset($data["attributes"]["type"])
 							&& $data["attributes"]["type"]=="file")
 						{
-							Autoload::addScript("Uploader");
+							Autoload::addComponent("Uploader");
 							Autoload::addScript("M4Tween");
-							Autoload::addStyle('includes/components/uploader/Uploader.css', false);
 							$this->hasUpload = true;
 						}else if(isset($data["attributes"]["type"])
 							&& $data["attributes"]["type"]=="submit"
@@ -745,7 +743,7 @@ namespace core\tools\form
 						}
 						break;
 					case self::TAG_DATEPICKER:
-						Autoload::addScript("Pikaday");
+						Autoload::addComponent("Pikaday");
 						$this->hasDatePicker = true;
 						break;
 					case self::TAG_COLORPICKER:
@@ -914,8 +912,6 @@ namespace core\tools\form
 			if($pParams != null)
 				extract($pParams, EXTR_REFS);
 
-			if($this->hasDatePicker)
-				$output .= '<link type="text/css" rel="stylesheet" href="'.Core::$path_to_components.'/pikaday/pikaday.css"/>';
 			if(!$noForm)
 			{
 				$n = array();
@@ -1188,7 +1184,7 @@ namespace core\tools\form
 				else
 					$file .= $value;
 			}
-			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."'>";
+			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'>";
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
 			$input .= self::getComponent($comp, 'upload');
 			return $input;

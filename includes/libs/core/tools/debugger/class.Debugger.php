@@ -311,7 +311,7 @@ namespace core\tools\debugger
 		 */
 		static public function prepare()
 		{
-			Autoload::addScript("Debugger");
+			Autoload::addComponent("Debugger");
 		}
 
 		/**

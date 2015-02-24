@@ -5,32 +5,23 @@
 	},
     "M4Tween":
     {
-        "javascript":
-        {
-            "src":[
-                "http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=M4Tween"
-            ]
-        }
+        "javascript":[
+            "http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=M4Tween"
+        ]
     },
     "Form":
     {
         "javascript":
-        {
-            "src":
-                [
-                    "core/Form.js"
-                ]
-        }
+        [
+            "core/Form.js"
+        ]
     },
     "Backoffice":
     {
         "javascript":
-        {
-            "src":
-                [
-                    "core/Backoffice.js"
-                ]
-        }
+        [
+            "core/Backoffice.js"
+        ]
     },
     "Debugger":
     {
@@ -39,26 +30,20 @@
             "debugger/Debugger.css"
         ],
         "javascript":
-        {
-            "src":
-            [
-                "debugger/Debugger.js"
-            ]
-        }
+        [
+            "debugger/Debugger.js"
+        ]
     },
     "Uploader":
     {
         "css":
-            [
-                "uploader/Uploader.css"
-            ],
+        [
+            "uploader/Uploader.css"
+        ],
         "javascript":
-        {
-            "src":
-                [
-                    "uploader/Uploader.js"
-                ]
-        }
+        [
+            "uploader/Uploader.js"
+        ]
     },
     "Pikaday":
     {
@@ -67,11 +52,8 @@
             "pikaday/pikaday.css"
         ],
         "javascript":
-        {
-            "src":
-             [
-                 "pikaday/pikaday.js"
-             ]
-        }
+        [
+            "pikaday/pikaday.js"
+        ]
     }
 }

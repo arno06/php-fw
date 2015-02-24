@@ -271,7 +271,7 @@ namespace core\application
 			$_GET = array_merge($parsedURL["parameters"], $_GET);
 			self::$path_to_theme = Configuration::$server_url.$acces."themes/".Configuration::$site_application."/".Configuration::$site_theme."/".self::$module;
 
-			self::$path_to_templates = "themes/".Configuration::$site_application."/default/".self::$module."/views";
+			self::$path_to_templates = Autoload::$folder."/themes/".Configuration::$site_application."/default/".self::$module."/views";
 		}
 
 

@@ -1,17 +1,12 @@
 [
     {
         "default":true,
-        "label":"Users",
-        "controller":"user",
+        "label":"Sample",
+        "controller":"sample",
         "action":"listing",
         "parameters":{
-            "order":"name_user",
+            "order":"path_upload",
             "by":"asc"
         }
-    },
-    {
-        "label":"Language",
-        "controller":"language",
-        "action":"listing"
     }
 ]

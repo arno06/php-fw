@@ -1,4 +1,4 @@
-<?php /* Smarty version 2.6.18, created on 2014-12-02 14:57:12
+<?php /* Smarty version 2.6.18, created on 2015-02-24 16:05:59
          compiled from template.debugger.tpl */ ?>
 <?php if ($this->_tpl_vars['is_error']): ?>
 <!DOCTYPE html>
@@ -11,11 +11,11 @@
 		<script type="text/javascript" src="<?php echo $this->_tpl_vars['dir_to_components']; ?>
 /debugger/Debugger.js"></script>
         <script type="text/javascript">Debugger.error = true;</script>
+		<style type="text/css"><!--@import URL("<?php echo $this->_tpl_vars['dir_to_components']; ?>
+/debugger/Debugger.css");--></style>
 	</head>
 	<body>
 <?php endif; ?>
-		<style type="text/css"><!--@import URL("<?php echo $this->_tpl_vars['dir_to_components']; ?>
-/debugger/Debugger.css");--></style>
 		<div id="debug"<?php if ($this->_tpl_vars['open'] || $this->_tpl_vars['is_error']): ?> class="<?php if ($this->_tpl_vars['is_error']): ?>fullscreen<?php else: ?>maximized<?php endif; ?>"<?php endif; ?>>
             <div class="debug_bar">
                 <div class="debug_global">
@@ -29,23 +29,23 @@
                 </div>
             </div>
 			<div class="debug_buttons">
-				<div rel="trace">
+				<div rel="trace" class="messages">
 					<span>&nbsp;</span>Traces&nbsp; <span class="count">(<?php echo $this->_tpl_vars['count']['trace']; ?>
 )</span>
 				</div>
-                <div rel="notice">
+				<div rel="notice" class="messages">
 					<span>&nbsp;</span>Notices <span class="count">(<?php echo $this->_tpl_vars['count']['notice']; ?>
 )</span>
 				</div>
-				<div rel="warning">
+				<div rel="warning" class="messages">
 					<span>&nbsp;</span>Warnings <span class="count">(<?php echo $this->_tpl_vars['count']['warning']; ?>
 )</span>
 				</div>
-				<div rel="error">
+				<div rel="error" class="messages">
 					<span>&nbsp;</span>Erreurs & Exceptions <span class="count">(<?php echo $this->_tpl_vars['count']['error']; ?>
 )</span>
 				</div>
-				<div rel="query">
+				<div rel="query" class="messages">
 					<span>&nbsp;</span>Requ&ecirc;tes SQL <span class="count">(<?php echo $this->_tpl_vars['count']['query']; ?>
 )</span>
 				</div>

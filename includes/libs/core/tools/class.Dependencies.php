@@ -8,7 +8,7 @@ namespace core\tools
     /**
      * Class Dependencies
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 1.0
+     * @version 1.1
      * @todo minified + cache
      */
     class Dependencies
@@ -17,17 +17,30 @@ namespace core\tools
 
         const NEED_SEPARATOR = ',';
 
-        private $headers = array(
-            "Content-Type"=>"application/javascript"
-        );
+        const TYPE_JS = "javascript";
+
+        const TYPE_CSS = "css";
+
+        private $headers;
 
         private $output = "";
 
         private $manifest = "";
 
-        public function __construct()
-        {
+        private $type;
 
+        public function __construct($pType = self::TYPE_JS)
+        {
+            $this->type = $pType;
+            switch($this->type)
+            {
+                case self::TYPE_JS:
+                    $this->headers = array("Content-Type"=>"application/javascript");
+                    break;
+                case self::TYPE_CSS:
+                    $this->headers = array("Content-Type"=>"text/css");
+                    break;
+            }
         }
 
         public function retrieve()
@@ -69,15 +82,14 @@ namespace core\tools
             {
                 if(isset($this->manifest[$lib]))
                 {
-                    if(!isset($this->manifest[$lib]['javascript'])
-                        ||!isset($this->manifest[$lib]['javascript']["src"])
-                        ||!is_array($this->manifest[$lib]['javascript']["src"]))
+                    if(!isset($this->manifest[$lib][$this->type])
+                        ||!is_array($this->manifest[$lib][$this->type]))
                     {
                         $this->output .= $this->log($lib." is not available", "warn");
                         continue;
                     }
 
-                    $files = $this->manifest[$lib]['javascript']["src"];
+                    $files = $this->manifest[$lib][$this->type];
 
                     for($i = 0, $max = count($files); $i<$max;$i++)
                     {
@@ -118,12 +130,11 @@ namespace core\tools
                 if(isset($this->manifest[$lib]))
                 {
                     array_unshift($pFinalList, $lib);
-                    if(!isset($this->manifest[$lib]['javascript'])
-                        ||!isset($this->manifest[$lib]['javascript']["need"])
-                        ||!is_array($this->manifest[$lib]['javascript']["need"])
-                        ||empty($this->manifest[$lib]['javascript']["need"]))
+                    if(!isset($this->manifest[$lib]["need"])
+                        ||!is_array($this->manifest[$lib]["need"])
+                        ||empty($this->manifest[$lib]["need"]))
                         continue;
-                    $dep = array_reverse($this->manifest[$lib]['javascript']["need"]);
+                    $dep = array_reverse($this->manifest[$lib]["need"]);
                     $this->calculateNeeds($dep, $pFinalList);
                 }
                 else
@@ -131,9 +142,18 @@ namespace core\tools
             }
         }
 
-        private function log($pText, $pType='log')
+        private function log($pText, $pLevel='log')
         {
-            return "console.".$pType."('Dependencies : ".addslashes($pText)."');\r\n";
+            switch($this->type)
+            {
+                case self::TYPE_JS:
+                    return "console.".$pLevel."('Dependencies : ".addslashes($pText)."');".PHP_EOL;
+                    break;
+                case self::TYPE_CSS:
+                    return "#Dependencies -".$pLevel."- : ".$pText.PHP_EOL;
+                    break;
+            }
+            return "";
         }
 
         private function output($pContent)

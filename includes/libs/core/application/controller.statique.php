@@ -26,7 +26,10 @@ namespace core\application
 
         public function dependencies()
         {
-            $d = new Dependencies();
+            $type = Dependencies::TYPE_JS;
+            if(isset($_GET['type'])&&in_array($_GET['type'], array(Dependencies::TYPE_JS, Dependencies::TYPE_CSS)))
+                $type = $_GET['type'];
+            $d = new Dependencies($type);
             $d->retrieve();
         }
 
@@ -210,7 +213,7 @@ namespace core\application
             {
                 Configuration::$site_application = $_POST["application"];
                 $path_to_form = "includes/applications/".$_POST["application"]."/modules/";
-                if($_POST["is_backoffice"])
+                if($_POST["backoffice"]&&$_POST['backoffice']=="true")
                     $path_to_form .= "back/";
                 else
                     $path_to_form .= "front/";
@@ -271,7 +274,7 @@ namespace core\application
                     $fileName = preg_replace("/(\{id\})/", $upload->id_upload, $input["fileName"]);
                     $upload->renameFile($fileName);
                 }
-                $response["path_upload"] = (Configuration::$site_application != "main" ? "../" : "") . $upload->pathFile;
+                $response["path_upload"] = (Core::$isBackoffice||Configuration::$site_application != "main" ? "../" : "") . $upload->pathFile;
                 $response["id_upload"] = $upload->id_upload;
             }
             $this->response($response);

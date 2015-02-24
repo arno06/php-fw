@@ -38,6 +38,11 @@ namespace core\application
 		/**
 		 * @var array
 		 */
+		private $styleDependcies;
+
+		/**
+		 * @var array
+		 */
 		private $exeptions = array('PHPMailer'=>'/includes/libs/phpMailer/class.phpmailer.php');
 
 
@@ -49,6 +54,7 @@ namespace core\application
 			$this->scripts = array();
 			$this->scriptDependencies = array();
 			$this->styles = array();
+			$this->styleDependcies = array();
 		}
 
 
@@ -117,9 +123,19 @@ namespace core\application
 			return false;
 		}
 
+		/**
+		 * Méthode d'ajout d'un composant aux dépendences de la page en cours
+		 * @static
+		 * @param string $pName
+		 */
+		static public function addComponent($pName)
+		{
+			self::addScript($pName);
+			self::addStyle($pName);
+		}
 
 		/**
-		 *
+		 * @static
 		 * @param string $pScript
 		 * @return void
 		 */
@@ -142,15 +158,21 @@ namespace core\application
 		/**
 		 * @static
 		 * @param string $pStyleSheet
-		 * @param bool   $pInThemeFolder
 		 * @return void
 		 */
-		static public function addStyle($pStyleSheet, $pInThemeFolder = true)
+		static public function addStyle($pStyleSheet)
 		{
-			if($pInThemeFolder)
-				$pStyleSheet = Core::$path_to_theme.'/css/'.$pStyleSheet;
-			if(!in_array($pStyleSheet, self::getInstance()->styles, true))
-				self::getInstance()->styles[] = $pStyleSheet;
+			if(preg_match('/\.css$/', $pStyleSheet))
+			{
+				$pStyleSheet = (strpos($pStyleSheet, 'http') === 0) ? $pStyleSheet : Core::$path_to_components . '/' . $pStyleSheet;
+				if(!in_array($pStyleSheet, self::getInstance()->styles, true))
+					self::getInstance()->styles[] = $pStyleSheet;
+			}
+			else
+			{
+				if(!in_array($pStyleSheet, self::getInstance()->styleDependcies, true))
+					self::getInstance()->styleDependcies[] = $pStyleSheet;
+			}
 		}
 
 
@@ -172,6 +194,8 @@ namespace core\application
 		 */
 		static public function styles()
 		{
+			if(!empty(self::getInstance()->styleDependcies))
+				self::getInstance()->styles[] = 'statique/dependencies/?type=css&need='.implode(',', self::getInstance()->styleDependcies);
 			return self::getInstance()->styles;
 		}
 

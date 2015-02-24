@@ -173,7 +173,7 @@
         if (/\.(png|gif|jpg|jpeg)$/i.exec(pData.path_upload))
         {
             aFile.classList.add('img');
-            aFile.innerHTML = "<img src='"+pData.path_upload+"'>";
+            aFile.innerHTML = "<img src='"+aFile.href+"'>";
         }
         else
         {

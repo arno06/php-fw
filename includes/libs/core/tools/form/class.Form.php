@@ -6,6 +6,7 @@ namespace core\tools\form
 	use core\application\Configuration;
 	use core\application\Dictionary;
 	use core\application\Autoload;
+	use core\db\Query;
 	use \Exception;
 	use Smarty;
 
@@ -45,7 +46,7 @@ namespace core\tools\form
 		const PATH_TO_UPLOAD_FOLDER = "files/uploads/";
 
 		/**
-		 * Expression réguliére pour une chaine de caractére alpha numérique
+		 * Expression régulière pour une chaine de caractére alpha numérique
 		 * @var String
 		 */
 		static public $regExp_AlphaNumeric= '/^[0-9a-z\_\-]+$/i';
@@ -53,13 +54,13 @@ namespace core\tools\form
 		static public $regExp_Password= '/^[0-9a-z]{6,}$/i';
 
 		/**
-		 * Expression réguliére de mail - PhpMailer
+		 * Expression régulière de mail - PhpMailer
 		 * @var String
 		 */
 		static public $regExp_Mail = '/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!\.)){0,61}[a-zA-Z0-9_-]?\.)+[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!$)){0,61}[a-zA-Z0-9_]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/';
 
 		/**
-		 * Expression réguliére pour un chiffre/nombre
+		 * Expression régulière pour un chiffre/nombre
 		 * @var String
 		 */
 		static public $regExp_Numeric = '/^[0-9]+$/';
@@ -70,19 +71,19 @@ namespace core\tools\form
 		static public $regExp_Date = '/^((19|20)[0-9]{2})\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/';
 
 		/**
-		 * Expression réguliére pour du texte (autorise tout type de caractére)
+		 * Expression régulière pour du texte (autorise tout type de caractére)
 		 * @var String
 		 */
 		static public $regExp_Text = '/.{1,}/';
 
 		/**
-		 * Expression réguliére d'un url http://www.domain.ext/
+		 * Expression régulière d'un url http://www.domain.ext/
 		 * @var String
 		 */
 		static public $regExp_Url = '/^http\:\/\/www\.[a-z0-9\_\-\?\&]\.[a-z]{2,3}\/$/';
 
 		/**
-		 * Expression réguliére des chaines de caractéres interdisant le <html>
+		 * Expression régulière des chaines de caractéres interdisant le <html>
 		 * @var String
 		 */
 		static public $regExp_TextNoHtml = '/^[^\<\>]{1,}$/i';
@@ -157,7 +158,7 @@ namespace core\tools\form
 		private $uploadsSendFail = array();
 
 		/**
-		 * Tableau des champs du formulaire dont la valeur est incorrecte (Expression Réguliére non vérifiée par exemple)
+		 * Tableau des champs du formulaire dont la valeur est incorrecte (Expression régulière non vérifiée par exemple)
 		 * @var array
 		 */
 		private $inputsIncorrect = array();
@@ -174,7 +175,7 @@ namespace core\tools\form
 		private $inputsWithConfirm = array();
 
 		/**
-		 * Tableau des champs obligatoires du formulaire dont les valeurs ne sont pas valides (vide ou expression Réguliére non vérifiée)
+		 * Tableau des champs obligatoires du formulaire dont les valeurs ne sont pas valides (vide ou expression régulière non vérifiée)
 		 * @var	array
 		 */
 		private $inputsRequire = array();
@@ -473,7 +474,8 @@ namespace core\tools\form
 								$p = trim($p);
 						}
 					}
-					if($this->post[$name]!==0&&empty($this->post[$name]))
+
+					if($this->post[$name]!==0&&$this->post[$name]!=='0'&&empty($this->post[$name]))
 					{
 						if(isset($data["isAlternativeFor"])&&isset($this->data[$data["isAlternativeFor"]])&&!empty($this->post[$data["isAlternativeFor"]]))
 							continue;
@@ -491,7 +493,7 @@ namespace core\tools\form
 				}
 				if($data["require"]==true&&empty($data["regExp"]))
 				{
-					trigger_error("Les champs obligatoires doivent nécessairement renseigner une expression réguliére &agrave; respecter !<br/>Formulaire <b>".$this->name."</b> champ <b>".$name."</b>", E_USER_ERROR);
+					trigger_error("Les champs obligatoires doivent nécessairement renseigner une expression régulière &agrave; respecter !<br/>Formulaire <b>".$this->name."</b> champ <b>".$name."</b>", E_USER_ERROR);
 				}
 				if(empty($data["regExp"]))
 				{
@@ -546,11 +548,11 @@ namespace core\tools\form
 		}
 
 		/**
-		 * Méthode de récupération de l'expression réguliére en fonction de l'information saisie dans le fichier de déclaration JSON
-		 * Cette expression réguliére peut se présenter sous deux formats :
+		 * Méthode de récupération de l'expression régulière en fonction de l'information saisie dans le fichier de déclaration JSON
+		 * Cette expression régulière peut se présenter sous deux formats :
 		 * 					- Nom d'une expression disponible de base. Voir les propriétés statics Form::$regExp_NOM
-		 * 					- Une expression réguliére directement spécifiée dans le JSON, celle-ci devra étre déclarée de la mnaiére suivante : custom:/[votre expression]/
-		 * @param String $pRegExp		Valeur de l'expression réguliére telle qu'elle est déclarée dans le JSON
+		 * 					- Une expression régulière directement spécifiée dans le JSON, celle-ci devra étre déclarée de la mnaiére suivante : custom:/[votre expression]/
+		 * @param String $pRegExp		Valeur de l'expression régulière telle qu'elle est déclarée dans le JSON
 		 * @return String
 		 */
 		private function getRegExp($pRegExp)
@@ -907,7 +909,7 @@ namespace core\tools\form
 		{
 			$noForm = false;
 			$noMandatory = false;
-			$controller = $action = $output = $idForm = "";
+			$controller = $action = $output = $idForm = $classes = "";
 			$helper = "core\\tools\\form\\FormHelpers";
 			if($pParams != null)
 				extract($pParams, EXTR_REFS);
@@ -915,7 +917,7 @@ namespace core\tools\form
 			if(!$noForm)
 			{
 				$n = array();
-				$s = array("controller", "action", "noForm", "helper", "idForm");
+				$s = array("controller", "action", "noForm", "helper", "idForm", "classes");
 				foreach($pParams as $np=>$vp)
 				{
 					if(in_array($np, $s))
@@ -928,6 +930,8 @@ namespace core\tools\form
 					$output .= ' enctype="multipart/form-data"';
 				if (!empty($idForm))
 					$output .= ' id="'.$idForm.'" ';
+				if (!empty($classes))
+					$output .= ' class="'.$classes.'" ';
 				$output .='>';
 			}
 			if($this->countMendatory>0 && !$noMandatory)
@@ -975,7 +979,7 @@ namespace core\tools\form
 
 
 		/**
-		 * Méthode utilitaire permettant de vérifier si une chaine de caractéres correspond é l'expression réguliére numérique
+		 * Méthode utilitaire permettant de vérifier si une chaine de caractéres correspond é l'expression régulière numérique
 		 * @param String $pVar				Valeur é tester
 		 * @return Boolean
 		 */
@@ -1127,10 +1131,15 @@ namespace core\tools\form
 				return "";
 			$style = "overflow:auto;";
 			if(isset($pData["height"]))
-					$style .= "height:".$pData["height"].";";
+				$style .= "height:".$pData["height"].";";
 			if(isset($pData["width"]))
 				$style .= "width:".$pData["width"].";";
-			$group = "<div class='checkboxgroup' style='".$style."'>";
+
+			$class = '';
+			if (isset($pData["attributes"]["class"])) {
+				$class = ' '.$pData["attributes"]["class"];
+			}
+			$group = "<div class='checkboxgroup".$class."' style='".$style."'>";
 			$i = 0;
 			$style = "";
 			if(isset($pData["display"])&&$pData["display"]=="block")
@@ -1149,11 +1158,11 @@ namespace core\tools\form
 					$value = $opt["value"];
 					$label = $opt["label"];
 					$i++;
-					$defaultChecked = $opt["checked"];
+					$defaultChecked = array_key_exists('checked', $opt) ? $opt["checked"] : false;
 					$c = "";
 					if($defaultChecked || in_array($value, $values))
 						$c = " checked";
-					$group .= "<span class='checkbox'><input type='checkbox' name='".$pName."[]' id='".$pName."_".$i."' value='".$value."'".$c."/>&nbsp;&nbsp;<label for='".$pName."_".$i."'>".$label."</label></span>";
+					$group .= '<span class="checkbox" '.$style.'><input type="checkbox" name="'.$pName.'[]" id="'.$pName.'_'.$i.'" value="'.$value.'" '.$c.' />&nbsp;&nbsp;<label for="'.$pName.'_'.$i.'">'.$label.'</label></span>';
 				}
 			}
 			else
@@ -1215,6 +1224,7 @@ namespace core\tools\form
 			foreach($attributes as $name=>$value)
 				$component .= $name."='".$value."' ";
 			$component .= "/>";
+			$component .= "<label for='".$attributes["id"]."' class='datepicker-icon'></label>";
 			$extra = self::script("var picker = new Pikaday({ field: document.getElementById('".$attributes["id"]."') });",'',true);
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
 			$input .= self::getComponent($component.$extra);
@@ -1256,7 +1266,12 @@ namespace core\tools\form
 				$style .= "height:".$pData["height"].";";
 			if(isset($pData["width"]))
 				$style .= "width:".$pData["width"].";";
-			$group = "<div class='radiogroup' style='".$style."'>";
+
+			$class = '';
+			if (isset($pData["attributes"]["class"])) {
+				$class = ' '.$pData["attributes"]["class"];
+			}
+			$group = "<div class='radiogroup".$class."' style='".$style."'>";
 			$i = 0;
 			$style = "";
 			if(isset($pData["display"])&&$pData["display"]=="block")

@@ -1187,7 +1187,7 @@ namespace core\tools\form
 			{
 				$value = $pData["attributes"]["value"];
 				$file = $server_url;
-				$m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "ModelUpload";
+				$m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
 				if(Form::isNumeric($value))
 					$file .= $m::getPathById($value);
 				else

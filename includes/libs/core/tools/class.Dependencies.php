@@ -150,7 +150,7 @@ namespace core\tools
                     return "console.".$pLevel."('Dependencies : ".addslashes($pText)."');".PHP_EOL;
                     break;
                 case self::TYPE_CSS:
-                    return "#Dependencies -".$pLevel."- : ".$pText.PHP_EOL;
+                    return "/* Dependencies -".$pLevel."- : ".$pText." */".PHP_EOL;
                     break;
             }
             return "";

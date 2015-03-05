@@ -3,7 +3,7 @@ BO.init = function(e)
 {
 	document.querySelectorAll(".td-liste").forEach(function(pItem){pItem.addEventListener("click", BO.tdListeClickHandler);});
 	document.querySelectorAll(".target-blank").forEach(function(pItem){pItem.addEventListener("click", BO.aBlankClick);});
-	document.querySelectorAll(".a-delete").forEach(function(pItem){pItem.addEventListener("click", BO.aDeleteClickHandler);});
+	document.querySelectorAll(".button.delete").forEach(function(pItem){pItem.addEventListener("click", BO.aDeleteClickHandler);});
 };
 
 BO.aDeleteClickHandler = function(e)

@@ -1,0 +1,14 @@
+{
+	"local":[
+		"vidalid.local"
+	],
+	"dev":[
+		"dev-vidalid2.vidal.net"
+	],
+	"prod":[
+		"vidalid.vidal.fr"
+	],
+	"preprod":[
+		"vidal-fr.vidal.net"
+	]
+}

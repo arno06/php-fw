@@ -24,10 +24,11 @@ namespace core\data
 		 * @param Array $pData				Donnée &agrave; convertir
 		 * @return String
 		 */
-		static public function encode(array $pData)
+		static public function encode(array $pData, $skipLabels = false)
 		{
 			if(!$pData)
 				return "";
+			$result = '';
 			$libelles = array();
 			$donnees = "";
 			for($i = 0, $max = count($pData); $i<$max;$i++)
@@ -66,7 +67,14 @@ namespace core\data
 					$ligne .= $ct++?self::SEPARATOR.$value:$value;
 				$donnees .= $ligne."\r\n";
 			}
-			return implode(self::SEPARATOR,$libelles)."\r\n".$donnees;
+
+			if (!$skipLabels) {
+				$result .= implode(self::SEPARATOR,$libelles)."\r\n";
+			}
+
+			$result .= $donnees;
+
+			return $result;
 		}
 
 		/**

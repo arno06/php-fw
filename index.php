@@ -33,6 +33,7 @@ require_once(__DIR__."/includes/libs/core/application/rewriteurl/class.RewriteUR
 require_once(__DIR__."/includes/libs/smarty/Smarty.class.php");
 
 use core\application\Core;
+Core::checkEnvironment();
 Core::setConfiguration();
 Core::init();
 Core::parseURL();

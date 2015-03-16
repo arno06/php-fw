@@ -27,7 +27,7 @@ namespace core\application
 		/**
 		 * @var string
 		 */
-		const PATH_TO_CONFIG = "/includes/applications/config.json";
+    static public $config_file = null;
 
 		/**
 		 * Définit si l'application vise le backoffice
@@ -139,6 +139,23 @@ namespace core\application
 				Debugger::prepare();
 		}
 
+		static public function checkEnvironment($pFile = "includes/applications/setup.json")
+		{
+			$setup = SimpleJSON::import($pFile);
+			self::$config_file = "dev.config.json";
+			if(!$setup)
+			{
+				return;
+			}
+			foreach($setup as $env=>$domains)
+			{
+				if(in_array($_SERVER["SERVER_NAME"], $domains))
+				{
+					self::$config_file = "/includes/applications/".$env.".config.json";
+				}
+			}
+		}
+
 		/**
 		 * Méthode statique de définition de l'objet Configuration via le fichier JSON
 		 * Récupération + parsing du fichier JSON
@@ -149,7 +166,7 @@ namespace core\application
 		static public function setConfiguration($pConfigurationFile = null)
 		{
 			if($pConfigurationFile == null)
-				$pConfigurationFile = Autoload::$folder.self::PATH_TO_CONFIG;
+				$pConfigurationFile = Autoload::$folder.self::$config_file;
 			$configurationData = array();
 			try
 			{
@@ -157,10 +174,10 @@ namespace core\application
 			}
 			catch(Exception $e)
 			{
-				if ($pConfigurationFile == Autoload::$folder.self::PATH_TO_CONFIG)
+				if ($pConfigurationFile == Autoload::$folder.self::$config_file)
 					die("Impossible de charger le fichier de configuration de base : <b>".$pConfigurationFile."</b>");
 			}
-			if (!is_array($configurationData) && $pConfigurationFile == Autoload::$folder.self::PATH_TO_CONFIG)
+			if (!is_array($configurationData) && $pConfigurationFile == Autoload::$folder.self::$config_file)
 				trigger_error('Impossible de parser le fichier de configuration de base <b>includes/applications/config.json</b>. Veuillez vérifier le formatage des données (guillements, virgules, accents...).', E_USER_ERROR);
 			foreach ($configurationData as $prefix=>$property)
 			{
@@ -227,13 +244,13 @@ namespace core\application
 			Configuration::$site_application = $application;
 			self::setConfiguration(Autoload::$folder."/includes/applications/".Configuration::$site_application."/config.json");
 
-			$acces = "";
+			$access = "";
 			if (Configuration::$site_application != "main")
 			{
 				Configuration::$server_url .= Configuration::$site_application."/";
-				$acces = "../";
+				$access = "../";
 			}
-			self::$path_to_components = Configuration::$server_url.$acces.self::$path_to_components;
+			self::$path_to_components = Configuration::$server_url.$access.self::$path_to_components;
 
 			self::defineGlobalObjects();
 
@@ -269,9 +286,9 @@ namespace core\application
 				self::$module = "front";
 
 			$_GET = array_merge($parsedURL["parameters"], $_GET);
-			self::$path_to_theme = Configuration::$server_url.$acces."themes/".Configuration::$site_application."/".Configuration::$site_theme."/".self::$module;
+			self::$path_to_theme = Configuration::$server_url.$access."themes/".Configuration::$site_application."/".Configuration::$site_theme."/".self::$module;
 
-			self::$path_to_templates = Autoload::$folder."/themes/".Configuration::$site_application."/default/".self::$module."/views";
+			self::$path_to_templates = "themes/".Configuration::$site_application."/default/".self::$module."/views";
 		}
 
 

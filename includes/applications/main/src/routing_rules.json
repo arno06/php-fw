@@ -8,7 +8,7 @@
         }
     },
     {
-        "url":"{$controller}/{$action}.html",
+        "url":"{$controller}/{$action}/",
         "parameters":
         {
             "controller":"[a-zA-z0-9\\-]+",

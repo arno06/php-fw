@@ -1,7 +1,11 @@
 {
 	"config":
 	{
-		"relative":"./"
+		"relative":"./",
+		"cache":
+		{
+			"duration":120
+		}
 	},
     "M4Tween":
     {

@@ -44,7 +44,7 @@ namespace core\tools\docs
             for($i = 0, $max = count($allProps); $i<$max;$i++)
             {
                 $prop = $allProps[$i];
-                $props[] = array('name'=>$prop->getName(), 'value'=>($prop->isPublic()?print_r($prop->getValue(), true):""),'details'=>$this->parseDocComment($prop->getDocComment()), 'public'=>$prop->isPublic(), 'protected'=>$prop->isProtected());
+                $props[] = array('name'=>$prop->getName(), 'value'=>'','details'=>$this->parseDocComment($prop->getDocComment()), 'public'=>$prop->isPublic(), 'protected'=>$prop->isProtected());
             }
 
             $this->sortName($props);
@@ -106,8 +106,6 @@ namespace core\tools\docs
             $smarty->compile_dir = $smartyDir;
 
             $classIndex = array();
-
-            trace_r($this->packages);
 
             foreach($this->packages as $className=>$details)
             {

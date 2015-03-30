@@ -85,7 +85,7 @@ namespace core\data
 		static public function decode($pString)
 		{
 			$return = array();
-			$dataArray = explode("\n",$pString);
+			$dataArray = explode(PHP_EOL,$pString);
 			$champs = explode(self::SEPARATOR, $dataArray[0]);
 			unset($dataArray[0]);
 			$max = count($dataArray);

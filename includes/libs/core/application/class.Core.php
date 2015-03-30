@@ -109,13 +109,8 @@ namespace core\application
 			session_start();
 			set_error_handler('\core\tools\debugger\Debugger::errorHandler');
 			set_exception_handler('\core\tools\debugger\Debugger::exceptionHandler');
-			self::$request_async = (isset($_SERVER["HTTP_X_PROTOTYPE_VERSION"])||
-				(isset($_SERVER["HTTP_X_REQUESTED_WITH"])&&
-					$_SERVER["HTTP_X_REQUESTED_WITH"]=="XMLHttpRequest"));
-			if(Configuration::$site_async)
-			{
-				trigger_error("TODO", E_USER_ERROR);
-			}
+			self::$request_async = (isset($_SERVER["HTTP_X_REQUESTED_WITH"])&&
+					                    $_SERVER["HTTP_X_REQUESTED_WITH"]=="XMLHttpRequest");
 		}
 
 		/**

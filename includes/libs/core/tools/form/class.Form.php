@@ -7,7 +7,8 @@ namespace core\tools\form
 	use core\application\Dictionary;
 	use core\application\Autoload;
 	use core\db\Query;
-	use \Exception;
+    use core\models\ModelUpload;
+    use \Exception;
 	use Smarty;
 
 	/**
@@ -643,10 +644,28 @@ namespace core\tools\form
 		/**
 		 * Méthode de renommage des fichiers uploadés en fonction de l'id de l'entrée enregistrée
 		 * Renvoi le tableau associatif des nouveaux de fichiers pour l'update de la base
+         * @param string|int $pId
 		 * @return array
 		 */
-		public function setUploadFileName()
+		public function setUploadFileName($pId = null)
 		{
+            foreach($this->data as $name=>&$inp)
+            {
+                if(isset($inp['tag']) && $inp['tag'] == self::TAG_UPLOAD && isset($this->post[$name]) && !empty($this->post[$name]))
+                {
+                    $newPath = "";
+                    if((!isset($inp['fileName'])) || (!preg_match('/(\{id\})/', $inp['fileName'])))
+                        continue;
+                    $folderName = self::PATH_TO_UPLOAD_FOLDER;
+                    if(isset($inp['folder']))
+                        $folderName .= $inp['folder'];
+                    $fileName = preg_replace("/(\{id\})/",$pId, $inp["fileName"]);
+                    $newPath = $folderName.$fileName;
+                    $id_upload = $this->post[$name];
+                    $m = new ModelUpload();
+                    $m->renameById($id_upload, $newPath);
+                }
+            }
 			$newFileName = array();
 			$max = count($this->uploads);
 			for($i = 0; $i<$max; ++$i)
@@ -655,7 +674,8 @@ namespace core\tools\form
 				$name = $upload["name"];
 				/** @var Upload $up */
 				$up = $upload["instance"];
-				$pId = $up->id_upload;
+                if($pId == null)
+				    $pId = $up->id_upload;
 				if($this->data[$name]["fileName"])
 				{
 					$fileName = preg_replace("/(\{id\})/",$pId,$this->data[$name]["fileName"]);
@@ -721,7 +741,6 @@ namespace core\tools\form
 						Autoload::addScript("ckeditor/ckeditor.js");
 						break;
 					case self::TAG_UPLOAD:
-						trace("you must handle upload");
 						Autoload::addComponent("Uploader");
 						Autoload::addScript("M4Tween");
 						$this->hasUpload = true;

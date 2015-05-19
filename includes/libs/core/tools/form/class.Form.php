@@ -653,7 +653,6 @@ namespace core\tools\form
             {
                 if(isset($inp['tag']) && $inp['tag'] == self::TAG_UPLOAD && isset($this->post[$name]) && !empty($this->post[$name]))
                 {
-                    $newPath = "";
                     if((!isset($inp['fileName'])) || (!preg_match('/(\{id\})/', $inp['fileName'])))
                         continue;
                     $folderName = self::PATH_TO_UPLOAD_FOLDER;
@@ -1206,13 +1205,23 @@ namespace core\tools\form
 			{
 				$value = $pData["attributes"]["value"];
 				$file = $server_url;
+                /** @var ModelUpload $m */
 				$m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
 				if(Form::isNumeric($value))
 					$file .= $m::getPathById($value);
 				else
 					$file .= $value;
 			}
-			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'>";
+            $deleteFileAction = "";
+            if(isset($pData['deleteFileAction']) && !empty($pData['deleteFileAction']))
+            {
+                if($value&&Form::isNumeric($value))
+                    $action = preg_replace('/\{id\}/', $value, $pData['deleteFileAction']);
+                else
+                    $action = $pData['deleteFileAction'];
+                $deleteFileAction = 'data-delete_file_action="'.$action.'"';
+            }
+			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'".$deleteFileAction.">";
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
 			$input .= self::getComponent($comp, 'upload');
 			return $input;

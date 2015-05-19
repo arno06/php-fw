@@ -7,7 +7,7 @@ namespace core\tools
 	 * Class Request - permet de gérer une surcouche nécessaire &agrave; CURL pour se simplifier les traitements
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package core\tools
 	 */
 	class Request
@@ -22,6 +22,15 @@ namespace core\tools
 		 */
 		private $url;
 
+        /**
+         * @var int
+         */
+        private $responseCode;
+
+        /**
+         * @var string
+         */
+        private $redirectURL;
 
 		/**
 		 * Constructor
@@ -34,7 +43,6 @@ namespace core\tools
 			$this->setOption(CURLOPT_HEADER, 0);
 		}
 
-
 		/**
 		 * Méthode de définition de l'url cible de la requête
 		 * @param  string   $pUrl
@@ -45,7 +53,6 @@ namespace core\tools
 			$this->url = $pUrl;
 			curl_setopt($this->curlResource, CURLOPT_URL, $pUrl);
 		}
-
 
 		/**
 		 * Définit les données à envoyer en POST
@@ -66,7 +73,6 @@ namespace core\tools
 		{
 			return $this->curlResource;
 		}
-
 
 		/**
 		 * Méthode de définition d'une option liée &agrave; la requête en cours
@@ -90,12 +96,32 @@ namespace core\tools
 			$return = curl_exec($this->curlResource);
 			$datas = ob_get_contents();
 			ob_end_clean();
-			$number = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
+			$this->responseCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
+            if(strpos($this->responseCode, "3") === 0)
+                $this->redirectURL = curl_getinfo($this->curlResource, CURLINFO_REDIRECT_URL);
 			curl_close($this->curlResource);
 			if(!$return)
 				throw new Exception("Impossible d'accéder &agrave; l'url : <b>".$this->url."</b>");
 			return $datas;
 		}
+
+        /**
+         * Code HTTP de la réponse
+         * @return int
+         */
+        public function getResponseHTTPCode()
+        {
+            return $this->responseCode;
+        }
+
+        /**
+         * URL de redirection
+         * @return string
+         */
+        public function getRedirectURL()
+        {
+            return $this->redirectURL;
+        }
 
 		/**
 		 * Exécute une requête HTTP via CURL
@@ -117,7 +143,6 @@ namespace core\tools
 			}
 			return $d;
 		}
-
 
 		/**
 		 * Exécute un ensemble de requête GET via les méthodes curl_multi_*

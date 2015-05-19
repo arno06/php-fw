@@ -10,7 +10,7 @@ namespace core\tools
      * Class Dependencies
      * Gère deux types de dépendences JS & CSS
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 1.2
+     * @version 1.3
      * @todo minified
      */
     class Dependencies
@@ -34,6 +34,11 @@ namespace core\tools
          * Type CSS
          */
         const TYPE_CSS = "css";
+
+        /**
+         * @var string
+         */
+        static private $current_folder;
 
         /**
          * @var array
@@ -162,7 +167,13 @@ namespace core\tools
                         if(!$absolute_link)
                         {
                             $files[$i] = dirname(self::MANIFEST)."/".$this->configuration["relative"].$files[$i];
-                            $this->output .= File::read($files[$i])."\r\n";
+                            $content = File::read($files[$i]);
+                            self::$current_folder = dirname($files[$i]);
+                            if($this->type == self::TYPE_CSS)
+                            {
+                                $content = preg_replace_callback('/(url\(\")([^\"]+)/', 'core\tools\Dependencies::correctUrls', $content);
+                            }
+                            $this->output .= $content."\r\n";
                         }
                         else
                             $this->output .= Request::load($files[$i]);
@@ -251,6 +262,20 @@ namespace core\tools
             {
                 header($n.": ".$v);
             }
+        }
+
+        /**
+         * Méthode de correction des urls des assets utilisés dans les CSS
+         * @param array $pMatches
+         * @return string
+         */
+        static private function correctUrls($pMatches)
+        {
+            if(strpos($pMatches[2], 'data:image')>-1)
+            {
+                return $pMatches[0];
+            }
+            return $pMatches[1].'../../'.self::$current_folder.'/'.$pMatches[2];
         }
     }
 }

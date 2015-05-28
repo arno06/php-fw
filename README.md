@@ -25,7 +25,7 @@ app\\ *{appName}* \\src\\ *{subPackage}* |Application |Classes & interfaces de l
             back
                 Mot de passe oublié
 
-#FORM
+# form
     INPUT[text|password|submit|...]
         {
             "label":"Input",

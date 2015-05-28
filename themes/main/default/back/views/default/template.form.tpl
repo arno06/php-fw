@@ -8,6 +8,11 @@
         {$content.error}
     </div>
 {/if}
+{if $content.confirmation}
+	<div class="confirmation">
+		{$content.confirmation}
+	</div>
+{/if}
 <div class="details form">
     {form_instance->display}
 </div>

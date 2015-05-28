@@ -1,6 +1,11 @@
 [
+	{
+		"url":"",
+		"controller":"index",
+		"action":"index"
+	},
     {
-        "url":"{$controller}.html",
+        "url":"{$controller}/",
         "action":"index",
         "parameters":
         {

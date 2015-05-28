@@ -247,6 +247,7 @@ namespace core\tools\form
 				return;
 			$this->dataCleaned = true;
 			$default = array(
+                "errorLabel"=>"",
 				"label"=>"",
 				"require"=>false,
 				"attributes"=>array(),
@@ -283,6 +284,8 @@ namespace core\tools\form
 				}
 				if($parseLabels&&!empty($input["label"]))
 					$input["label"] = Dictionary::term($input["label"]);
+                else if(!$parseLabels && empty($input['label']) && isset($input['attributes']) && isset($input['attributes']['placeholder']))
+                    $input['errorLabel'] = $input['attributes']['placeholder'];
 			}
 		}
 

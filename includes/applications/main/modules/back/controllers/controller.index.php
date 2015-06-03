@@ -1,7 +1,8 @@
 <?php
 namespace app\main\controllers\back
 {
-	use core\application\FrontController;
+    use core\application\Configuration;
+    use core\application\FrontController;
 	use core\application\InterfaceController;
 	use core\application\authentification\AuthentificationHandler;
 	use core\application\Go;
@@ -19,7 +20,8 @@ namespace app\main\controllers\back
 
 		public function index()
 		{
-			if(!AuthentificationHandler::is(AuthentificationHandler::ADMIN))
+            $authHandler = Configuration::$application_authentificationHandler;
+            if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::toBack("index", "login");
 			$menu = new Menu(Core::$path_to_application.'/modules/back/menu.json');
 			$menu->redirectToDefaultItem(true);
@@ -27,15 +29,16 @@ namespace app\main\controllers\back
 
 		public function login()
 		{
-
-			if(AuthentificationHandler::is(AuthentificationHandler::ADMIN))
+            $authHandler = Configuration::$application_authentificationHandler;
+			if(call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::toBack();
 			$this->setTitle("Espace d'adminitration | Connexion");
 			$form = new Form("login");
 			if($form->isValid())
 			{
 				$data = $form->getValues();
-				if(AuthentificationHandler::getInstance()->setAdminSession($data["login"], $data["mdp"]))
+                $authHandlerInst = call_user_func_array(array($authHandler, 'getInstance'), array());
+				if($authHandlerInst->setAdminSession($data["login"], $data["mdp"]))
 				{
 					Go::toBack();
 				}
@@ -52,7 +55,8 @@ namespace app\main\controllers\back
 
 		public function logout()
 		{
-			AuthentificationHandler::unsetUserSession();
+            $authHandler = Configuration::$application_authentificationHandler;
+            call_user_func_array(array($authHandler, 'unsetUserSession'), array());
 			Go::toBack();
 		}
 	}

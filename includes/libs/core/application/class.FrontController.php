@@ -111,8 +111,9 @@ namespace core\application
 		public function getGlobalVars()
 		{
 			$is = array();
-			foreach(AuthentificationHandler::$permissions as $name=>$value)
-				$is[$name] = AuthentificationHandler::is($name);
+            $authHandler = Configuration::$application_authentificationHandler;
+            foreach($authHandler::$permissions as $name=>$value)
+				$is[$name] = $authHandler::is($name);
 			return array(
 				"path_to_theme"=>Core::$path_to_theme,
 				"path_to_components"=>Core::$path_to_components,

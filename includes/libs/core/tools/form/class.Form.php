@@ -938,7 +938,7 @@ namespace core\tools\form
 			if(!$noForm)
 			{
 				$n = array();
-				$s = array("controller", "action", "noForm", "helper", "idForm", "classes");
+				$s = array("controller", "action", "noForm", "noMandatory", "helper", "idForm", "classes");
 				foreach($pParams as $np=>$vp)
 				{
 					if(in_array($np, $s))

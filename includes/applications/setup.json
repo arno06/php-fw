@@ -3,7 +3,7 @@
 		"vidalid.local"
 	],
 	"dev":[
-		"dev-vidalid2.vidal.net"
+		"framework.local"
 	],
 	"prod":[
 		"vidalid.vidal.fr"

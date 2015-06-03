@@ -108,7 +108,8 @@ namespace core\application
 		 */
 		public function __construct()
 		{
-			if(!AuthentificationHandler::is(AuthentificationHandler::ADMIN))
+            $authHandler = Configuration::$application_authentificationHandler;
+            if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::toBack();
 			$class = explode("\\", get_class($this));
 			$this->className = end($class);

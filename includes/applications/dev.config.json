@@ -20,23 +20,23 @@
     "db": {
         "default":
         {
-            "handler":"core\\db\\handler\\MysqlHandler",
+            "handler":"core\\db\\handler\\MysqliHandler",
             "host":"localhost",
             "user":"root",
             "password":"",
-            "name":"fwphp"
+            "name":"php-fw"
         }
     },
     "application":
     {
-        "debug":true
+        "debug":false
     },
     "authentification":
     {
         "tableName": "%s_user",
         "tableId": "id_user",
         "fieldPassword": "password_user",
-        "fieldLogin": "login_user",
+        "fieldLogin": "email_user",
         "fieldPermissions": "permissions_user",
         "useGroup": ""
     }

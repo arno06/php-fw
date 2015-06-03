@@ -415,8 +415,10 @@ namespace core\application
 		 */
 		static public function debug()
 		{
-			return Configuration::$application_debug||AuthentificationHandler::is(AuthentificationHandler::DEVELOPER);
-		}
+            $authHandler = Configuration::$application_authentificationHandler;
+            $isDev = call_user_func_array(array($authHandler, "is"), array($authHandler::DEVELOPER));
+            return Configuration::$application_debug||$isDev;
+        }
 
 
 		/**
@@ -426,7 +428,8 @@ namespace core\application
 		static public function deactivateDebug()
 		{
 			Configuration::$application_debug = false;
-			AuthentificationHandler::$permissions = array();
+            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler::$permissions = array();
 		}
 
 

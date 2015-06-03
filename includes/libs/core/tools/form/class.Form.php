@@ -7,7 +7,8 @@ namespace core\tools\form
 	use core\application\Dictionary;
 	use core\application\Autoload;
 	use core\db\Query;
-	use \Exception;
+    use core\models\ModelUpload;
+    use \Exception;
 	use Smarty;
 
 	/**
@@ -246,6 +247,7 @@ namespace core\tools\form
 				return;
 			$this->dataCleaned = true;
 			$default = array(
+                "errorLabel"=>"",
 				"label"=>"",
 				"require"=>false,
 				"attributes"=>array(),
@@ -282,6 +284,8 @@ namespace core\tools\form
 				}
 				if($parseLabels&&!empty($input["label"]))
 					$input["label"] = Dictionary::term($input["label"]);
+                else if(!$parseLabels && empty($input['label']) && isset($input['attributes']) && isset($input['attributes']['placeholder']))
+                    $input['errorLabel'] = $input['attributes']['placeholder'];
 			}
 		}
 
@@ -643,10 +647,27 @@ namespace core\tools\form
 		/**
 		 * Méthode de renommage des fichiers uploadés en fonction de l'id de l'entrée enregistrée
 		 * Renvoi le tableau associatif des nouveaux de fichiers pour l'update de la base
+         * @param string|int $pId
 		 * @return array
 		 */
-		public function setUploadFileName()
+		public function setUploadFileName($pId = null)
 		{
+            foreach($this->data as $name=>&$inp)
+            {
+                if(isset($inp['tag']) && $inp['tag'] == self::TAG_UPLOAD && isset($this->post[$name]) && !empty($this->post[$name]))
+                {
+                    if((!isset($inp['fileName'])) || (!preg_match('/(\{id\})/', $inp['fileName'])))
+                        continue;
+                    $folderName = self::PATH_TO_UPLOAD_FOLDER;
+                    if(isset($inp['folder']))
+                        $folderName .= $inp['folder'];
+                    $fileName = preg_replace("/(\{id\})/",$pId, $inp["fileName"]);
+                    $newPath = $folderName.$fileName;
+                    $id_upload = $this->post[$name];
+                    $m = new ModelUpload();
+                    $m->renameById($id_upload, $newPath);
+                }
+            }
 			$newFileName = array();
 			$max = count($this->uploads);
 			for($i = 0; $i<$max; ++$i)
@@ -655,7 +676,8 @@ namespace core\tools\form
 				$name = $upload["name"];
 				/** @var Upload $up */
 				$up = $upload["instance"];
-				$pId = $up->id_upload;
+                if($pId == null)
+				    $pId = $up->id_upload;
 				if($this->data[$name]["fileName"])
 				{
 					$fileName = preg_replace("/(\{id\})/",$pId,$this->data[$name]["fileName"]);
@@ -721,7 +743,6 @@ namespace core\tools\form
 						Autoload::addScript("ckeditor/ckeditor.js");
 						break;
 					case self::TAG_UPLOAD:
-						trace("you must handle upload");
 						Autoload::addComponent("Uploader");
 						Autoload::addScript("M4Tween");
 						$this->hasUpload = true;
@@ -1187,13 +1208,23 @@ namespace core\tools\form
 			{
 				$value = $pData["attributes"]["value"];
 				$file = $server_url;
+                /** @var ModelUpload $m */
 				$m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
 				if(Form::isNumeric($value))
 					$file .= $m::getPathById($value);
 				else
 					$file .= $value;
 			}
-			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'>";
+            $deleteFileAction = "";
+            if(isset($pData['deleteFileAction']) && !empty($pData['deleteFileAction']))
+            {
+                if($value&&Form::isNumeric($value))
+                    $action = preg_replace('/\{id\}/', $value, $pData['deleteFileAction']);
+                else
+                    $action = $pData['deleteFileAction'];
+                $deleteFileAction = 'data-delete_file_action="'.$action.'"';
+            }
+			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'".$deleteFileAction.">";
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
 			$input .= self::getComponent($comp, 'upload');
 			return $input;

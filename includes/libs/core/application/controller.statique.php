@@ -24,6 +24,14 @@ namespace core\application
     class statique extends FrontController
     {
 
+        public function check_env()
+        {
+            /**
+             * Vérifier la configuration
+             * Vérifier les dossiers de caches (existence + droit d'écriture)
+             */
+        }
+
         public function dependencies()
         {
             $type = Dependencies::TYPE_JS;

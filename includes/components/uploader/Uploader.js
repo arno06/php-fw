@@ -157,6 +157,20 @@
 
     function resetUploadInput(pInput)
     {
+        var hidden = pInput.parentNode.querySelector('input[type="hidden"]');
+        if(pInput.dataset.delete_file_action)
+        {
+            var action = pInput.dataset.delete_file_action;
+            var id = hidden.value;
+            if(action.indexOf('{id}')>-1)
+            {
+                action = action.replace('{id}', id);
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', action);
+            xhr.send();
+        }
+        hidden.value = "";
         M4Tween.killTweensOf(pInput.dataset);
         pInput.dataset.progress = 0;
         pInput.parentNode.querySelector('div.status_bar .foreground').innerHTML = "";

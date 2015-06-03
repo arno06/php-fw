@@ -33,9 +33,9 @@ namespace core\application\rewriteurl
 		{
 			$extract = null;
 
-			if($extract = self::handleRoutingRules($pUrl))
+			if(!Core::$isBackoffice)
 			{
-				return $extract;
+				return self::handleRoutingRules($pUrl);
 			}
 
 			$parameters = array();

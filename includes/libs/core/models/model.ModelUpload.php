@@ -22,6 +22,18 @@ namespace core\models
 			$this->id = "id_upload";
 		}
 
+        public function renameById($pId, $pPath)
+        {
+            $p = $this->getPathById($pId);
+            $e = explode('.', $p);
+            $ext = end($e);
+            $pPath .= ".".$ext;
+            if($p === $pPath)
+                return;
+            File::rename($p, $pPath);
+            $this->updateUpload($pId, $pPath);
+        }
+
 		public function deleteById($pId)
 		{
 			File::delete($this->getValueById("path_upload", $pId));

@@ -1,7 +1,8 @@
 <?php
 namespace core\db
 {
-	use Exception;
+    use core\application\Configuration;
+    use Exception;
 	/**
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version .1
@@ -23,8 +24,12 @@ namespace core\db
 		{
 			if(!array_key_exists($pName, self::$handlers))
 			{
-				trigger_error("L'identifiant \"".$pName."\" ne correspond &agrave; aucun gestionnaire stocké.");
-				return null;
+                if(!array_key_exists($pName, Configuration::$db))
+                {
+                    trigger_error("L'identifiant \"".$pName."\" ne correspond &agrave; aucun gestionnaire stocké.");
+                    return null;
+                }
+                self::set($pName, Configuration::$db[$pName]);
 			}
 			return self::$handlers[$pName];
 		}

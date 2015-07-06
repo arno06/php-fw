@@ -122,13 +122,6 @@ namespace core\application
 		{
 			if(self::isBot())
 				self::deactivateDebug();
-			if(is_array(Configuration::$db)&&!empty(Configuration::$db))
-			{
-				foreach(Configuration::$db as $name=>$info)
-				{
-					DBManager::set($name, $info);
-				}
-			}
 			call_user_func_array(array(Configuration::$application_authentificationHandler,"getInstance"), array());
 			if(self::debug())
 				Debugger::prepare();

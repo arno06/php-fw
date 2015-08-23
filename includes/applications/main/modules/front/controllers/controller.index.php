@@ -14,9 +14,9 @@ namespace app\main\controllers\front
 
         public function index()
         {
-            $r = new Documentor();
-            $r->parsePackage('includes/libs/core', 'core');
-            $r->output('files/docs/');
+//            $r = new Documentor();
+//            $r->parsePackage('includes/libs/core', 'core');
+//            $r->output('files/docs/');
         }
     }
 }

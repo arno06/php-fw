@@ -3,18 +3,17 @@ namespace core\application
 {
 	use core\data\SimpleJSON;
 	use core\tools\debugger\Debugger;
-	use core\application\authentification\AuthentificationHandler;
 	use core\db\DBManager;
-	use core\application\rewriteurl\RewriteURLHandler;
+	use core\application\routing\RoutingHandler;
 	use \Exception;
-	use Smarty;
+	use \Smarty;
 
 
 	/**
 	 * Noyau central
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 2.0
+	 * @version 2.5
 	 * @package application
 	 */
 	abstract class Core
@@ -22,18 +21,12 @@ namespace core\application
 		/**
 		 * Version en cours du framework
 		 */
-		const VERSION = "2.0";
+		const VERSION = "2.5";
 
 		/**
 		 * @var string
 		 */
-    static public $config_file = null;
-
-		/**
-		 * Définit si l'application vise le backoffice
-		 * @var Boolean
-		 */
-		static public $isBackoffice = false;
+        static public $config_file = null;
 
 		/**
 		 * Définit le chemin vers le dossier de l'application en cours
@@ -58,6 +51,23 @@ namespace core\application
 		static public $path_to_templates = "themes/main/default/front/views";
 
 		/**
+		 * Contient l'url requêtée (sans l'application ni la langue)
+		 * @var String
+		 */
+		static public $url;
+
+		/**
+		 * @var string
+		 */
+		static public $application;
+
+		/**
+		 * Définit le module en cours - front ou back
+		 * @var String
+		 */
+		static public $module;
+
+		/**
 		 * Définit le nom du controller
 		 * @var String
 		 */
@@ -68,18 +78,6 @@ namespace core\application
 		 * @var String
 		 */
 		static public $action;
-
-		/**
-		 * Contient l'url requêtée (sans l'application ni la langue)
-		 * @var String
-		 */
-		static public $url;
-
-		/**
-		 * Définit le module en cours - front ou back
-		 * @var String
-		 */
-		static public $module;
 
 		/**
 		 * Fait référence &agrave; l'instance du controller en cours
@@ -115,14 +113,14 @@ namespace core\application
 
 		/**
 		 * Instanciation des objects globlaux de l'application
-		 * Gestionnaire de relation &agrave; la base de donnée, gestionnaire d'authentification... ect
+		 * Gestionnaire de relation &agrave; la base de donnée, gestionnaire d'authentication... ect
 		 * @return void
 		 */
 		static public function defineGlobalObjects()
 		{
 			if(self::isBot())
 				self::deactivateDebug();
-			call_user_func_array(array(Configuration::$application_authentificationHandler,"getInstance"), array());
+			call_user_func_array(array(Configuration::$application_authenticationHandler,"getInstance"), array());
 			if(self::debug())
 				Debugger::prepare();
 		}
@@ -130,7 +128,7 @@ namespace core\application
 		static public function checkEnvironment($pFile = "includes/applications/setup.json")
 		{
 			$setup = SimpleJSON::import($pFile);
-			self::$config_file = "dev.config.json";
+			self::$config_file = "/includes/applications/dev.config.json";
 			if(!$setup)
 			{
 				return;
@@ -142,6 +140,7 @@ namespace core\application
 					self::$config_file = "/includes/applications/".$env.".config.json";
 				}
 			}
+			self::setConfiguration();
 		}
 
 		/**
@@ -208,11 +207,10 @@ namespace core\application
 		static public function parseURL($pUrl = null)
 		{
 			Configuration::$server_domain = $_SERVER["SERVER_NAME"];
-			if(!empty($_SERVER["SERVER_PORT"])&&$_SERVER["SERVER_PORT"]!=80)
-				Configuration::$server_domain.=":".$_SERVER["SERVER_PORT"];
+			$protocol = "http".((isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443')?'s':'')."://";
 			Configuration::$server_folder = preg_replace('/\/(index).php$/', "", $_SERVER["SCRIPT_NAME"]);
 			Configuration::$server_folder = preg_replace('/^\//', "", Configuration::$server_folder);
-			Configuration::$server_url = "http://".Configuration::$server_domain."/";
+			Configuration::$server_url = $protocol.Configuration::$server_domain."/";
 			if(!empty(Configuration::$server_folder))
 				Configuration::$server_url .= Configuration::$server_folder."/";
 
@@ -222,13 +220,9 @@ namespace core\application
 				$url = $matches[1];
 			}
 
-			if(!preg_match('/\/$/',$url,$extract, PREG_OFFSET_CAPTURE)&&
-				!preg_match('/\.[a-z]{2,4}$/', $url, $extract, PREG_OFFSET_CAPTURE))
-			{
-				$url .= "/";
-			}
+			self::$application = RoutingHandler::extractApplication($url);
+			self::$module = RoutingHandler::extractApplication($url);
 
-			$application = self::extractApplication($url);
 			Configuration::$site_application = $application;
 			self::setConfiguration(Autoload::$folder."/includes/applications/".Configuration::$site_application."/config.json");
 
@@ -247,10 +241,10 @@ namespace core\application
 			self::$isBackoffice = RewriteURLHandler::checkForBackoffice($url);
 
 			Configuration::$application_rewriteURLHandler = ucfirst(Configuration::$site_application)."RewriteURLHandler";
-			$path_to_rewriteURLHandler = self::$path_to_application."/src/application/rewriteurl/class.".Configuration::$application_rewriteURLHandler.".php";
+			$path_to_rewriteURLHandler = self::$path_to_application."/src/application/routing/class.".Configuration::$application_rewriteURLHandler.".php";
 			if(!file_exists($path_to_rewriteURLHandler))
 			{
-				$path_to_rewriteURLHandler = Autoload::$folder."/includes/libs/core/application/rewriteurl/class.RewriteURLHandler.php";
+				$path_to_rewriteURLHandler = Autoload::$folder."/includes/libs/core/application/routing/class.Routing.php";
 				Configuration::$application_rewriteURLHandler = 'core\application\rewriteurl\RewriteURLHandler';
 			}
 			include_once($path_to_rewriteURLHandler);
@@ -403,7 +397,7 @@ namespace core\application
 
 
 		/**
-		 * Méthode de vérification si l'application est disponible en mode développeur (en fonction du config.json et de l'authentification)
+		 * Méthode de vérification si l'application est disponible en mode développeur (en fonction du config.json et de l'authentication)
 		 * @return bool
 		 */
 		static public function debug()

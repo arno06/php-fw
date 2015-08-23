@@ -75,7 +75,7 @@ namespace core\tools\google
 
 
 		/**
-		 * Méthode de demande d'authentification pour le service google souhaité
+		 * Méthode de demande d'authentication pour le service google souhaité
 		 * @return void
 		 */
 		private function login()

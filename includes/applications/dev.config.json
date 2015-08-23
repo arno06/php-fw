@@ -1,7 +1,19 @@
 {
+    "applications":
+    {
+        "main":
+        {
+            "default":"",
+            "back":"admin"
+        },
+        "test":
+        {
+            "default":"",
+            "v1":"v1mod"
+        }
+    },
     "site": {
         "async": "",
-        "application": "main",
         "theme": "default",
         "explainOnSelect": "",
         "multilanguage": "",
@@ -10,7 +22,6 @@
         "defaultLanguage": "fr",
         "currentLanguage": "fr",
         "template404": "template.404.tpl",
-        "backoffice": "admin",
         "session": "php_fw",
         "inlineHTMLCode": ""
     },

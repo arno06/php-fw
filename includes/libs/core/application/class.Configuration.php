@@ -12,9 +12,9 @@ namespace core\application
 	abstract class Configuration
 	{
 		/**
-		 * @var bool
+		 * @var array
 		 */
-		static public $site_external_access;
+		static public $applications;
 
 		/**
 		 * Définit si le site utilise la navigation asynchrone par défaut
@@ -27,12 +27,6 @@ namespace core\application
 		 * @var string
 		 */
 		static public $site_encoding = "UTF-8";
-
-		/**
-		 * Liste des applications disponibles
-		 * @var String
-		 */
-		static public $site_application = "main";
 
 		/**
 		 * Thème du site
@@ -81,12 +75,6 @@ namespace core\application
 		 * @var String
 		 */
 		static public $site_template404 = "template.404.tpl";
-
-		/**
-		 * Nom d'accès pour les controllers Backoffice
-		 * @var String
-		 */
-		static public $site_backoffice = "admin";
 
 		/**
 		 * Nom attribué à la session de l'application
@@ -148,7 +136,7 @@ namespace core\application
 		 * Nom de la classe chargée de gérer les authentifications sur le site
 		 * @var String
 		 */
-		static public $application_authentificationHandler = "core\\application\\authentification\\AuthentificationHandler";
+		static public $application_authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
 
 		/**
 		 * @var string
@@ -174,26 +162,26 @@ namespace core\application
 		/**
 		 * @var string
 		 */
-		static public $authentification_tableName = "%s_user";
+		static public $authentication_tableName = "%s_user";
 
 		/**
 		 * @var string
 		 */
-		static public $authentification_tableId = "id_user";
+		static public $authentication_tableId = "id_user";
 
 		/**
 		 * @var string
 		 */
-		static public $authentification_fieldPassword = "mdp_user";
+		static public $authentication_fieldPassword = "mdp_user";
 
 		/**
 		 * @var string
 		 */
-		static public $authentification_fieldLogin = "login_user";
+		static public $authentication_fieldLogin = "login_user";
 
 		/**
 		 * @var string
 		 */
-		static public $authentification_fieldPermissions = "permissions_user";
+		static public $authentication_fieldPermissions = "permissions_user";
 	}
 }

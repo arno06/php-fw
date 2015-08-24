@@ -288,7 +288,7 @@ namespace core\tools\debugger
 				{
 					Logs::write($pErrorMessage." ".$pErrorFile." ".$pErrorLine, $pErrorLevel);
 				}
-				Header::content_type("text/html", Configuration::$site_encoding);
+				Header::content_type("text/html", Configuration::$global_encoding);
 				self::$open = true;
 				self::renderHTML(null, true, true);
 				exit();

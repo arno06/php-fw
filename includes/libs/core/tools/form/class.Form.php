@@ -266,7 +266,7 @@ namespace core\tools\form
 					"parameters"=>array()
 				)
 			);
-			$parseLabels = !Core::$isBackoffice&&Configuration::$site_multilanguage;
+			$parseLabels = !Core::$isBackoffice&&Configuration::$global_multilanguage;
 			foreach($this->data as &$input)
 			{
 				foreach($default as $n=>$v)
@@ -760,7 +760,7 @@ namespace core\tools\form
 							$this->hasUpload = true;
 						}else if(isset($data["attributes"]["type"])
 							&& $data["attributes"]["type"]=="submit"
-							&& Configuration::$site_multilanguage)
+							&& Configuration::$global_multilanguage)
 						{
 							$data["attributes"]["value"] = Dictionary::term($data["attributes"]["value"]);
 						}
@@ -812,7 +812,8 @@ namespace core\tools\form
 						if(isset($data["chosen"]) && $data["chosen"]==true)
 						{
 							Autoload::addScript("chosen/chosen.min.js");
-							Autoload::addStyle(Core::$path_to_components."/chosen/style/chosen.css", false);
+                            /** @todo componentify this */
+							Autoload::addStyle(Core::$path_to_components."/chosen/style/chosen.css");
 						}
 						break;
 				}
@@ -946,7 +947,7 @@ namespace core\tools\form
 					$n[$np] = $vp;
 				}
 				$pParams = $n;
-				$output .= '<form action="'.Core::rewriteURL($controller, $action, $pParams, Configuration::$site_currentLanguage).'" method="post"';
+				$output .= '<form action="'.Core::rewriteURL($controller, $action, $pParams, Configuration::$global_currentLanguage).'" method="post"';
 				if($this->hasUpload)
 					$output .= ' enctype="multipart/form-data"';
 				if (!empty($idForm))
@@ -1199,8 +1200,9 @@ namespace core\tools\form
 			self::$ct_upload++;
 			$file = $style = $value = "";
 			$server_url = Configuration::$server_url;
-			if(Configuration::$site_application!="main")
-				$server_url .= "../";
+            /**
+             * @todo concaténer la valeur du relative path de l'application en cours à $server_url ?
+             */
 
 			$disabled = isset($pData["attributes"]["disabled"]) && $pData["attributes"]["disabled"] == "disabled"?"disabled":"";
 

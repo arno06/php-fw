@@ -48,7 +48,6 @@ namespace core\tools
 			$this->smarty = new Smarty();
 			$this->smarty->assign("path_to_theme", Core::$path_to_theme);
 			$this->smarty->assign("server_url", Configuration::$server_url);
-			$this->smarty->assign("site_backoffice", Configuration::$site_backoffice);
 			Core::setupSmarty($this->smarty);
 			$this->phpmailer = new PHPMailer();
 		}

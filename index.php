@@ -19,15 +19,10 @@ require_once(__DIR__."/includes/libs/core/data/interface.InterfaceData.php");
 require_once(__DIR__."/includes/libs/core/data/class.SimpleJSON.php");
 require_once(__DIR__."/includes/libs/core/application/class.Configuration.php");
 require_once(__DIR__."/includes/libs/core/system/class.File.php");
-require_once(__DIR__."/includes/libs/core/application/class.BaseModel.php");
-require_once(__DIR__ . "/includes/libs/core/models/model.ModelAuthentication.php");
-require_once(__DIR__."/includes/libs/core/db/class.Query.php");
-require_once(__DIR__."/includes/libs/core/db/class.DBManager.php");
 require_once(__DIR__."/includes/libs/core/application/class.Dictionary.php");
 require_once(__DIR__."/includes/libs/core/application/event/class.EventDispatcher.php");
-require_once(__DIR__."/includes/libs/core/application/class.FrontController.php");
+require_once(__DIR__."/includes/libs/core/application/class.DefaultController.php");
 require_once(__DIR__ . "/includes/libs/core/application/routing/class.Routing.php");
-require_once(__DIR__."/includes/libs/smarty/Smarty.class.php");
 
 use core\application\Core;
 Core::checkEnvironment();

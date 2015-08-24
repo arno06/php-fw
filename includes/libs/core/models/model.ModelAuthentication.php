@@ -3,6 +3,7 @@ namespace core\models
 {
     use core\application\BaseModel;
     use core\application\Configuration;
+    use core\application\Core;
     use core\db\Query;
 
     /**
@@ -20,7 +21,7 @@ namespace core\models
 
         public function __construct()
         {
-            parent::__construct(sprintf(Configuration::$authentification_tableName,Configuration::$site_application), Configuration::$authentification_tableId);
+            parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application->getModule()->name), Configuration::$authentication_tableId);
         }
 
         static public function isUser($pLogin, $pMdp)

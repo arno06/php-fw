@@ -16,7 +16,7 @@ namespace core\application
 	 * @version 1.0
 	 * @package core\application
 	 */
-	class BackController extends FrontController implements InterfaceController
+	class DefaultBackController extends DefaultController implements InterfaceController
 	{
 
 		/**

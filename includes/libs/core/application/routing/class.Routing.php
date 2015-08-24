@@ -33,7 +33,7 @@ namespace core\application\routing
 		{
 			$extract = null;
 
-			if(!Core::$isBackoffice)
+			if(Core::$application->getModule()->useRoutingFile)
 			{
 				return self::handleRoutingRules($pUrl);
 			}
@@ -140,10 +140,10 @@ namespace core\application\routing
 			$pController =  self::getAlias($pController);
 			$pAction = self::getAlias($pAction);
 			$return = "";
-			if(!Core::$isBackoffice&&(!isset($pLangue)||empty($pLangue))&&Configuration::$site_multilanguage)
-				$return = Configuration::$site_currentLanguage."/";
-			elseif(!Core::$isBackoffice&&isset($pLangue)&&!empty($pLangue)&&Configuration::$site_multilanguage)
-				$return = $pLangue."/";
+//			if(!Core::$isBackoffice&&(!isset($pLangue)||empty($pLangue))&&Configuration::$site_multilanguage)
+//				$return = Configuration::$site_currentLanguage."/";
+//			elseif(!Core::$isBackoffice&&isset($pLangue)&&!empty($pLangue)&&Configuration::$site_multilanguage)
+//				$return = $pLangue."/";
 			if(!empty($pController))
 				$return .= $pController."/";
 			if(!empty($pAction))
@@ -160,7 +160,7 @@ namespace core\application\routing
 		/**
 		 *
 		 * @param String $pValue
-		 * @return String
+		 * @return string
 		 */
 		static public function getAlias($pValue = "")
 		{
@@ -170,6 +170,10 @@ namespace core\application\routing
 				return preg_replace('/(\_)/', "-", $pValue);
 		}
 
+        /**
+         * @param $pUrl
+         * @return mixed|string
+         */
 		static public function extractApplication(&$pUrl)
 		{
 			$folder = preg_replace('/(\/)/', '\/', Configuration::$server_folder);
@@ -177,26 +181,31 @@ namespace core\application\routing
 
 			$applications = array_keys(Configuration::$applications);
 
+            $application = self::shift($pUrl, '/^('.implode("|", $applications).')\//');
 
-			if(preg_match('/^('.implode("|", $applications).')\//', $pUrl, $extract, PREG_OFFSET_CAPTURE))
-			{
-				$application = str_replace("/","",$extract[0][0]);
-				$pUrl = preg_replace("/^".$extract[1][0].'\//',"",$pUrl);
-				if($application=="main")
-					Go::toFront();
-			}
-			else
-			{
-				$application = "main";
-			}
-			echo $application;
-			exit();
+            if($application == "main")
+                Go::toFront();
+
+            if($application == false)
+                $application = "main";
+
 			return $application;
 		}
 
-		static public function extractModule($pUrl)
+        /**
+         * @param $pUrl
+         * @param $pAvailableModule
+         * @return string
+         */
+		static public function extractModule(&$pUrl, $pAvailableModule = array('default'))
 		{
+            $modules = implode("|", $pAvailableModule);
 
+            $module = self::shift($pUrl, '/^('.$modules.')\//');
+
+            if($module === false)
+                $module = "front";
+            return $module;
 		}
 
 
@@ -345,7 +354,7 @@ namespace core\application\routing
 			foreach($chars as $key=>$change)
 			{
 				$pTexte = str_replace($key, $change, $pTexte);
-				$pTexte = str_replace(mb_strtoupper($key, Configuration::$site_encoding), mb_strtoupper($change, Configuration::$site_encoding), $pTexte);
+				$pTexte = str_replace(mb_strtoupper($key, Configuration::$global_encoding), mb_strtoupper($change, Configuration::$global_encoding), $pTexte);
 			}
 			if ($pLower) $pTexte = strtolower($pTexte);
 			$pTexte = preg_replace("/[\s]/i", "_", $pTexte);

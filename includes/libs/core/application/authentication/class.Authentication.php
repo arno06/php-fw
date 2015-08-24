@@ -1,9 +1,11 @@
 <?php
 namespace core\application\authentication
 {
-	use \core\application\Configuration;
-	use core\models\ModelAuthentication;
-	use core\tools\debugger\Debugger;
+
+    use core\application\Application;
+    use \core\application\Configuration;
+    use core\application\Core;
+    use core\models\ModelAuthentication;
 
 	/**
 	 * Class Authentication
@@ -56,7 +58,7 @@ namespace core\application\authentication
 		 */
 		public function __construct()
 		{
-			$this->sessionVar .= Configuration::$site_application;
+			$this->sessionVar .= Core::$application->getName();
 			if(!isset($_SESSION[$this->sessionVar])
 				||!is_array($_SESSION[$this->sessionVar]))
 			{

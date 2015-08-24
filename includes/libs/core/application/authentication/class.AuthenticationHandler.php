@@ -55,7 +55,7 @@ namespace core\application\Authentication
 		{
 			if(!$pInstance instanceOf PrivateClass)
 				trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
-			self::$permissions = array_merge(self::$permissions, Configuration::$site_permissions);
+			self::$permissions = array_merge(self::$permissions, Configuration::$global_permissions);
 			$this->parseUserSession();
 		}
 

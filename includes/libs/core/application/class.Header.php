@@ -29,7 +29,7 @@ namespace core\application
 		static public function content_type($pValue, $pCharset = false)
 		{
 			if(!$pCharset)
-				$pCharset = Configuration::$site_encoding;
+				$pCharset = Configuration::$global_encoding;
 			header("Content-Type: ".$pValue."; charset=".$pCharset);
 		}
 

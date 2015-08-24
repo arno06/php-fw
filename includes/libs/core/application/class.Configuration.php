@@ -3,10 +3,10 @@ namespace core\application
 {
 	/**
 	 * Class Configuration
-	 * Sert de référence pour n'importe quelle propriété nécessaire à la configuration du framework
+	 * Sert de référence pour n'importe quelle propriété de configuration du framework
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package application
 	 */
 	abstract class Configuration
@@ -17,82 +17,63 @@ namespace core\application
 		static public $applications;
 
 		/**
-		 * Définit si le site utilise la navigation asynchrone par défaut
-		 * @tbd
-		 * @var bool
-		 */
-		static public $site_async = false;
-
-		/**
 		 * @var string
 		 */
-		static public $site_encoding = "UTF-8";
-
-		/**
-		 * Thème du site
-		 * @var String
-		 */
-		static public $site_theme = "default";
+		static public $global_encoding = "UTF-8";
 
 		/**
 		 * Définit si Query génère automatiquement des requêtes Explain sur les Select
 		 * @var bool
 		 */
-		static public $site_explainOnSelect = true;
+		static public $global_explainOnSelect = true;
 
 		/**
 		 * Définit si le site est multilangue
 		 * @var Boolean
 		 */
-		static public $site_multilanguage = false;
+		static public $global_multilanguage = false;
 
 		/**
 		 * Définit l'email de contact du site
 		 * @var string
 		 */
-		static public $site_emailContact = "";
+		static public $global_emailContact = "";
 
 		/**
 		 * Définit si l'url doit être traduite (controller/action) en fonction des alias du fichier de langue
 		 * @var Boolean
 		 */
-		static public $site_translateURL = false;
+		static public $global_translateURL = false;
 
 		/**
 		 * Définit la langue par défaut
 		 * @var String
 		 */
-		static public $site_defaultLanguage = "fr";
+		static public $global_defaultLanguage = "fr";
 
 		/**
 		 * Définit la langue en cours
 		 * @var String
 		 */
-		static public $site_currentLanguage = "fr";
-
-		/**
-		 * Nom du controller s'occupant de gérer la page d'erreur 404
-		 * @var String
-		 */
-		static public $site_template404 = "template.404.tpl";
+		static public $global_currentLanguage = "fr";
 
 		/**
 		 * Nom attribué à la session de l'application
 		 * @var String
 		 */
-		static public $site_session = "fw_php";
+		static public $global_session = "fw_php";
 
 		/**
 		 * Tableau des permissions disponibles sur le site
 		 * @var array
 		 */
-		static public $site_permissions = array();
+		static public $global_permissions = array();
 
 		/**
 		 * Définit si Smarty supprime les retours à la ligne à l'écriture des fichiers de cache des templates
 		 * @var bool
 		 */
-		static public $site_inlineHTMLCode = false;
+		static public $global_inlineHTMLCode = false;
 
 		/**
 		 * Domaine du serveur
@@ -139,25 +120,9 @@ namespace core\application
 		static public $application_authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
 
 		/**
-		 * @var string
-		 */
-		static public $application_rewriteURLHandler;
-
-		/**
-		 * Nom du controller de base
-		 * @var FrontController
-		 */
-		static public $application_frontController = "core\\application\\FrontController";
-
-		/**
-		 * @var BackController
-		 */
-		static public $application_backController = "core\\application\\BackController";
-
-		/**
 		 * @var bool
 		 */
-		static public $application_debug = false;
+		static public $global_debug = false;
 
 		/**
 		 * @var string

@@ -937,7 +937,7 @@ namespace core\db
 		public function execute($pHandler = "default")
 		{
 			$result = parent::execute($pHandler);
-			if (Configuration::$site_explainOnSelect == true)
+			if (Configuration::$global_explainOnSelect == true)
 				$this->explain($pHandler);
 			return $result;
 		}

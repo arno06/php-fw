@@ -16,10 +16,11 @@ namespace core\application
 		 */
 		static public function to404()
 		{
-			$controller = Core::$isBackoffice?new Configuration::$application_backController:new Configuration::$application_frontController;
+            $defaultController = Core::$application->getModule()->defaultController;
+			$controller = new $defaultController();
 			Header::http("1.0 404 Not Found");
 			Header::status("404 Not Found");
-			Core::execute($controller, null, Configuration::$site_template404);
+			Core::execute($controller, Core::$application->getModule()->action404);
 			Core::endApplication();
 		}
 

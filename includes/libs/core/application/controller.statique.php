@@ -21,7 +21,7 @@ namespace core\application
      * @package application
      * @subpackage controller
      */
-    class statique extends FrontController
+    class statique extends DefaultController
     {
 
         public function check_env()
@@ -59,16 +59,15 @@ namespace core\application
 
             preg_match(File::REGEXP_EXTENSION, $image, $extract);
             $ext = $extract[1];
-            $folder_cache = "includes/applications/".Configuration::$site_application."/_cache/imgs/";
+            $app = Core::$application->getName();
+            $folder_cache = "includes/applications/".$app."/_cache/imgs/";
             $file_cache = $folder_cache."resize_".$_GET["id"]."_".$_GET["w"]."_".$_GET["h"].".".$ext;
-            if(Configuration::$site_application!="main")
+            if($app != "main")
                 Configuration::$server_url .= "../";
             if(file_exists($file_cache))
                 Header::location(Configuration::$server_url.$file_cache);
 
             Image::createCopy($image, $file_cache, $_GET["w"], $_GET["h"]);
-//        echo(Configuration::$server_url.$file_cache);
-//		        die("f");
             Header::location(Configuration::$server_url.$file_cache);
         }
 

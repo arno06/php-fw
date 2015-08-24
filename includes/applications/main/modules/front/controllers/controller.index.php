@@ -1,10 +1,11 @@
 <?php
 namespace app\main\controllers\front
 {
-    use core\application\FrontController;
+
+    use core\application\DefaultController;
     use core\tools\docs\Documentor;
 
-    class index extends FrontController
+    class index extends DefaultController
     {
 
         public function __construct()

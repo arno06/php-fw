@@ -122,7 +122,7 @@ namespace core\tools
 		 */
 		public function __doRequest($request, $location, $action, $version, $one_way = null)
 		{
-			Configuration::$site_encoding = "UTF-8";
+			Configuration::$global_encoding = "UTF-8";
 
 			$soapRequest = array("soap:Envelope"=>array(
 				"xmlns:soap"=>self::NS_SOAP,

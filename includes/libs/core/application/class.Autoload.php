@@ -43,7 +43,7 @@ namespace core\application
 		/**
 		 * @var array
 		 */
-		private $exeptions = array('PHPMailer'=>'/includes/libs/phpMailer/class.phpmailer.php');
+		private $exeptions = array('PHPMailer'=>'/includes/libs/phpMailer/class.phpmailer.php', 'Smarty'=>'/includes/libs/smarty/Smarty.class.php');
 
 
 		/**

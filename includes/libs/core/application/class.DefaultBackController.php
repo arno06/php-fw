@@ -108,9 +108,9 @@ namespace core\application
 		 */
 		public function __construct()
 		{
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Configuration::$application_authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
-				Go::toBack();
+				Go::to();
 			$class = explode("\\", get_class($this));
 			$this->className = end($class);
             $this->formName = $this->className;
@@ -127,15 +127,14 @@ namespace core\application
 		}
 
 		/**
-		 * @param null $pSmarty
 		 * @param bool $pDisplay
 		 * @return string
 		 */
-		public function renderHTML($pSmarty = null, $pDisplay = true)
+		public function render($pDisplay = true)
 		{
 			$this->addContent("actions", $this->actions->toArray());
 			$this->addContent('menu_items', $this->menu->retrieveItems());
-			return parent::renderHTML($pSmarty, $pDisplay);
+			return parent::render($pDisplay);
 		}
 
 		/**
@@ -145,7 +144,7 @@ namespace core\application
 		 */
 		public function index()
 		{
-			Go::toBack($this->className, "listing");
+			Go::to($this->className, "listing");
 		}
 
 		/**
@@ -264,7 +263,7 @@ namespace core\application
 
 			$data = $this->model->getTupleById($_GET["id"]);
 			if(!$data)
-				Go::toBack($this->className);
+				Go::to($this->className);
 			$form->injectValues($data);
 
 			if($form->isValid())
@@ -301,7 +300,7 @@ namespace core\application
 				Go::to404();
 			$this->model->deleteById($_GET["id"]);
 			$this->dispatchEvent(new Event(self::EVENT_SUCCESSUL_DELETE));
-			Go::toBack($this->className);
+			Go::to($this->className);
 		}
 
 		public function view()

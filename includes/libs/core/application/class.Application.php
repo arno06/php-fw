@@ -15,13 +15,19 @@ namespace core\application
 
         private $relative_path = "";
 
+        public $multiLanguage = false;
+
+        public $currentLanguage = "fr";
+
+        public $defaultLanguage = "fr";
+
         public function __construct($pName = self::DEFAULT_APPLICATION)
         {
             $this->name = $pName;
             if($pName != self::DEFAULT_APPLICATION)
             {
                 $this->url .= $pName."/";
-                $this->path .= "../";
+                $this->relative_path .= "../";
             }
             if(!Configuration::$applications[$this->name])
             {
@@ -29,7 +35,15 @@ namespace core\application
             }
 
             $data = Configuration::$applications[$this->name];
-            $this->theme = $data['theme'];
+
+            $props = get_class_vars(__CLASS__);
+            foreach($props as $n=>$p)
+            {
+                if(isset($data[$n]))
+                {
+                    $this->{$n} = $data[$n];
+                }
+            }
         }
 
         public function setModule($pName = Module::DEFAULT_MODULE)
@@ -37,7 +51,7 @@ namespace core\application
             if($pName != Module::DEFAULT_MODULE)
             {
                 $this->url .= $pName."/";
-                $this->path .= "../";
+                $this->relative_path .= "../";
             }
             $data = Configuration::$applications[$this->name]['modules'][$pName];
             $this->module = new Module($pName, $data);
@@ -45,7 +59,7 @@ namespace core\application
 
         public function getModulesAvailable()
         {
-            return array_keys(Configuration::$applications[$this->name]);
+            return array_keys(Configuration::$applications[$this->name]['modules']);
         }
 
         public function getUrlPart()
@@ -68,7 +82,7 @@ namespace core\application
             return $this->module;
         }
 
-        public function getName()
+        public function __toString()
         {
             return $this->name;
         }
@@ -83,5 +97,18 @@ namespace core\application
         public $useRoutingFile = true;
         public $defaultController = "core\\application\\DefaultController";
         public $action404 = "not_found";
+
+        public function __construct($pName, $pData)
+        {
+            $this->name = $pName;
+            $props = get_class_vars(__CLASS__);
+            foreach($props as $n=>$p)
+            {
+                if(isset($pData[$n]))
+                {
+                    $this->{$n} = $pData[$n];
+                }
+            }
+        }
     }
 }

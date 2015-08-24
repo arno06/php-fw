@@ -31,7 +31,7 @@ namespace core\utils
 			$ip = $_SERVER["REMOTE_ADDR"];
 			$folder = "includes/logs/".date("m-y")."/";
 			$file = date("d-m-y").".txt";
-			$message = "[ ".date("H\hi\ms\s")." ] [".$ip."] [ ".Core::$application->getName()." ] [ ".$pLevel." ]\t\t".$pMessage."\r\n";
+			$message = "[ ".date("H\hi\ms\s")." ] [".$ip."] [ ".Core::$application." ] [ ".$pLevel." ]\t\t".$pMessage."\r\n";
 			Folder::create($folder);
 			File::create($folder.$file);
 			chmod($folder.$file, 0666);

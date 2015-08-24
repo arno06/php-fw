@@ -4,6 +4,9 @@
         "main":
         {
 			"theme":"default",
+			"multiLanguage": "",
+			"defaultLanguage": "fr",
+			"currentLanguage": "fr",
 			"modules":{
 				"front": {
 					"useRoutingFile":true,
@@ -21,6 +24,9 @@
         "test":
         {
 			"theme":"default",
+			"multiLanguage": "",
+			"defaultLanguage": "fr",
+			"currentLanguage": "fr",
 			"modules": {
 				"front": {
 					"useRoutingFile": true,
@@ -39,10 +45,7 @@
 		"debug":true,
 		"session": "php_fw",
         "explainOnSelect": "",
-        "multilanguage": "",
-        "emailContact": "me@arnaud-nicolas.fr",
-        "defaultLanguage": "fr",
-        "currentLanguage": "fr"
+        "emailContact": "me@arnaud-nicolas.fr"
     },
     "server": {
         "smtp": ""

@@ -1,8 +1,6 @@
 <?php
 namespace core\application\authentication
 {
-
-    use core\application\Application;
     use \core\application\Configuration;
     use core\application\Core;
     use core\models\ModelAuthentication;
@@ -58,7 +56,7 @@ namespace core\application\authentication
 		 */
 		public function __construct()
 		{
-			$this->sessionVar .= Core::$application->getName();
+			$this->sessionVar .= Core::$application;
 			if(!isset($_SESSION[$this->sessionVar])
 				||!is_array($_SESSION[$this->sessionVar]))
 			{
@@ -83,7 +81,7 @@ namespace core\application\authentication
 			$token = $this->getToken($this->mdp_user);
 			if(ModelAuthentication::isUser($this->login_user, $this->mdp_user)&&$token==$this->token)
 			{
-				$this->permissions = ModelAuthentication::$data[Configuration::$Authentication_fieldPermissions];
+				$this->permissions = ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
 				$this->data = ModelAuthentication::$data;
 			}
 			else
@@ -115,7 +113,7 @@ namespace core\application\authentication
 				$lvl = AuthenticationHandler::$permissions[AuthenticationHandler::USER];
 				if($pAdmin)
 					$lvl = AuthenticationHandler::$permissions[AuthenticationHandler::ADMIN];
-				$isAutorized = $lvl&ModelAuthentication::$data[Configuration::$Authentication_fieldPermissions];
+				$isAutorized = $lvl&ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
 
 				if($isAutorized)
 				{

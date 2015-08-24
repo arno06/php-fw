@@ -30,3 +30,16 @@ Core::init();
 Core::parseURL();
 Core::execute(Core::getController(), Core::getAction(), Core::getTemplate());
 Core::endApplication();
+
+function tick()
+{
+    global $timeInit;
+    global $memInit;
+    global $ok;
+    if(!$ok)
+    {
+        echo "<table>";
+        $ok = true;
+    }
+    echo "<tr><td>".round(microtime(true)-$timeInit, 4)."</td><td>".round(memory_get_usage(MEMORY_REAL_USAGE)-$memInit, 4)."</td></tr>";
+}

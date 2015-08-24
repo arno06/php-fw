@@ -204,10 +204,7 @@ namespace core\tools\form
 			$this->name = $pName;
 			if(!$pReal)
 				return;
-			if(Core::$isBackoffice)
-				$module = "back";
-			else
-				$module = "front";
+            $module = Core::$module;
 			$formFile = Core::$path_to_application."/modules/".$module."/forms/form.".$pName.".json";
 			try
 			{
@@ -266,7 +263,7 @@ namespace core\tools\form
 					"parameters"=>array()
 				)
 			);
-			$parseLabels = !Core::$isBackoffice&&Configuration::$global_multilanguage;
+			$parseLabels = false;
 			foreach($this->data as &$input)
 			{
 				foreach($default as $n=>$v)
@@ -1226,7 +1223,7 @@ namespace core\tools\form
                     $action = $pData['deleteFileAction'];
                 $deleteFileAction = 'data-delete_file_action="'.$action.'"';
             }
-			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Configuration::$site_application."' data-value='".$value."' data-file='".$file."' data-backoffice='".(Core::$isBackoffice?'true':'false')."'".$deleteFileAction.">";
+			$comp = "<input ".$disabled." type='file' name='".$pName."_input' data-form_name='".$pData["form_name"]."' data-input_name='".$pData["field_name"]."' data-application='".Core::$application."' data-value='".$value."' data-file='".$file."' data-module='".Core::$module."'".$deleteFileAction.">";
 			$input = self::getLabel($pData["label"].$pRequire, $pId);
 			$input .= self::getComponent($comp, 'upload');
 			return $input;
@@ -1428,7 +1425,7 @@ namespace core\tools\form
 							resultHighlighter: 'phraseMatch',
 							resultListLocator: 'responses',
 							resultTextLocator: 'value',".$minQueryLength.$on."
-							source: 'statique/autocomplete/application:".Configuration::$site_application."/is_backoffice:".Core::$isBackoffice."/form_name:".$pData["form_name"]."/input_name:".$pData["field_name"]."/q:{query}/'
+							source: 'statique/autocomplete/application:".Core::$application."/module:".Core::$module."/form_name:".$pData["form_name"]."/input_name:".$pData["field_name"]."/q:{query}/'
 						  });
 						});
 					", "", true);

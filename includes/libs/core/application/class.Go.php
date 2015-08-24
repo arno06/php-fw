@@ -5,7 +5,7 @@ namespace core\application
 	 * Class Go
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .1
+	 * @version 1.0
 	 * @package application
 	 */
 	class Go
@@ -34,7 +34,7 @@ namespace core\application
 		 * @param int $pCode
 		 * @return void
 		 */
-		static public function toFront($pController = "", $pAction = "", $pParams = array(), $pLangue = "", $pCode = 301)
+		static public function to($pController = "", $pAction = "", $pParams = array(), $pLangue = "", $pCode = 301)
 		{
 			$rewriteURL = Configuration::$server_url;
 			$rewriteURL .= Core::rewriteURL($pController, $pAction, $pParams, $pLangue);
@@ -44,14 +44,15 @@ namespace core\application
 
 		/**
 		 * @static
+         * @param string $pModule
 		 * @param string $pController
 		 * @param string $pAction
 		 * @param array $pParams
 		 * @return void
 		 */
-		static public function toBack($pController = "", $pAction = "", $pParams = array())
+		static public function toModule($pModule = 'front', $pController = "", $pAction = "", $pParams = array())
 		{
-			$rewriteURL = Configuration::$server_url.Configuration::$site_backoffice."/";
+			$rewriteURL = Configuration::$server_url.$pModule."/";
 			$rewriteURL .= Core::rewriteURL($pController, $pAction, $pParams);
 			Header::location($rewriteURL);
 		}

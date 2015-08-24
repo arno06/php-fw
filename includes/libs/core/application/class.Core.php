@@ -195,7 +195,7 @@ namespace core\application
 		 */
 		static public function rewriteURL($pController = "", $pAction = "", $pParams = array(), $pLangue = "")
 		{
-			return call_user_func_array(array(Configuration::$application_rewriteURLHandler, "rewrite"), array($pController, $pAction, $pParams, $pLangue));
+			return RoutingHandler::rewrite($pController, $pAction, $pParams, $pLangue);
 		}
 
 		/**
@@ -271,7 +271,7 @@ namespace core\application
 			}
 			$seo = Dictionary::seoInfos(self::$controller, self::$action);
 			$controller_file = self::$path_to_application."/modules/".self::$module."/controllers/controller.".self::$controller.".php";
-			$controller = 'app\\'.self::$application->getName().'\\controllers\\'.self::$module.'\\'.self::$controller;
+			$controller = 'app\\'.self::$application.'\\controllers\\'.self::$module.'\\'.self::$controller;
 			if (!file_exists($controller_file))
 			{
                 $defaultController = self::$application->getModule()->defaultController;

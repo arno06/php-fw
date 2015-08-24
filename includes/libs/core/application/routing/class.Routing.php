@@ -1,11 +1,14 @@
 <?php
 namespace core\application\routing
 {
-	use core\application\Configuration;
+
+    use core\application\Application;
+    use core\application\Configuration;
 	use core\application\Core;
 	use core\application\Go;
 	use core\application\Dictionary;
-	use core\data\SimpleJSON;
+    use core\application\Module;
+    use core\data\SimpleJSON;
 	use \Exception;
 
 	/**
@@ -164,10 +167,7 @@ namespace core\application\routing
 		 */
 		static public function getAlias($pValue = "")
 		{
-			if(!Core::$isBackoffice&&Configuration::$site_translateURL)
-				return preg_replace('/(\_)/', "-", Dictionary::getAliasFor($pValue));
-			else
-				return preg_replace('/(\_)/', "-", $pValue);
+            return preg_replace('/(\_)/', "-", $pValue);
 		}
 
         /**
@@ -178,17 +178,12 @@ namespace core\application\routing
 		{
 			$folder = preg_replace('/(\/)/', '\/', Configuration::$server_folder);
 			$pUrl = preg_replace('/^(\/'.(!empty($folder)?$folder.'\/':"").")/","",$pUrl);
-
 			$applications = array_keys(Configuration::$applications);
-
             $application = self::shift($pUrl, '/^('.implode("|", $applications).')\//');
-
-            if($application == "main")
-                Go::toFront();
-
-            if($application == false)
-                $application = "main";
-
+            if($application == Application::DEFAULT_APPLICATION)
+                Go::to();
+            if($application === false)
+                $application = Application::DEFAULT_APPLICATION;
 			return $application;
 		}
 
@@ -200,11 +195,11 @@ namespace core\application\routing
 		static public function extractModule(&$pUrl, $pAvailableModule = array('default'))
 		{
             $modules = implode("|", $pAvailableModule);
-
             $module = self::shift($pUrl, '/^('.$modules.')\//');
-
+            if($module == Module::DEFAULT_MODULE)
+                Go::to();
             if($module === false)
-                $module = "front";
+                $module = Module::DEFAULT_MODULE;
             return $module;
 		}
 
@@ -216,11 +211,11 @@ namespace core\application\routing
 		 */
 		static public function extractLanguage(&$pURL)
 		{
-			if(Configuration::$site_multilanguage&&!Core::$isBackoffice&&!preg_match("/^statique/",$pURL, $matches))
+			if(Configuration::$global_multilanguage&&!preg_match("/^statique/",$pURL, $matches))
 			{
 				$language = self::shift($pURL, self::REGEXP_LANGUAGE);
 				if(!$language)
-					Go::toFront("","",array(), Configuration::$site_defaultLanguage);
+					Go::to("","",array(), Configuration::$site_defaultLanguage);
 				return $language;
 			}
 			return Configuration::$site_defaultLanguage;
@@ -235,14 +230,6 @@ namespace core\application\routing
 		static public function extractController(&$pURL)
 		{
 			$controller = self::shift($pURL, self::REGEXP_CONTROLLER);
-			if (!empty($controller)
-				&&Configuration::$site_translateURL
-				&&!Core::$isBackoffice)
-			{
-				$controller = Dictionary::getAliasFrom($controller);
-				if(empty($controller))
-					Go::to404();
-			}
 			return $controller;
 		}
 
@@ -255,14 +242,6 @@ namespace core\application\routing
 		static public function extractAction(&$pURL)
 		{
 			$action = self::shift($pURL, self::REGEXP_ACTION);
-			if (!empty($action)
-				&&Configuration::$site_translateURL
-				&&!Core::$isBackoffice)
-			{
-				$action = Dictionary::getAliasFrom($action);
-				if(empty($action))
-					Go::to404();
-			}
 			return $action;
 		}
 

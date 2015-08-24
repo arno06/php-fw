@@ -59,8 +59,7 @@ namespace core\application
 
             preg_match(File::REGEXP_EXTENSION, $image, $extract);
             $ext = $extract[1];
-            $app = Core::$application->getName();
-            $folder_cache = "includes/applications/".$app."/_cache/imgs/";
+            $folder_cache = "includes/applications/".Core::$application."/_cache/imgs/";
             $file_cache = $folder_cache."resize_".$_GET["id"]."_".$_GET["w"]."_".$_GET["h"].".".$ext;
             if($app != "main")
                 Configuration::$server_url .= "../";
@@ -80,8 +79,6 @@ namespace core\application
                 Go::to404();
             $form = $_GET["form"];
             $input = $_GET["input"];
-            if(isset($_GET["backoffice"])&&$_GET["backoffice"]==1)
-                Core::$isBackoffice = true;
             $form = new Form($form);
             $captcha = $form->getInput($input);
             if(empty($captcha) || $captcha["tag"] != Form::TAG_CAPTCHA)
@@ -111,7 +108,7 @@ namespace core\application
                     $c->$avaibles[$i] = $captcha[$avaibles[$i]];
             }
             $c->render();
-            exit();
+            Core::endApplication();
         }
 
         /**
@@ -128,8 +125,8 @@ namespace core\application
             if(empty($response["error"]))
             {
                 $path_to_form = "includes/applications/".$_GET["application"]."/modules/";
-                if($_GET["is_backoffice"])
-                    $path_to_form .= "back/";
+                if($_GET["module"])
+                    $path_to_form .= $_GET["module"]."/";
                 else
                     $path_to_form .= "front/";
                 $path_to_form .= "forms/form.".$_GET["form_name"].".json";
@@ -218,10 +215,10 @@ namespace core\application
                 $response["error"] = "Aucun fichier n'a été transmis";
             if(empty($response["error"]))
             {
-                Configuration::$site_application = $_POST["application"];
-                $path_to_form = "includes/applications/".$_POST["application"]."/modules/";
-                if($_POST["backoffice"]&&$_POST['backoffice']=="true")
-                    $path_to_form .= "back/";
+                $app = $_POST["application"];
+                $path_to_form = "includes/applications/".$app."/modules/";
+                if(isset($_POST["module"])&&!empty($_POST['backoffice']))
+                    $path_to_form .= $_POST["module"]."/";
                 else
                     $path_to_form .= "front/";
                 $form_name = $_POST["form_name"];

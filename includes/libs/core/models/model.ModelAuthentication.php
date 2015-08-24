@@ -21,7 +21,7 @@ namespace core\models
 
         public function __construct()
         {
-            parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application->getModule()->name), Configuration::$authentication_tableId);
+            parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application), Configuration::$authentication_tableId);
         }
 
         static public function isUser($pLogin, $pMdp)
@@ -31,9 +31,9 @@ namespace core\models
 
             $instance = self::getInstance();
 
-            if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentification_fieldLogin, Query::EQUAL, $pLogin)))
+            if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentication_fieldLogin, Query::EQUAL, $pLogin)))
             {
-                if($result[configuration::$authentification_fieldPassword] == $pMdp)
+                if($result[configuration::$authentication_fieldPassword] == $pMdp)
                 {
                     self::$data = $result;
                     return true;

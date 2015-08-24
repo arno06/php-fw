@@ -250,7 +250,7 @@ namespace core\tools
             $this->headers["Content-Length"] = strlen($pContent);
             $this->writeHeaders();
             echo $pContent;
-            exit();
+            Core::endApplication();
         }
 
         /**

@@ -7,6 +7,12 @@
 			"duration":120
 		}
 	},
+	"Request":
+	{
+		"javascript":[
+			"http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=Request"
+		]
+	},
     "M4Tween":
     {
         "javascript":[
@@ -15,9 +21,14 @@
     },
 	"Autocomplete":
 	{
+		"need":["Request"],
+		"css":
+		[
+			"core/autocomplete/Autocomplete.css"
+		],
 		"javascript":
 		[
-			"core/Autocomplete.js"
+			"core/autocomplete/Autocomplete.js"
 		]
 	},
     "Form":

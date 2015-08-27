@@ -1,19 +1,19 @@
 <?php
 namespace core\application
 {
-	use core\application\authentification\AuthentificationHandler;
 	use core\tools\form\Form;
+    use core\application\event\EventDispatcher;
 	use Smarty;
 
 	/**
-	 * Controller de frontoffice de base
+	 * Controller de base
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package application
 	 * @subpackage controller
 	 */
-	class FrontController extends event\EventDispatcher
+	class DefaultController extends EventDispatcher
 	{
 		/**
 		 * Tableau associatif des données qu'on souhaite envoyer &agrave; la vue.
@@ -67,17 +67,27 @@ namespace core\application
 			Go::to404();
 		}
 
+        /**
+         * Méthode par défaut de page introuvable
+         */
+        public function not_found()
+        {
+            if(get_called_class() != __CLASS__)
+            {
+                Go::to404();
+            }
+            $this->setTemplate(null, null, 'template.404.tpl');
+        }
+
 
 		/**
 		 * Méthode public de rendu de la page en cours
-		 * @param Smarty $smarty
 		 * @param bool $pDisplay
 		 * @return string
 		 */
-		public function renderHTML($smarty = null, $pDisplay = true)
+		public function render($pDisplay = true)
 		{
-			if($smarty==null)
-				$smarty = new Smarty();
+            $smarty = new Smarty();
 			Core::setupSmarty($smarty);
 			if(!$smarty->template_exists($this->template))
 			{
@@ -111,9 +121,9 @@ namespace core\application
 		public function getGlobalVars()
 		{
 			$is = array();
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             foreach($authHandler::$permissions as $name=>$value)
-				$is[$name] = $authHandler::is($name);
+                $is[$name] = $authHandler::$data&&$authHandler::is($name);
 			return array(
 				"path_to_theme"=>Core::$path_to_theme,
 				"path_to_components"=>Core::$path_to_components,

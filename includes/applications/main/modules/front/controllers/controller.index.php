@@ -1,10 +1,9 @@
 <?php
 namespace app\main\controllers\front
 {
-    use core\application\FrontController;
-    use core\tools\docs\Documentor;
+    use core\application\DefaultController;
 
-    class index extends FrontController
+    class index extends DefaultController
     {
 
         public function __construct()
@@ -14,9 +13,7 @@ namespace app\main\controllers\front
 
         public function index()
         {
-            $r = new Documentor();
-            $r->parsePackage('includes/libs/core', 'core');
-            $r->output('files/docs/');
+
         }
     }
 }

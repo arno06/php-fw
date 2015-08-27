@@ -60,7 +60,7 @@ namespace core\data
 		{
 			$return = "";
 			if($pEncoding)
-				$return = "<?xml version=\"1.0\" encoding=\"".Configuration::$site_encoding."\"?>";
+				$return = "<?xml version=\"1.0\" encoding=\"".Configuration::$global_encoding."\"?>";
 			$return .= self::getRecursiveNodes($pTableau);
 			return $return;
 		}

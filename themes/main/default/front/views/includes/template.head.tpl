@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="{$configuration.site_currentLanguage}">
+<html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset={$configuration.site_encoding}" >
+		<meta http-equiv="Content-Type" content="text/html; charset={$configuration.global_encoding}" >
         <base href="{$configuration.server_url}"/>
 		<title>{$head.title}</title>
         {if isset($content.canonical) && !empty($content.canonical)}

@@ -1,7 +1,4 @@
 {
-	"local":[
-		"vidalid.local"
-	],
 	"dev":[
 		"localhost"
 	]

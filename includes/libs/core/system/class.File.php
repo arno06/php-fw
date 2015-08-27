@@ -151,6 +151,10 @@ namespace core\system
 			return $extracts[1];
 		}
 
+        /**
+         * @param string $pFile
+         * @return bool
+         */
 		static public function isImage($pFile)
 		{
 			$extension = self::getExtension($pFile);

@@ -39,7 +39,7 @@ namespace core\tools
             }
         }
 
-        public function redirectToDefaultItem($pBackOffice = false)
+        public function redirectToDefaultItem()
         {
             $item = null;
             if(is_array($this->items) && !empty($this->items))
@@ -54,10 +54,8 @@ namespace core\tools
                 trigger_error("[Object Menu] No default item found", E_USER_WARNING);
                 return;
             }
-            if($pBackOffice == true)
-                Go::toBack($item['controller'], $item['action'], $item['parameters']);
-            else
-                Go::toFront($item['controller'], $item['action'], $item['parameters']);
+
+            Go::to($item['controller'], $item['action'], $item['parameters']);
         }
 
         public function retrieveItems()

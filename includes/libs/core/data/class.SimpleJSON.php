@@ -2,7 +2,8 @@
 namespace core\data
 {
 	use core\system\File;
-	use core\tools\debugger\Debugger;
+    use \Exception;
+
 	/**
 	 * Class SimpleJSON
 	 * Permet de manipuler des données au format JSON
@@ -17,7 +18,7 @@ namespace core\data
 		 * Méthode de chargement et de décodage d'un fichier JSON
 		 * @param String $pFile
 		 * @return Array
-		 * @throws Exception
+		 * @throws \Exception
 		 */
 		static public function import($pFile)
 		{

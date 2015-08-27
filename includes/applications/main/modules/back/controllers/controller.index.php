@@ -1,17 +1,18 @@
 <?php
 namespace app\main\controllers\back
 {
+
+    use core\application\Application;
     use core\application\Configuration;
-    use core\application\FrontController;
+    use core\application\DefaultController;
 	use core\application\InterfaceController;
-	use core\application\authentification\AuthentificationHandler;
 	use core\application\Go;
 	use core\application\Core;
 	use core\tools\Menu;
 	use core\tools\form\Form;
 	use core\utils\Logs;
 
-	class index extends FrontController implements InterfaceController
+	class index extends DefaultController implements InterfaceController
 	{
 		public function __construct()
 		{
@@ -20,18 +21,18 @@ namespace app\main\controllers\back
 
 		public function index()
 		{
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
-				Go::toBack("index", "login");
+				Go::to("index", "login");
 			$menu = new Menu(Core::$path_to_application.'/modules/back/menu.json');
-			$menu->redirectToDefaultItem(true);
+			$menu->redirectToDefaultItem();
 		}
 
 		public function login()
 		{
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
 			if(call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
-				Go::toBack();
+				Go::to();
 			$this->setTitle("Espace d'adminitration | Connexion");
 			$form = new Form("login");
 			if($form->isValid())
@@ -40,7 +41,7 @@ namespace app\main\controllers\back
                 $authHandlerInst = call_user_func_array(array($authHandler, 'getInstance'), array());
 				if($authHandlerInst->setAdminSession($data["login"], $data["mdp"]))
 				{
-					Go::toBack();
+					Go::to();
 				}
 				else
 				{
@@ -55,9 +56,9 @@ namespace app\main\controllers\back
 
 		public function logout()
 		{
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             call_user_func_array(array($authHandler, 'unsetUserSession'), array());
-			Go::toBack();
+			Go::to();
 		}
 	}
 }

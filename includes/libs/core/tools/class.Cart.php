@@ -8,7 +8,7 @@ namespace core\tools
 	 * Class Cart Permet de gérer un panier - cas d'une boutique en ligne
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .1
+	 * @version .2
 	 * @package core\tools
 	 */
 	class Cart extends Singleton
@@ -136,19 +136,14 @@ namespace core\tools
 			return $count;
 		}
 
+        /**
+         * Méthode de récupération de quantité pour un produit particulier
+         * @param $pId
+         * @return mixed
+         */
 		static public function getQuantityById($pId)
 		{
 			return $_SESSION[self::SESSION_VAR_NAME][$pId]['quantity'];
-		}
-
-		/**
-		 * Singleton
-		 * @param String $pClassName [optional]
-		 * @return Cart
-		 */
-		static public function getInstance($pClassName = "")
-		{
-			return parent::getInstance(__CLASS__);
 		}
 	}
 }

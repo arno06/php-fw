@@ -24,7 +24,7 @@ namespace core\data
 			if (is_object($pValue))
 				return $pValue;
 			if(!is_array($pValue))
-				return mb_encode_numericentity($pValue, $convmap, Configuration::$site_encoding);
+				return mb_encode_numericentity($pValue, $convmap, Configuration::$global_encoding);
 			foreach($pValue as &$value)
 				$value = self::toNumericEntities($value);
 			return $pValue;
@@ -52,7 +52,7 @@ namespace core\data
 					"&#8218"=>"'");
 				foreach($specialChars as $k=>$v)
 					$pValue = preg_replace("/".$k."/",$v,$pValue);
-				return mb_decode_numericentity($pValue, $convmap, Configuration::$site_encoding);
+				return mb_decode_numericentity($pValue, $convmap, Configuration::$global_encoding);
 			}
 			foreach($pValue as &$value)
 				$value = self::fromNumericEntities($value);
@@ -70,7 +70,7 @@ namespace core\data
 		static public function toHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
 		{
 			if(!$pCharset)
-				$pCharset = Configuration::$site_encoding;
+				$pCharset = Configuration::$global_encoding;
 			if(!is_array($pValue))
 				return htmlentities($pValue, $pQuote, $pCharset);
 			foreach($pValue as &$value)
@@ -89,18 +89,18 @@ namespace core\data
 		static public function fromHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
 		{
 			if(!$pCharset)
-				$pCharset = Configuration::$site_encoding;
+				$pCharset = Configuration::$global_encoding;
 			if(!is_array($pValue))
 				return html_entity_decode($pValue, $pQuote, $pCharset);
 			foreach($pValue as &$value)
-				$value = self::fromNumericEntities($value, $pQuote, $pCharset);
+				$value = self::fromNumericEntities($value);
 			return $pValue;
 		}
 
 
 		/**
 		 * @static
-		 * @param array|string $pValue
+		 * @param array|string|object $pValue
 		 * @return array|string
 		 */
 		static public function fromUTF8($pValue)

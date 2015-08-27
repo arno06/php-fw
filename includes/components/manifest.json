@@ -13,6 +13,13 @@
             "http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=M4Tween"
         ]
     },
+	"Autocomplete":
+	{
+		"javascript":
+		[
+			"core/Autocomplete.js"
+		]
+	},
     "Form":
     {
         "javascript":

@@ -1,7 +1,10 @@
 <?php
 namespace core\tools
 {
+
+    use core\application\Application;
     use core\application\Core;
+    use core\application\Header;
     use core\system\File;
     use core\data\SimpleJSON;
     use core\utils\Stack;
@@ -10,7 +13,7 @@ namespace core\tools
      * Class Dependencies
      * Gère deux types de dépendences JS & CSS
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 1.3
+     * @version 1.4
      * @todo minified
      */
     class Dependencies
@@ -39,11 +42,6 @@ namespace core\tools
          * @var string
          */
         static private $current_folder;
-
-        /**
-         * @var array
-         */
-        private $headers;
 
         /**
          * @var string
@@ -76,10 +74,10 @@ namespace core\tools
             switch($this->type)
             {
                 case self::TYPE_JS:
-                    $this->headers = array("Content-Type"=>"application/javascript");
+                    Header::content_type("application/javascript");
                     break;
                 case self::TYPE_CSS:
-                    $this->headers = array("Content-Type"=>"text/css");
+                    Header::content_type("text/css");
                     break;
             }
 
@@ -100,29 +98,8 @@ namespace core\tools
             $cacheDuration = Stack::get("cache.duration", $this->configuration);
             if(!empty($cacheDuration))
             {
-                $eTag = '"'.md5($_GET["need"]).'"';
-
-                $this->headers["Cache-Control"] = "max-age=".$cacheDuration.", public";
-                $this->headers["ETag"] = $eTag;
-
-
-                if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && isset($_SERVER['HTTP_IF_NONE_MATCH']))
-                {
-                    $if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
-                    $if_none_match = $_SERVER['HTTP_IF_NONE_MATCH'];
-                    $expires = $if_modified_since+$cacheDuration;
-
-                    if($if_none_match == $eTag && (time() < $expires))
-                    {
-                        header('HTTP/1.1 304 Not Modified');
-                        $this->headers["Expires"] = gmdate("D, d M Y H:i:s", $expires)." GMT";
-                        $this->writeHeaders();
-                        exit();
-                    }
-                }
-
-                $this->headers["Last-Modified"] = gmdate("D, d M Y H:i:s", time())." GMT";
-                $this->headers["Expires"] = gmdate("D, d M Y H:i:s", time() + $cacheDuration)." GMT";
+                $eTag = md5($_GET["need"]);
+                Header::handleCache($eTag, $cacheDuration);
             }
         }
 
@@ -191,7 +168,7 @@ namespace core\tools
             $accept_gzip = preg_match('/gzip/', $_SERVER['HTTP_ACCEPT_ENCODING'], $matches)&&!Core::checkRequiredGetVars("output");
             if($accept_gzip)
             {
-                $this->headers["Content-Encoding"] = "gzip";
+                Header::content_encoding("gzip");
                 $this->output = gzencode($this->output);
             }
 
@@ -247,21 +224,9 @@ namespace core\tools
         private function output($pContent)
         {
 
-            $this->headers["Content-Length"] = strlen($pContent);
-            $this->writeHeaders();
+            Header::content_length(strlen($pContent));
             echo $pContent;
-            exit();
-        }
-
-        /**
-         * Méthode d'écriture des headers
-         */
-        private function writeHeaders()
-        {
-            foreach($this->headers as $n=>$v)
-            {
-                header($n.": ".$v);
-            }
+            Core::endApplication();
         }
 
         /**
@@ -275,7 +240,7 @@ namespace core\tools
             {
                 return $pMatches[0];
             }
-            return $pMatches[1].'../../'.self::$current_folder.'/'.$pMatches[2];
+            return $pMatches[1].Application::getInstance()->getPathPart().'../../'.self::$current_folder.'/'.$pMatches[2];
         }
     }
 }

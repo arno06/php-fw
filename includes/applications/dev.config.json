@@ -1,18 +1,31 @@
 {
-    "site": {
-        "async": "",
-        "application": "main",
-        "theme": "default",
+    "applications":
+    {
+        "main":
+        {
+			"theme":"default",
+			"multiLanguage": false,
+			"defaultLanguage": "fr",
+			"currentLanguage": "fr",
+			"modules":{
+				"front": {
+					"useRoutingFile":true,
+					"defaultController":"core\\application\\DefaultController",
+					"action404":"not_found"
+				},
+				"back": {
+					"useRoutingFile":false,
+					"defaultController":"core\\application\\DefaultBackController",
+					"action404":"not_found"
+				}
+			}
+        }
+    },
+    "global": {
+		"debug":true,
+		"session": "php_fw",
         "explainOnSelect": "",
-        "multilanguage": "",
-        "emailContact": "me@arnaud-nicolas.fr",
-        "translateURL": false,
-        "defaultLanguage": "fr",
-        "currentLanguage": "fr",
-        "template404": "template.404.tpl",
-        "backoffice": "admin",
-        "session": "php_fw",
-        "inlineHTMLCode": ""
+        "emailContact": "me@arnaud-nicolas.fr"
     },
     "server": {
         "smtp": ""
@@ -27,11 +40,7 @@
             "name":"fwphp"
         }
     },
-    "application":
-    {
-        "debug":true
-    },
-    "authentification":
+    "authentication":
     {
         "tableName": "%s_user",
         "tableId": "id_user",

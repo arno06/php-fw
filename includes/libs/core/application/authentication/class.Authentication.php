@@ -1,25 +1,25 @@
 <?php
-namespace core\application\authentification
+namespace core\application\authentication
 {
-	use \core\application\Configuration;
-	use core\models\ModelAuthentification;
-	use core\tools\debugger\Debugger;
+    use \core\application\Configuration;
+    use core\application\Core;
+    use core\models\ModelAuthentication;
 
 	/**
-	 * Class Authentification
+	 * Class Authentication
 	 * Permet de gérer les différentes sessions d'identifications via un Login, un Mot de passe et un jeton "unique"
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version .2
 	 * @package application
-	 * @subpackage authentification
+	 * @subpackage authentication
 	 */
-	class Authentification
+	class Authentication
 	{
 		/**
 		 * Nom de base de la variable de session
 		 * @var String
 		 */
-		protected $sessionVar = "authentification_";
+		protected $sessionVar = "Authentication_";
 
 		/**
 		 * Indique la valeur des permissions alouées &agrave; l'utilisateur
@@ -46,7 +46,7 @@ namespace core\application\authentification
 		protected $token;
 
 		/**
-		 * Données de l'utilisateur si son authentification est vérifiée
+		 * Données de l'utilisateur si son authentication est vérifiée
 		 * @var	Array
 		 */
 		public $data;
@@ -56,11 +56,10 @@ namespace core\application\authentification
 		 */
 		public function __construct()
 		{
-			$this->sessionVar .= Configuration::$site_application;
+			$this->sessionVar .= Core::$application;
 			if(!isset($_SESSION[$this->sessionVar])
 				||!is_array($_SESSION[$this->sessionVar]))
 			{
-				$this->checkIfNoLogged();
 				return;
 			}
 			$this->parseSessionVar();
@@ -79,13 +78,13 @@ namespace core\application\authentification
 				return;
 			}
 			$token = $this->getToken($this->mdp_user);
-			if(ModelAuthentification::isUser($this->login_user, $this->mdp_user)&&$token==$this->token)
+			if(ModelAuthentication::isUser($this->login_user, $this->mdp_user)&&$token==$this->token)
 			{
-				$this->permissions = ModelAuthentification::$data[Configuration::$authentification_fieldPermissions];
-				$this->data = ModelAuthentification::$data;
+				$this->permissions = ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
+				$this->data = ModelAuthentication::$data;
 			}
 			else
-				$this->unsetAuthentification();
+				$this->unsetAuthentication();
 		}
 
 		/**
@@ -93,27 +92,27 @@ namespace core\application\authentification
 		 */
 		private function checkIfNoLogged()
 		{
-			ModelAuthentification::isUser($this->login_user, $this->mdp_user);
-			$this->data = ModelAuthentification::$data;
+			ModelAuthentication::isUser($this->login_user, $this->mdp_user);
+			$this->data = ModelAuthentication::$data;
 		}
 
 
 		/**
-		 * Méthode de définition des variables de session pour l'instance d'authentification en cours
+		 * Méthode de définition des variables de session pour l'instance d'authentication en cours
 		 * @param  $pLogin
 		 * @param  $pMdp
 		 * @param bool $pAdmin
 		 * @return bool
 		 */
-		public function setAuthentification($pLogin, $pMdp, $pAdmin = false)
+		public function setAuthentication($pLogin, $pMdp, $pAdmin = false)
 		{
 			$pMdp = md5($pMdp);
-			if(ModelAuthentification::isUser($pLogin, $pMdp))
+			if(ModelAuthentication::isUser($pLogin, $pMdp))
 			{
-				$lvl = AuthentificationHandler::$permissions[AuthentificationHandler::USER];
+				$lvl = AuthenticationHandler::$permissions[AuthenticationHandler::USER];
 				if($pAdmin)
-					$lvl = AuthentificationHandler::$permissions[AuthentificationHandler::ADMIN];
-				$isAutorized = $lvl&ModelAuthentification::$data[Configuration::$authentification_fieldPermissions];
+					$lvl = AuthenticationHandler::$permissions[AuthenticationHandler::ADMIN];
+				$isAutorized = $lvl&ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
 
 				if($isAutorized)
 				{
@@ -127,24 +126,24 @@ namespace core\application\authentification
 
 
 		/**
-		 * Méthode de parsing des variables de la session d'authentification en cours
+		 * Méthode de parsing des variables de la session d'authentication en cours
 		 * @return void
 		 */
 		protected function parseSessionVar()
 		{
 			foreach($_SESSION[$this->sessionVar] as $name=>$value)
 			{
-				if(property_exists("core\\application\\authentification\\Authentification",$name))
+				if(property_exists("core\\application\\Authentication\\Authentication",$name))
 					$this->$name = $value;
 			}
 		}
 
 
 		/**
-		 * Méthode de suppression des variables de session pour l'instance d'authentification en cours
+		 * Méthode de suppression des variables de session pour l'instance d'authentication en cours
 		 * @return void
 		 */
-		public function unsetAuthentification()
+		public function unsetAuthentication()
 		{
 			$_SESSION[$this->sessionVar] = array();
 			unset($_SESSION[$this->sessionVar]);

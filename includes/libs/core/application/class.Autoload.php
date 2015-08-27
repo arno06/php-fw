@@ -5,7 +5,7 @@ namespace core\application
 	 * Class Autoload
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package core\application
 	 */
 	class Autoload extends Singleton
@@ -43,7 +43,7 @@ namespace core\application
 		/**
 		 * @var array
 		 */
-		private $exeptions = array('PHPMailer'=>'/includes/libs/phpMailer/class.phpmailer.php');
+		private $exeptions = array('PHPMailer'=>'/includes/libs/phpMailer/class.phpmailer.php', 'Smarty'=>'/includes/libs/smarty/Smarty.class.php');
 
 
 		/**
@@ -64,7 +64,7 @@ namespace core\application
 		 * @return bool
 		 */
 		public function load($pClassName)
-		{
+        {
 			$path = '';
 			$packages = explode('\\', $pClassName);
 
@@ -199,15 +199,5 @@ namespace core\application
 			return self::getInstance()->styles;
 		}
 
-
-		/**
-		 * @static
-		 * @param string $pClass
-		 * @return Autoload
-		 */
-		static public function getInstance($pClass = '')
-		{
-			return parent::getInstance(__CLASS__);
-		}
 	}
 }

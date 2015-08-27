@@ -16,7 +16,7 @@ namespace core\application
 	 * @version 1.0
 	 * @package core\application
 	 */
-	class BackController extends FrontController implements InterfaceController
+	class DefaultBackController extends DefaultController implements InterfaceController
 	{
 
 		/**
@@ -108,9 +108,9 @@ namespace core\application
 		 */
 		public function __construct()
 		{
-            $authHandler = Configuration::$application_authentificationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
-				Go::toBack();
+				Go::to();
 			$class = explode("\\", get_class($this));
 			$this->className = end($class);
             $this->formName = $this->className;
@@ -127,16 +127,28 @@ namespace core\application
 		}
 
 		/**
-		 * @param null $pSmarty
 		 * @param bool $pDisplay
 		 * @return string
 		 */
-		public function renderHTML($pSmarty = null, $pDisplay = true)
+		public function render($pDisplay = true)
 		{
 			$this->addContent("actions", $this->actions->toArray());
 			$this->addContent('menu_items', $this->menu->retrieveItems());
-			return parent::renderHTML($pSmarty, $pDisplay);
+			return parent::render($pDisplay);
 		}
+
+
+        /**
+         * Méthode par défaut de page introuvable
+         */
+        public function not_found()
+        {
+            if(get_called_class() != __CLASS__)
+            {
+                Go::to404();
+            }
+            $this->setTemplate(null, null, 'template.404.tpl');
+        }
 
 		/**
 		 * Méthode appelé par défault en cas de non-existance d'action
@@ -145,7 +157,7 @@ namespace core\application
 		 */
 		public function index()
 		{
-			Go::toBack($this->className, "listing");
+			Go::to($this->className, "listing");
 		}
 
 		/**
@@ -264,7 +276,7 @@ namespace core\application
 
 			$data = $this->model->getTupleById($_GET["id"]);
 			if(!$data)
-				Go::toBack($this->className);
+				Go::to($this->className);
 			$form->injectValues($data);
 
 			if($form->isValid())
@@ -301,7 +313,7 @@ namespace core\application
 				Go::to404();
 			$this->model->deleteById($_GET["id"]);
 			$this->dispatchEvent(new Event(self::EVENT_SUCCESSUL_DELETE));
-			Go::toBack($this->className);
+			Go::to($this->className);
 		}
 
 		public function view()
@@ -339,13 +351,13 @@ namespace core\application
 		{
 			if(!$pAction)
 				$pAction = $pActionName;
-			$this->actions[$pActionName] = array('name'=>$pAction, 'applyToEntry'=>$pApplyToEntry);
+			$this->actions[$pActionName] = array('name'=>$pAction, 'applyToEntry'=>$pApplyToEntry, 'enabled'=>true);
 		}
 
 		public function disable($pActionName)
 		{
 			if(isset($this->actions[$pActionName]))
-				unset($this->actions[$pActionName]);
+                $this->actions[$pActionName]['enabled'] = false;
 		}
 
 		public function isEnabled($pActionName)
@@ -355,7 +367,14 @@ namespace core\application
 
 		public function toArray()
 		{
-			return $this->actions;
+            $return = array();
+            foreach($this->actions as $n=>$v)
+            {
+                if(!$v['enabled'])
+                    continue;
+                $return[$n] = $v;
+            }
+			return $return;
 		}
 	}
 

@@ -1,19 +1,19 @@
 <?php
-namespace core\application\authentification
+namespace core\application\Authentication
 {
 	use core\application\Singleton;
 	use core\application\PrivateClass;
 	use core\application\Configuration;
 
 	/**
-	 * Class AuthentificationHandler gère les différentes authentifications des applications
+	 * Class AuthenticationHandler gère les différentes Authentications des applications
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package application
-	 * @subpackage authentification
+	 * @subpackage authentication
 	 */
-	class AuthentificationHandler extends Singleton
+	class AuthenticationHandler extends Singleton
 	{
 		const USER      = "USER";
 
@@ -35,14 +35,14 @@ namespace core\application\authentification
 		);
 
 		/**
-		 * Données relatives &agrave; l'utilisateur connecté
+		 * Données relatives à l'utilisateur connecté
 		 * @var array
 		 */
 		static public $data;
 
 		/**
 		 * Instance Authenficiation configurée pour un utilisateur
-		 * @var Authentification
+		 * @var Authentication
 		 */
 		protected $userAuth;
 
@@ -55,18 +55,18 @@ namespace core\application\authentification
 		{
 			if(!$pInstance instanceOf PrivateClass)
 				trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
-			self::$permissions = array_merge(self::$permissions, Configuration::$site_permissions);
+			self::$permissions = array_merge(self::$permissions, Configuration::$global_permissions);
 			$this->parseUserSession();
 		}
 
 		/**
-		 * Définit une nouvelle instance Authentification pour un Utilisateur
+		 * Définit une nouvelle instance Authentication pour un Utilisateur
 		 * Définit la variable isUser
 		 * @return void
 		 */
 		protected function parseUserSession()
 		{
-			$this->userAuth = new Authentification();
+			$this->userAuth = new Authentication();
 			self::$data = $this->userAuth->data;
 		}
 
@@ -80,7 +80,7 @@ namespace core\application\authentification
 		static public function setAdminSession($pLogin, $pMdp)
 		{
 			$i = self::getInstance();
-			return $i->userAuth->setAuthentification($pLogin, $pMdp, true);
+			return $i->userAuth->setAuthentication($pLogin, $pMdp, true);
 		}
 
 		/**
@@ -93,7 +93,7 @@ namespace core\application\authentification
 		static public function setUserSession($pLogin, $pMdp)
 		{
 			$i = self::getInstance();
-			return $i->userAuth->setAuthentification($pLogin, $pMdp,  false);
+			return $i->userAuth->setAuthentication($pLogin, $pMdp,  false);
 		}
 
 		/**
@@ -103,7 +103,7 @@ namespace core\application\authentification
 		static public function unsetUserSession()
 		{
 			$i = self::getInstance();
-			$i->userAuth->unsetAuthentification();
+			$i->userAuth->unsetAuthentication();
 		}
 
 		/**
@@ -122,19 +122,7 @@ namespace core\application\authentification
 
 		static public function isLoggedToBack()
 		{
-			return (AuthentificationHandler::is(AuthentificationHandler::ADMIN));
-		}
-
-		/**
-		 * Singleton
-		 * @param String $pClassName [optional]
-		 * @return AuthentificationHandler
-		 */
-		static public function getInstance($pClassName = "")
-		{
-			if(empty($pClassName))
-				$pClassName = __CLASS__;
-			return parent::getInstance($pClassName);
+			return (AuthenticationHandler::is(AuthenticationHandler::ADMIN));
 		}
 
 		/**
@@ -143,7 +131,7 @@ namespace core\application\authentification
 		 */
 		public function __toString()
 		{
-			return "[Objet AuthentificationHandler]";
+			return "[Object AuthenticationHandler]";
 		}
 
 		/**

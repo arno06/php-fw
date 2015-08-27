@@ -3,6 +3,7 @@ namespace core\models
 {
     use core\application\BaseModel;
     use core\application\Configuration;
+    use core\application\Core;
     use core\db\Query;
 
     /**
@@ -12,7 +13,7 @@ namespace core\models
      * @version .1
      * @package models
      */
-    class ModelAuthentification extends BaseModel
+    class ModelAuthentication extends BaseModel
     {
         static private $instance;
 
@@ -20,8 +21,7 @@ namespace core\models
 
         public function __construct()
         {
-            $this->table = sprintf(Configuration::$authentification_tableName,Configuration::$site_application);
-            $this->id = Configuration::$authentification_tableId;
+            parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application), Configuration::$authentication_tableId);
         }
 
         static public function isUser($pLogin, $pMdp)
@@ -31,9 +31,9 @@ namespace core\models
 
             $instance = self::getInstance();
 
-            if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentification_fieldLogin, Query::EQUAL, $pLogin)))
+            if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentication_fieldLogin, Query::EQUAL, $pLogin)))
             {
-                if($result[configuration::$authentification_fieldPassword] == $pMdp)
+                if($result[configuration::$authentication_fieldPassword] == $pMdp)
                 {
                     self::$data = $result;
                     return true;
@@ -43,12 +43,12 @@ namespace core\models
         }
 
         /**
-         * @return ModelAuthentification
+         * @return ModelAuthentication
          */
         static public function getInstance()
         {
             if(!self::$instance)
-                self::$instance = new ModelAuthentification();
+                self::$instance = new ModelAuthentication();
             return self::$instance;
         }
     }

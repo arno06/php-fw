@@ -170,7 +170,7 @@ CHECKBOXGROUP
 Debugger
 ---------
 
-``php
+```php
 /**
  * @parameter string $pString			Data to log into debugger
  * @parameter bool	 $pDisplay			Specify if the debugger should automatically be opened

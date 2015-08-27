@@ -1,31 +1,42 @@
-# namespaces
+PHP Framework
+=============
+
+Yet another PHP Framework
+
+Dependencies
+------------
+
+None - all needed libs are included.
+
+Features
+--------
+
+* MVC Architecture
+* Support multiple applications on a single installation
+* Each application support multiple modules
+* Externalized configuration 
+* Multi language support (url ready if needed)
+* Support multiple database handlers with lazy loading
+* MySQL query builder
+* Routing handler with specific declaration file
+* PHP Debugger
+* Centralized component system for front-end
+* Autoload class
+* Smarty templating engine (an old version tho)
+
+Namespaces
+-----------
 namespace | contexte | description
 --------------|------------|--------------
-core\\ *{subPackage}* \ |Global |Classes & interfaces du package core
-lib\\ *{package}* \\ *{subPackage}* |Global |Classes & interfaces des packages secondaire
-app\\ *{appName}* \\models |Application |Modèles de l'application *appName*
-app\\ *{appName}* \\controllers\\ front |Application|Controllers de front de l'application *appName*
-app\\ *{appName}* \\controllers\\ back |Application |Controllers de back de l'application *appName*
-app\\ *{appName}* \\src\\ *{subPackage}* |Application |Classes & interfaces de l'application *{appName}*
+core \\ *{subPackage}* \\ |Global |Classes & interfaces du package core
+lib \\ *{package}* \\ *{subPackage}* |Global |Classes & interfaces des packages secondaire
+app \\ *{appName}* \\ models |Application |Modèles de l'application *appName*
+app \\ *{appName}* \\ controllers \\ *{moduleName}* |Application|Controllers du module *{moduleName}* de l'application *{appName}*
+app \\ *{appName}* \\ src \\ *{subPackage}* |Application |Classes & interfaces de l'application *{appName}*
 
-# todo
-    v2
-        Form:
-            getInput
-            refonte des helpers de composants
-            Components
-                Select + Select Multiple
-                RTE
-                ColorPicker
-                Autocomplete
-        Core/Conf
-            Externalisation de la config des modules
 
-        Modules
-            back
-                Mot de passe oublié
-
-# form
+Forms
+----------
     INPUT[text|password|submit|...]
         {
             "label":"Input",

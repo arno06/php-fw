@@ -12,6 +12,7 @@ namespace core\application
 	abstract class Configuration
 	{
 		/**
+         * Définit les applications disponibles ainsi que leurs configurations associées
 		 * @var array
 		 */
 		static public $applications;
@@ -27,35 +28,11 @@ namespace core\application
 		 */
 		static public $global_explainOnSelect = true;
 
-		/**
-		 * Définit si le site est multilangue
-		 * @var Boolean
-		 */
-		static public $global_multilanguage = false;
-
-		/**
+        /**
 		 * Définit l'email de contact du site
 		 * @var string
 		 */
 		static public $global_emailContact = "";
-
-		/**
-		 * Définit si l'url doit être traduite (controller/action) en fonction des alias du fichier de langue
-		 * @var Boolean
-		 */
-		static public $global_translateURL = false;
-
-		/**
-		 * Définit la langue par défaut
-		 * @var String
-		 */
-		static public $global_defaultLanguage = "fr";
-
-		/**
-		 * Définit la langue en cours
-		 * @var String
-		 */
-		static public $global_currentLanguage = "fr";
 
 		/**
 		 * Nom attribué à la session de l'application
@@ -75,21 +52,26 @@ namespace core\application
 		 */
 		static public $global_inlineHTMLCode = false;
 
+        /**
+         * @var bool
+         */
+        static public $global_debug = false;
+
 		/**
 		 * Domaine du serveur
-		 * @var String
+		 * @var string
 		 */
 		static public $server_domain;
 
 		/**
 		 * Dossier de base dans lequel se trouve le framework
-		 * @var String
+		 * @var string
 		 */
 		static public $server_folder;
 
 		/**
 		 * URL du serveur (concaténation du domaine et du dossier)
-		 * @var String
+		 * @var string
 		 */
 		static public $server_url;
 
@@ -109,20 +91,9 @@ namespace core\application
 				"user"=>"root",
 				"password"=>"",
 				"name"=>"php-framework",
-				"handler"=>"MysqlHandler"
+				"handler"=>"MysqliHandler"
 			)
 		);
-
-		/**
-		 * Nom de la classe chargée de gérer les authentifications sur le site
-		 * @var String
-		 */
-		static public $application_authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
-
-		/**
-		 * @var bool
-		 */
-		static public $global_debug = false;
 
 		/**
 		 * @var string

@@ -9,7 +9,7 @@ namespace core\application\Authentication
 	 * Class AuthenticationHandler gère les différentes Authentications des applications
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package application
 	 * @subpackage authentication
 	 */
@@ -35,7 +35,7 @@ namespace core\application\Authentication
 		);
 
 		/**
-		 * Données relatives &agrave; l'utilisateur connecté
+		 * Données relatives à l'utilisateur connecté
 		 * @var array
 		 */
 		static public $data;
@@ -123,18 +123,6 @@ namespace core\application\Authentication
 		static public function isLoggedToBack()
 		{
 			return (AuthenticationHandler::is(AuthenticationHandler::ADMIN));
-		}
-
-		/**
-		 * Singleton
-		 * @param String $pClassName [optional]
-		 * @return AuthenticationHandler
-		 */
-		static public function getInstance($pClassName = "")
-		{
-			if(empty($pClassName))
-				$pClassName = __CLASS__;
-			return parent::getInstance($pClassName);
 		}
 
 		/**

@@ -4,7 +4,7 @@
         "main":
         {
 			"theme":"default",
-			"multiLanguage": "",
+			"multiLanguage": false,
 			"defaultLanguage": "fr",
 			"currentLanguage": "fr",
 			"modules":{
@@ -13,30 +13,10 @@
 					"defaultController":"core\\application\\DefaultController",
 					"action404":"not_found"
 				},
-				"back":
-				{
+				"back": {
 					"useRoutingFile":false,
 					"defaultController":"core\\application\\DefaultBackController",
 					"action404":"not_found"
-				}
-			}
-        },
-        "test":
-        {
-			"theme":"default",
-			"multiLanguage": "",
-			"defaultLanguage": "fr",
-			"currentLanguage": "fr",
-			"modules": {
-				"front": {
-					"useRoutingFile": true,
-					"defaultController": "core\\application\\DefaultController",
-					"action404": "not_found"
-				},
-				"v1": {
-					"useRoutingFile": false,
-					"defaultController": "core\\application\\DefaultBackController",
-					"action404": "not_found"
 				}
 			}
         }

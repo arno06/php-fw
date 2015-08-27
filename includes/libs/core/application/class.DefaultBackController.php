@@ -108,7 +108,7 @@ namespace core\application
 		 */
 		public function __construct()
 		{
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::to();
 			$class = explode("\\", get_class($this));
@@ -136,6 +136,19 @@ namespace core\application
 			$this->addContent('menu_items', $this->menu->retrieveItems());
 			return parent::render($pDisplay);
 		}
+
+
+        /**
+         * Méthode par défaut de page introuvable
+         */
+        public function not_found()
+        {
+            if(get_called_class() != __CLASS__)
+            {
+                Go::to404();
+            }
+            $this->setTemplate(null, null, 'template.404.tpl');
+        }
 
 		/**
 		 * Méthode appelé par défault en cas de non-existance d'action
@@ -338,13 +351,13 @@ namespace core\application
 		{
 			if(!$pAction)
 				$pAction = $pActionName;
-			$this->actions[$pActionName] = array('name'=>$pAction, 'applyToEntry'=>$pApplyToEntry);
+			$this->actions[$pActionName] = array('name'=>$pAction, 'applyToEntry'=>$pApplyToEntry, 'enabled'=>true);
 		}
 
 		public function disable($pActionName)
 		{
 			if(isset($this->actions[$pActionName]))
-				unset($this->actions[$pActionName]);
+                $this->actions[$pActionName]['enabled'] = false;
 		}
 
 		public function isEnabled($pActionName)
@@ -354,7 +367,14 @@ namespace core\application
 
 		public function toArray()
 		{
-			return $this->actions;
+            $return = array();
+            foreach($this->actions as $n=>$v)
+            {
+                if(!$v['enabled'])
+                    continue;
+                $return[$n] = $v;
+            }
+			return $return;
 		}
 	}
 

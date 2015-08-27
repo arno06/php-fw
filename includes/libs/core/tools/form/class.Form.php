@@ -1,7 +1,9 @@
 <?php
 namespace core\tools\form
 {
-	use core\application\Core;
+
+    use core\application\Application;
+    use core\application\Core;
 	use core\data\SimpleJSON;
 	use core\application\Configuration;
 	use core\application\Dictionary;
@@ -238,7 +240,7 @@ namespace core\tools\form
 		/**
 		 *
 		 */
-		private function cleanDatas()
+		private function cleanData()
 		{
 			if($this->dataCleaned)
 				return;
@@ -295,7 +297,7 @@ namespace core\tools\form
 		 */
 		public function isValid()
 		{
-			$this->cleanDatas();
+			$this->cleanData();
 			$this->error = "";
 			if(!isset($_POST[$this->name])||empty($_POST[$this->name]))
 				return false;
@@ -523,8 +525,6 @@ namespace core\tools\form
 				if(!$valid)
 				{
 					$this->inputsIncorrect[] = $name;
-//				if($data["require"] == true)
-//					$this->inputsRequire[] = $name;
 					unset($this->post[$name]);
 					$this->isValid = false;
 					continue;
@@ -623,9 +623,9 @@ namespace core\tools\form
 				if($i>0)
 					$error.= ", ";
 				if(!is_array($pArray[$i]))
-					$error .= "<b>".(isset($this->data[$pArray[$i]]["errorLabel"])?$this->data[$pArray[$i]]["errorLabel"]:$this->data[$pArray[$i]]["label"])."</b>";
+					$error .= "<b>".(isset($this->data[$pArray[$i]]["errorLabel"])&&!empty($this->data[$pArray[$i]]["errorLabel"])?$this->data[$pArray[$i]]["errorLabel"]:$this->data[$pArray[$i]]["label"])."</b>";
 				else
-					$error .= "<b>".(isset($this->data[$pArray[$i][0]]["errorLabel"])?$this->data[$pArray[$i][0]]["errorLabel"]:$this->data[$pArray[$i][0]]["label"])."</b> &amp; <b>".(isset($this->data[$pArray[$i][1]]["errorLabel"]) ? $this->data[$pArray[$i][1]]["errorLabel"] : $this->data[$pArray[$i][1]]["label"])."</b>";
+					$error .= "<b>".(isset($this->data[$pArray[$i][0]]["errorLabel"])&&!empty($this->data[$pArray[$i][0]]["errorLabel"])?$this->data[$pArray[$i][0]]["errorLabel"]:$this->data[$pArray[$i][0]]["label"])."</b> &amp; <b>".(isset($this->data[$pArray[$i][1]]["errorLabel"]) ? $this->data[$pArray[$i][1]]["errorLabel"] : $this->data[$pArray[$i][1]]["label"])."</b>";
 			}
 			if($nb==1)
 			{
@@ -725,7 +725,7 @@ namespace core\tools\form
 		 */
 		public function prepareToView()
 		{
-			$this->cleanDatas();
+			$this->cleanData();
 			if(isset($this->post))
 				$this->injectValues($this->post);
 			Autoload::addScript("Form");
@@ -748,7 +748,7 @@ namespace core\tools\form
 						if(isset($data["attributes"]["type"])&&$data["attributes"]["type"]=="checkbox")
 							unset($data["attributes"]["valueOff"]);
 						if(isset($data["autoComplete"]))
-							Autoload::addScript("yui/yui.min.js");
+                            Autoload::addComponent('Autocomplete');
 						if(isset($data["attributes"]["type"])
 							&& $data["attributes"]["type"]=="file")
 						{
@@ -757,7 +757,7 @@ namespace core\tools\form
 							$this->hasUpload = true;
 						}else if(isset($data["attributes"]["type"])
 							&& $data["attributes"]["type"]=="submit"
-							&& Configuration::$global_multilanguage)
+							&& Application::getInstance()->multiLanguage)
 						{
 							$data["attributes"]["value"] = Dictionary::term($data["attributes"]["value"]);
 						}
@@ -928,7 +928,9 @@ namespace core\tools\form
 		{
 			$noForm = false;
 			$noMandatory = false;
-			$controller = $action = $output = $idForm = $classes = "";
+			$output = $idForm = $classes = "";
+            $controller = Core::$controller;
+            $action = Core::$action;
 			$helper = "core\\tools\\form\\FormHelpers";
 			if($pParams != null)
 				extract($pParams, EXTR_REFS);
@@ -944,7 +946,7 @@ namespace core\tools\form
 					$n[$np] = $vp;
 				}
 				$pParams = $n;
-				$output .= '<form action="'.Core::rewriteURL($controller, $action, $pParams, Configuration::$global_currentLanguage).'" method="post"';
+				$output .= '<form action="'.Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage).'" method="post"';
 				if($this->hasUpload)
 					$output .= ' enctype="multipart/form-data"';
 				if (!empty($idForm))
@@ -1210,7 +1212,7 @@ namespace core\tools\form
                 /** @var ModelUpload $m */
 				$m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
 				if(Form::isNumeric($value))
-					$file .= $m::getPathById($value);
+					$file .= Application::getInstance()->getPathPart().$m::getPathById($value);
 				else
 					$file .= $value;
 			}
@@ -1354,6 +1356,14 @@ namespace core\tools\form
 			$input = self::getLabel($label, $pId, !$inline);
 			if($pData["tag"] == Form::TAG_SELECT && isset($pData["attributes"]["multiple"]) && $pData["attributes"]["multiple"] == "multiple")
 				$pName .= "[]";
+            if(isset($pData["autoComplete"])
+                &&isset($pData["attributes"]["type"])
+                &&$pData["attributes"]["type"]=="text")
+            {
+                $pData["attributes"]["data-ac_minQueryLength"] = "3";
+                $pData["attributes"]["data-ac_resultsLocator"] = "responses";
+                $pData["attributes"]["data-ac_source"] = "statique/autocomplete/application:".Core::$application."/module:".Core::$module."/form_name:".$pData["form_name"]."/input_name:".$pData["field_name"]."/q:{query}/";
+            }
 			$component = '<'.$pData["tag"].' name="'.$pName.'" id="'.$pId.'"';
 			foreach($pData["attributes"] as $prop=>$value)
 			{
@@ -1404,31 +1414,7 @@ namespace core\tools\form
 						&&isset($pData["attributes"]["type"])
 						&&$pData["attributes"]["type"]=="text")
 					{
-						$on = "";
-						if(isset($pData["autoComplete"]["on"])&&is_array($pData["autoComplete"]["on"]))
-						{
-							$on = "on:{";
-							$cb = array();
-							foreach($pData["autoComplete"]["on"] as$name=>$callBack)
-								$cb[] = "'".$name."':".$callBack."";
-							$on .= implode(",", $cb);
-							$on .= "},";
-						}
-						$minQueryLength = "";
-						if (isset($pData["autoComplete"]["minQueryLength"]) && Form::isNumeric($pData["autoComplete"]["minQueryLength"]))
-						{
-							$minQueryLength = "minQueryLength:".$pData["autoComplete"]["minQueryLength"].",";
-						}
-						$extra .= self::script("
-						YUI().use('autocomplete', 'autocomplete-highlighters', function (Y) {
-						  Y.one('#".$pId."').plug(Y.Plugin.AutoComplete, {
-							resultHighlighter: 'phraseMatch',
-							resultListLocator: 'responses',
-							resultTextLocator: 'value',".$minQueryLength.$on."
-							source: 'statique/autocomplete/application:".Core::$application."/module:".Core::$module."/form_name:".$pData["form_name"]."/input_name:".$pData["field_name"]."/q:{query}/'
-						  });
-						});
-					", "", true);
+						$extra .= self::script("Autocomplete.applyTo('#".$pId."');");
 					}
 					break;
 				case "select":

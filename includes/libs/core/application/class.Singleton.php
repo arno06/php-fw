@@ -5,11 +5,12 @@ namespace core\application
 	 * Classe privée de vérification d'un singleton
 	 */
 	class PrivateClass{}
+
 	/**
-	 * Class d'implémentation d'un singleton PHP 5.2.x
+	 * Class d'implémentation d'un singleton PHP 5.3
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .2
+	 * @version 1.0
 	 * @package application
 	 */
 	abstract class Singleton
@@ -22,16 +23,14 @@ namespace core\application
 
 		/**
 		 * Méthode de récupération de l'instance de la classe en cours
-		 * @param string $pClassName
 		 * @return Object
 		 */
-		public static function getInstance($pClassName = "")
+		public static function getInstance()
 		{
-			if(empty($pClassName))
-				return null;
-			if(!isset(self::$instances[$pClassName]))
-				self::$instances[$pClassName] = new $pClassName(new PrivateClass());
-			return self::$instances[$pClassName];
+            $className = get_called_class();
+			if(!isset(self::$instances[$className]))
+				self::$instances[$className] = new $className(new PrivateClass());
+			return self::$instances[$className];
 		}
 
 		/**

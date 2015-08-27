@@ -2,11 +2,7 @@
     {
         "default":true,
         "label":"Sample",
-        "controller":"sample",
-        "action":"listing",
-        "parameters":{
-            "order":"path_upload",
-            "by":"asc"
-        }
+        "controller":"test",
+        "action":"listing"
     }
 ]

@@ -13,15 +13,15 @@ namespace core\application
     use \Exception;
 
     /**
-     * Controller statique - d&eacute;finit les pages statiques "utilitaires"
+     * Controller StaticController - définit les pages statiques "utilitaires"
      *
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 1.0
+     * @version 1.1
      * @package application
      * @subpackage controller
      */
-    class statique extends DefaultController
+    class StaticController extends DefaultController
     {
 
         public function check_env()
@@ -217,7 +217,7 @@ namespace core\application
             {
                 $app = $_POST["application"];
                 $path_to_form = "includes/applications/".$app."/modules/";
-                if(isset($_POST["module"])&&!empty($_POST['backoffice']))
+                if(isset($_POST["module"])&&!empty($_POST['module']))
                     $path_to_form .= $_POST["module"]."/";
                 else
                     $path_to_form .= "front/";
@@ -278,7 +278,7 @@ namespace core\application
                     $fileName = preg_replace("/(\{id\})/", $upload->id_upload, $input["fileName"]);
                     $upload->renameFile($fileName);
                 }
-                $response["path_upload"] = (Core::$isBackoffice||Configuration::$site_application != "main" ? "../" : "") . $upload->pathFile;
+                $response["path_upload"] = Application::getInstance()->getPathPart().$upload->pathFile;
                 $response["id_upload"] = $upload->id_upload;
             }
             $this->response($response);

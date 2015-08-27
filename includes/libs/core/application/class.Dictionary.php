@@ -142,15 +142,5 @@ namespace core\application
 			$i->table_terms =$pTerms;
 			$i->table_seo = $pSeo;
 		}
-
-		/**
-		 * Singleton
-		 * @param String $pClassName [optional]
-		 * @return Dictionary
-		 */
-		static public function getInstance($pClassName = "")
-		{
-			return parent::getInstance(__CLASS__);
-		}
 	}
 }

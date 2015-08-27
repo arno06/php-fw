@@ -67,8 +67,15 @@ namespace core\application
 			Go::to404();
 		}
 
+        /**
+         * Méthode par défaut de page introuvable
+         */
         public function not_found()
         {
+            if(get_called_class() != __CLASS__)
+            {
+                Go::to404();
+            }
             $this->setTemplate(null, null, 'template.404.tpl');
         }
 
@@ -114,9 +121,9 @@ namespace core\application
 		public function getGlobalVars()
 		{
 			$is = array();
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             foreach($authHandler::$permissions as $name=>$value)
-				$is[$name] = $authHandler::is($name);
+                $is[$name] = $authHandler::$data&&$authHandler::is($name);
 			return array(
 				"path_to_theme"=>Core::$path_to_theme,
 				"path_to_components"=>Core::$path_to_components,

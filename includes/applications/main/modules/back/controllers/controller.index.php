@@ -1,6 +1,8 @@
 <?php
 namespace app\main\controllers\back
 {
+
+    use core\application\Application;
     use core\application\Configuration;
     use core\application\DefaultController;
 	use core\application\InterfaceController;
@@ -19,7 +21,7 @@ namespace app\main\controllers\back
 
 		public function index()
 		{
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::to("index", "login");
 			$menu = new Menu(Core::$path_to_application.'/modules/back/menu.json');
@@ -28,7 +30,7 @@ namespace app\main\controllers\back
 
 		public function login()
 		{
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
 			if(call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
 				Go::to();
 			$this->setTitle("Espace d'adminitration | Connexion");
@@ -54,7 +56,7 @@ namespace app\main\controllers\back
 
 		public function logout()
 		{
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             call_user_func_array(array($authHandler, 'unsetUserSession'), array());
 			Go::to();
 		}

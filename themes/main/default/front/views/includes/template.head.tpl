@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{$configuration.global_currentLanguage}">
+<html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset={$configuration.global_encoding}" >
         <base href="{$configuration.server_url}"/>

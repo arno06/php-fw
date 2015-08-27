@@ -65,7 +65,7 @@ namespace core\application
 		}
 
 		/**
-		 * Méthode d'insertion multiple d'entrées pour un m�me model
+		 * Méthode d'insertion multiple d'entrées pour un même model
 		 * @param array $pValues				Tableau multi-dimensionnel contenant les données &agrave; insérer
 		 * @return resource
 		 */
@@ -146,7 +146,7 @@ namespace core\application
 		}
 
 		/**
-		 * Méthode de récupération de lé clé primaire venant d'�tre générée par la base de données
+		 * Méthode de récupération de lé clé primaire venant d'être générée par la base de données
 		 * @return int
 		 */
 		public function getInsertId()

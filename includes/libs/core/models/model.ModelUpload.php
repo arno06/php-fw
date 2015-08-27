@@ -1,9 +1,12 @@
 <?php
 namespace core\models
 {
-	use core\application\BaseModel;
+
+    use core\application\Application;
+    use core\application\BaseModel;
 	use core\application\Configuration;
-	use core\system\File;
+    use core\application\Core;
+    use core\system\File;
 	use core\db\Query;
 
 	/**
@@ -18,8 +21,7 @@ namespace core\models
 
 		public function __construct()
 		{
-			$this->table = Configuration::$site_application."_upload";
-			$this->id = "id_upload";
+            parent::__construct(Application::getInstance()."_upload", "id_upload");
 		}
 
         public function renameById($pId, $pPath)

@@ -13,7 +13,7 @@ namespace core\application
 	 * Noyau central
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 2.5
+	 * @version 3.0
 	 * @package application
 	 */
 	abstract class Core
@@ -21,7 +21,7 @@ namespace core\application
 		/**
 		 * Version en cours du framework
 		 */
-		const VERSION = "2.5";
+		const VERSION = "3.0";
 
 		/**
 		 * @var string
@@ -35,7 +35,7 @@ namespace core\application
 		static public $path_to_application;
 
 		/**
-		 * Définit le chemin vers le dossier du th&egrave;me pour l'application en cours
+		 * Définit le chemin vers le dossier du thème pour l'application en cours
 		 * @var String
 		 */
 		static public $path_to_theme = "themes/main/default/front";
@@ -91,11 +91,6 @@ namespace core\application
 		static public $request_async = false;
 
 		/**
-		 * @var array
-		 */
-		static public $headers;
-
-		/**
 		 * Initialisation du Core applicatif du framework
 		 * @return void
 		 */
@@ -113,18 +108,21 @@ namespace core\application
 
 		/**
 		 * Instanciation des objects globlaux de l'application
-		 * Gestionnaire de relation &agrave; la base de donnée, gestionnaire d'authentication... ect
 		 * @return void
 		 */
 		static public function defineGlobalObjects()
 		{
 			if(self::isBot())
 				self::deactivateDebug();
-//			call_user_func_array(array(Configuration::$application_authenticationHandler,"getInstance"), array());
 			if(self::debug())
 				Debugger::prepare();
 		}
 
+        /**
+         * Méthode d'identification de l'environnement en fonction du domaine
+         * @param string $pFile
+         * @throws \Exception
+         */
 		static public function checkEnvironment($pFile = "includes/applications/setup.json")
 		{
 			$setup = SimpleJSON::import($pFile);
@@ -200,7 +198,7 @@ namespace core\application
 
 		/**
 		 * Méthode de parsing de l'url en cours
-		 * récup&egrave;re le controller, l'action, la langue (si multilangue) ainsi que les param&egrave;tres $_GET
+		 * récupère le controller, l'action, la langue (si multilangue) ainsi que les paramètres $_GET
 		 * @param $pUrl
 		 * @return void
 		 */
@@ -225,7 +223,7 @@ namespace core\application
 
             $application_name = RoutingHandler::extractApplication($url);
 
-			self::$application = new Application($application_name);
+			self::$application = Application::getInstance()->setup($application_name);
 			self::$application->setModule(RoutingHandler::extractModule($url, self::$application->getModulesAvailable()));
             self::$module = self::$application->getModule()->name;
 
@@ -237,14 +235,24 @@ namespace core\application
 
 			self::defineGlobalObjects();
 
-			self::$path_to_application = Autoload::$folder."/includes/applications/".$application_name;
 
-            /**
-             * should handle multilanguage here
-             */
+            if(self::$application->multiLanguage)
+            {
+                self::$application->currentLanguage = RoutingHandler::extractLanguage($url);
+
+                if(empty(self::$application->currentLanguage))
+                {
+                    self::$application->currentLanguage = self::$application->defaultLanguage;
+                    Header::location(Configuration::$server_url.self::$application->currentLanguage."/".$url);
+                }
+            }
+
+            self::$path_to_application = Autoload::$folder."/includes/applications/".$application_name;
 
 			self::setDictionary();
-			$parsedURL = RoutingHandler::parse($url);
+
+            $parsedURL = RoutingHandler::parse($url);
+
 			self::$url = $url;
 
 			self::$controller = str_replace("-", "_", $parsedURL["controller"]);
@@ -265,8 +273,7 @@ namespace core\application
 		{
 			if(Core::$controller==="statique")
 			{
-				include_once("includes/libs/core/application/controller.statique.php");
-				self::$instance_controller = new statique();
+				self::$instance_controller = new StaticController();
 				return self::$instance_controller;
 			}
 			$seo = Dictionary::seoInfos(self::$controller, self::$action);
@@ -303,10 +310,10 @@ namespace core\application
 		 */
 		static public function setDictionary()
 		{
-			$dictionary_path = self::$path_to_application."/localization/".Configuration::$global_currentLanguage.".json";
+			$dictionary_path = self::$path_to_application."/localization/".Application::getInstance()->currentLanguage.".json";
 			try
 			{
-				$donneesLangue = SimpleJSON::import($dictionary_path);
+				$data = SimpleJSON::import($dictionary_path);
 			}
 			catch(Exception $e)
 			{
@@ -314,20 +321,20 @@ namespace core\application
 					trigger_error('Fichier de langue "<b>'.$dictionary_path.'</b>" introuvable', E_USER_ERROR);
 				else
 				{
-					Configuration::$global_currentLanguage = Configuration::$global_defaultLanguage;
+                    Application::getInstance()->currentLanguage = Application::getInstance()->defaultLanguage;
 					Go::to404();
 				}
 			}
 			$seo = array();
 			$terms = array();
 			$alias = array();
-			if(isset($donneesLangue["terms"])&&is_array($donneesLangue["terms"]))
-				$terms = $donneesLangue["terms"];
-			if(isset($donneesLangue["seo"])&&is_array($donneesLangue["seo"]))
-				$seo = $donneesLangue["seo"];
-			if(isset($donneesLangue["alias"])&&is_array($donneesLangue["alias"]))
-				$alias = $donneesLangue["alias"];
-			Dictionary::defineLanguage(Configuration::$global_currentLanguage, $terms, $seo, $alias);
+			if(isset($data["terms"])&&is_array($data["terms"]))
+				$terms = $data["terms"];
+			if(isset($data["seo"])&&is_array($data["seo"]))
+				$seo = $data["seo"];
+			if(isset($data["alias"])&&is_array($data["alias"]))
+				$alias = $data["alias"];
+			Dictionary::defineLanguage(Application::getInstance()->currentLanguage, $terms, $seo, $alias);
 		}
 
 
@@ -358,20 +365,19 @@ namespace core\application
 		 */
 		static public function debug()
 		{
-            $authHandler = Configuration::$application_authenticationHandler;
-            $isDev = call_user_func_array(array($authHandler, "is"), array($authHandler::DEVELOPER));
-            return Configuration::$global_debug||$isDev;
+            $authHandler = Application::getInstance()->authenticationHandler;
+            return Configuration::$global_debug||call_user_func_array(array($authHandler, "is"), array($authHandler::DEVELOPER));
         }
 
 
 		/**
-		 * @static
+         * Méthode de désactivation systématique du mode de debug
 		 * @return void
 		 */
 		static public function deactivateDebug()
 		{
 			Configuration::$global_debug = false;
-            $authHandler = Configuration::$application_authenticationHandler;
+            $authHandler = Application::getInstance()->authenticationHandler;
             $authHandler::$permissions = array();
 		}
 
@@ -407,7 +413,7 @@ namespace core\application
 		}
 
 		/***
-		 * Méthode permettant d'afficher simplement un contenu sans passer par le syst&egrave;me de templating
+		 * Méthode permettant d'afficher simplement un contenu sans passer par le système de templating
 		 * Sert notamment dans le cadre de requêtes asychrones (avec du Flash ou du JS par exemple)
 		 * @param string $pContent			Contenu &agrave; afficher
 		 * @param string $pType [optional]	Type de contenu &agrave; afficher - doit être spécifié pour assurer une bonne comptatilité &agrave; l'affichage
@@ -462,13 +468,12 @@ namespace core\application
 				$pController->setTemplate(self::$controller, self::$action, $pTemplate);
 			if($pAction!=null)
 				$pController->$pAction();
-			$smarty = new Smarty();
 			if(!Core::$request_async)
 			{
 				Header::content_type("text/html");
 				$pController->render();
 				if(Core::debug())
-					Debugger::renderHTML($smarty);
+					Debugger::render();
 			}
 			else
 			{
@@ -480,7 +485,6 @@ namespace core\application
 				$type = "json";
 				self::performResponse($response, $type);
 			}
-			$smarty = null;
 		}
 
 

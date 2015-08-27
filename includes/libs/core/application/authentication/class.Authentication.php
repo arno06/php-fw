@@ -60,7 +60,6 @@ namespace core\application\authentication
 			if(!isset($_SESSION[$this->sessionVar])
 				||!is_array($_SESSION[$this->sessionVar]))
 			{
-				$this->checkIfNoLogged();
 				return;
 			}
 			$this->parseSessionVar();

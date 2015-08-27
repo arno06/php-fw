@@ -6,7 +6,6 @@ namespace core\application\routing
     use core\application\Configuration;
 	use core\application\Core;
 	use core\application\Go;
-	use core\application\Dictionary;
     use core\application\Module;
     use core\data\SimpleJSON;
 	use \Exception;
@@ -15,12 +14,13 @@ namespace core\application\routing
 	 * Class RoutingHandler - gestionnaire par défault de réécriture d'url
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.2
 	 * @package application
 	 * @subpackage routing
 	 */
 	abstract class RoutingHandler
 	{
+        const HTTP_METHOD_WILDCARD = "*";
 		const REGEXP_LANGUAGE   = '/^([a-z]{2,3})\//';
 		const REGEXP_CONTROLLER = '/^([a-z\-]{1,})\//';
 		const REGEXP_ACTION     = '/^([a-z\-]{1,})\//';
@@ -36,7 +36,9 @@ namespace core\application\routing
 		{
 			$extract = null;
 
-			if(Core::$application->getModule()->useRoutingFile)
+            $static = preg_match('/^statique\//', $pUrl, $matches);
+
+			if(!$static && Application::getInstance()->getModule()->useRoutingFile)
 			{
 				return self::handleRoutingRules($pUrl);
 			}
@@ -62,8 +64,16 @@ namespace core\application\routing
 				"parameters"=>$parameters);
 		}
 
+        /**
+         * Méthode de définition du contexte en fonction du fichier de routing & de l'url
+         * @param string $pUrl
+         * @return array|null
+         */
 		static private function handleRoutingRules($pUrl)
 		{
+            if(empty($pUrl))
+                $pUrl = "/";
+
 			$request_url = $pUrl;
 			$parameters = array();
 
@@ -79,52 +89,86 @@ namespace core\application\routing
 
 			$index_parameters = array();
 
-			for($i = 0, $max = count($rules); $i<$max;$i++)
-			{
-				$rule = $rules[$i];
+            $rules = $rules[Core::$module];
 
-				$rule['re_url'] = $rule['url'];
-				$rule['re_url'] = str_replace('/', '\/', $rule['re_url']);
-				$rule['re_url'] = str_replace('.', '\.', $rule['re_url']);
+            if(!$rules)
+            {
+                trigger_error("Le module '".Core::$module."' ne dispose d'aucune règle dans le fichier de routing.", E_USER_ERROR);
+            }
 
-				$index_param = 0;
-				if(!isset($rule["parameters"]))
-					$rule["parameters"] = array();
-				foreach($rule["parameters"] as $name=>$re)
-				{
-					if(!preg_match('/\{\$'.$name.'\}/', $rule['re_url']))
-						continue;
+            $request_method = $_SERVER['REQUEST_METHOD'];
 
-					$index_parameters[++$index_param] = $name;
-					$rule['re_url'] = preg_replace('/\{\$'.$name.'\}/', '('.$re.')', $rule['re_url']);
-				}
+            $final_rule = null;
 
-				$rule['re_url'] = "/^".$rule['re_url'].'$/';
+            foreach($rules as $url=>$rule)
+            {
+                $re_url = $url;
+                $re_url = str_replace('/', '\/', $re_url);
+                $re_url = str_replace('.', '\.', $re_url);
+                $index_param = 0;
+                if(!isset($rule["parameters"]))
+                    $rule["parameters"] = array();
+                foreach($rule["parameters"] as $name=>$re)
+                {
+                    if(!preg_match('/\{\$'.$name.'\}/', $re_url))
+                        continue;
 
-				if(!preg_match($rule['re_url'], $request_url, $matches))
-					continue;
+                    $index_parameters[++$index_param] = $name;
+                    $re_url = preg_replace('/\{\$'.$name.'\}/', '('.$re.')', $re_url);
+                }
+                $re_url = "/^".$re_url.'$/';
 
-				for($k = 1, $maxk = count($matches); $k<$maxk; $k++)
-				{
-					$parameters[$index_parameters[$k]] = $matches[$k];
-				}
+                if(!preg_match($re_url, $request_url, $matches))
+                    continue;
 
-				if(isset($parameters["controller"])&&!empty($parameters["controller"]))
-				{
-					$rule["controller"] = $parameters["controller"];
-					unset($parameters["controller"]);
-				}
-				if(isset($parameters["action"])&&!empty($parameters["action"]))
-				{
-					$rule["action"] = $parameters["action"];
-					unset($parameters["action"]);
-				}
+                for($k = 1, $maxk = count($matches); $k<$maxk; $k++)
+                {
+                    $parameters[$index_parameters[$k]] = $matches[$k];
+                }
+                unset($rule['parameters']);
 
-				return array("controller"=>$rule['controller'],
-					"action"=>$rule['action'],
-					"parameters"=>$parameters);
-			}
+                if(isset($rule[$request_method]) && !empty($rule[$request_method]))
+                {
+                    $final_rule = $rule[$request_method];
+                }
+                else
+                {
+                    $allowed_methods = array_keys($rule);
+                    foreach($allowed_methods as $m)
+                    {
+                        if(preg_match('/\|*'.$request_method.'\|*/', $m, $matches))
+                        {
+                            $final_rule = $rule[$m];
+                        }
+                    }
+                }
 
+                if(!$final_rule && isset($rule[self::HTTP_METHOD_WILDCARD]) && !empty($rule[self::HTTP_METHOD_WILDCARD]))
+                {
+                    $final_rule = $rule[self::HTTP_METHOD_WILDCARD];
+                }
+
+                if(!$final_rule)
+                {
+                    return null;
+                }
+
+
+                if(isset($parameters["controller"])&&!empty($parameters["controller"]))
+                {
+                    $final_rule["controller"] = $parameters["controller"];
+                    unset($parameters["controller"]);
+                }
+                if(isset($parameters["action"])&&!empty($parameters["action"]))
+                {
+                    $final_rule["action"] = $parameters["action"];
+                    unset($parameters["action"]);
+                }
+
+                $final_rule['parameters'] = $parameters;
+
+                return $final_rule;
+            }
 			return null;
 		}
 
@@ -143,10 +187,10 @@ namespace core\application\routing
 			$pController =  self::getAlias($pController);
 			$pAction = self::getAlias($pAction);
 			$return = "";
-//			if(!Core::$isBackoffice&&(!isset($pLangue)||empty($pLangue))&&Configuration::$site_multilanguage)
-//				$return = Configuration::$site_currentLanguage."/";
-//			elseif(!Core::$isBackoffice&&isset($pLangue)&&!empty($pLangue)&&Configuration::$site_multilanguage)
-//				$return = $pLangue."/";
+            if(Application::getInstance()->multiLanguage)
+            {
+                $return .= ((!isset($pLangue)||empty($pLangue))?Application::getInstance()->currentLanguage:$pLangue)."/";
+            }
 			if(!empty($pController))
 				$return .= $pController."/";
 			if(!empty($pAction))
@@ -211,14 +255,15 @@ namespace core\application\routing
 		 */
 		static public function extractLanguage(&$pURL)
 		{
-			if(Configuration::$global_multilanguage&&!preg_match("/^statique/",$pURL, $matches))
+
+			if(Application::getInstance()->multiLanguage&&!preg_match("/^statique/",$pURL, $matches))
 			{
 				$language = self::shift($pURL, self::REGEXP_LANGUAGE);
 				if(!$language)
-					Go::to("","",array(), Configuration::$site_defaultLanguage);
+					Go::to("","",array(), Application::getInstance()->defaultLanguage);
 				return $language;
 			}
-			return Configuration::$site_defaultLanguage;
+			return Application::getInstance()->defaultLanguage;
 		}
 
 
@@ -315,10 +360,8 @@ namespace core\application\routing
 				"è"=>"e",
 				"ê"=>"e",
 				"ë"=>"e",
-				"ë"=>"e",
 				"ì"=>"i",
 				"ï"=>"i",
-				"ì"=>"i",
 				"î"=>"i",
 				"ù"=>"u",
 				"ü"=>"u",

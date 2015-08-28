@@ -73,9 +73,9 @@ namespace core\data
 		static private function getArrayFromNode($pString)
 		{
 			$return = array();
-			while(preg_match("/^\<([a-z0-9:]{1,})([^>]*)?[\s]*\/\>(.*)/i", $pString, $m))
+			while(preg_match("/^\<([a-z0-9:_]{1,})([^>]*)?[\s]*\/\>(.*)/i", $pString, $m))
 				$pString = preg_replace("/".addcslashes($m[0], "<>\\/")."/", "<".$m[1].$m[2]."></".$m[1].">".$m[3], $pString);
-			while(preg_match("/^\<([a-z0-9:]{1,})([^>]*)?[\s]*\>(.*)/i", $pString, $m))
+			while(preg_match("/^\<([a-z0-9:_]{1,})([^>]*)?[\s]*\>(.*)/i", $pString, $m))
 			{
 				if(preg_match("/\<\/".$m[1]."\>/", $m[3], $extract))
 				{

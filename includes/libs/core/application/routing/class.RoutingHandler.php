@@ -239,11 +239,13 @@ namespace core\application\routing
 		static public function extractModule(&$pUrl, $pAvailableModule = array('default'))
 		{
             $modules = implode("|", $pAvailableModule);
+            $modules = str_replace('_', '-', $modules);
             $module = self::shift($pUrl, '/^('.$modules.')\//');
             if($module == Module::DEFAULT_MODULE)
                 Go::to();
             if($module === false)
                 $module = Module::DEFAULT_MODULE;
+            $module = str_replace('-', '_', $module);
             return $module;
 		}
 

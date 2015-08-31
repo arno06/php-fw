@@ -18,9 +18,10 @@ namespace core\utils
          * @param string $pId
          * @param string $pValue
          * @param string $pTime
+         * @param string|null $pDomain
          * @return void
          */
-        static public function set($pId, $pValue, $pTime = "default")
+        static public function set($pId, $pValue, $pTime = "default", $pDomain = null)
         {
             $ids = explode(".", $pId);
             $t = "";
@@ -32,8 +33,9 @@ namespace core\utils
             }
             if($pTime == "default")
                 $pTime = time() + 3600;
+
             eval('$_COOKIE'.$string.'="'.$pValue.'";');
-            setcookie($t, $pValue, $pTime, "/".(!empty(Configuration::$server_folder)?Configuration::$server_folder."/":""));
+            setcookie($t, $pValue, $pTime, "/".(!empty(Configuration::$server_folder)?Configuration::$server_folder."/":""), $pDomain);
         }
 
         /**

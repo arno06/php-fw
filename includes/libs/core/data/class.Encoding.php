@@ -122,6 +122,29 @@ namespace core\data
 		}
 
 		/**
+		 * @static
+		 * @param array|string $pValue
+		 * @return array|string
+		 */
+		static public function toUTF8($pValue)
+		{
+			if(is_string($pValue))
+				return utf8_encode($pValue);
+			if (is_object($pValue))
+			{
+				$values = get_object_vars($pValue);
+				foreach($values as $key=>$value)
+					$pValue->$key = self::toUTF8($value);
+			}
+			elseif (is_array($pValue))
+			{
+				foreach($pValue as &$value)
+					$value = self::toUTF8($value);
+			}
+			return $pValue;
+		}
+
+		/**
 		 * Méthode static de récupération du BOM UTF-8
 		 * @static
 		 * @return string

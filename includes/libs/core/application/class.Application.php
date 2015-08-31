@@ -102,7 +102,7 @@ namespace core\application
         {
             if($pName != Module::DEFAULT_MODULE)
             {
-                $this->url .= $pName."/";
+                $this->url .= str_replace('_', '-', $pName)."/";
                 $this->relative_path .= "../";
             }
             $data = Configuration::$applications[$this->name]['modules'][$pName];

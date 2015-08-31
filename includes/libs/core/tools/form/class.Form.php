@@ -538,7 +538,7 @@ namespace core\tools\form
 		 * @param string $pName
 		 * @return void
 		 */
-		private function applyModifiers($pModifiers, $pName)
+		protected function applyModifiers($pModifiers, $pName)
 		{
 			if(!is_array($pModifiers))
 				return;
@@ -556,7 +556,7 @@ namespace core\tools\form
 		 * @param String $pRegExp		Valeur de l'expression régulière telle qu'elle est déclarée dans le JSON
 		 * @return String
 		 */
-		private function getRegExp($pRegExp)
+		protected function getRegExp($pRegExp)
 		{
 			if(preg_match("/^(custom\:)/", $pRegExp, $extract, PREG_OFFSET_CAPTURE))
 				return preg_replace("/^(custom\:)/", "", $pRegExp);
@@ -796,8 +796,8 @@ namespace core\tools\form
 								}
 								else
 								{
-									$donnees_name = $donnees[$fm["name"]];
-									$donnees_value = $donnees[$fm["value"]];
+									$donnees_name = isset($donnees[$fm['name']])?$donnees[$fm["name"]]:'';
+									$donnees_value = isset($donnees[$fm['value']])?$donnees[$fm["value"]]:'';
 								}
 								$options[] = array("name"=>$donnees_name, "label"=>$donnees_name, "value"=>$donnees_value, "checked"=>$defaultChecked);
 							}
@@ -1433,6 +1433,8 @@ namespace core\tools\form
 					', "", true);
 					}
 					$options = "";
+                    if(!isset($pData["options"]))
+                        $pData["options"] = array();
 					if(!$pData["require"] && (!(isset($pData["attributes"]["multiple"]) || $pData["attributes"]["multiple"] == "multiple")))
 					{
 						$d = array("value"=>"", "name"=>"");

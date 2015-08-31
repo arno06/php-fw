@@ -90,7 +90,7 @@ namespace core\tools\debugger
 			self::getInstance()->count[$pClass]++;
 			$pClass .= " ".self::$state;
 			self::$state = self::$state == "odd"?"even":"odd";
-			self::getInstance()->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'></td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
+			self::getInstance()->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
 		}
 
 		/**

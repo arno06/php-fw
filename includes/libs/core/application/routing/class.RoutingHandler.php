@@ -111,7 +111,10 @@ namespace core\application\routing
                 foreach($rule["parameters"] as $name=>$re)
                 {
                     if(!preg_match('/\{\$'.$name.'\}/', $re_url))
+                    {
+                        $parameters[$name] = $re;
                         continue;
+                    }
 
                     $index_parameters[++$index_param] = $name;
                     $re_url = preg_replace('/\{\$'.$name.'\}/', '('.$re.')', $re_url);

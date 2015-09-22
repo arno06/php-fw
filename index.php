@@ -5,7 +5,6 @@ $timeInit = microtime(true);
 $memInit = memory_get_usage(MEMORY_REAL_USAGE);
 
 require_once(__DIR__."/includes/libs/core/application/class.Singleton.php");
-require_once(__DIR__."/includes/libs/core/application/class.Header.php");
 require_once(__DIR__."/includes/libs/core/application/class.Autoload.php");
 
 use core\application\Autoload;

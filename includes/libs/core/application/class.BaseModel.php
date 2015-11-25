@@ -77,7 +77,7 @@ namespace core\application
 
 		/**
 		 * Méthode de modification d'une ou plusieurs entrées dans la table du modèle en cours
-		 * @param Array              $pValues			Tableau associatif contenant les données
+		 * @param array              $pValues			Tableau associatif contenant les données
 		 * @param QueryCondition     $pCondition			Condition permettant de cibler la modification
 		 * @param Boolean $escape
 		 * @return resource
@@ -92,7 +92,7 @@ namespace core\application
 		 * Renvoie un tableau associatif des données correspondant au résultat de la requête
 		 * @param string $pId				Valeur de clé primaire &agrave; cibler
 		 * @param string $pFields
-		 * @return Array
+		 * @return array
 		 */
 		public function getTupleById($pId, $pFields = "*")
 		{
@@ -102,7 +102,7 @@ namespace core\application
 		/**
 		 * Méthode permettant de générer facilement une requête d'update &agrave; partir de valeur de clé primaire et d'un tableau associatif des valeurs
 		 * @param String $pId		Valeur de clé primaire &agrave; cibler
-		 * @param Array $pValues	Tableau associatif des champs et de leurs nouvelles valeurs
+		 * @param array $pValues	Tableau associatif des champs et de leurs nouvelles valeurs
 		 * @return resource
 		 */
 		public function updateById($pId, array $pValues)
@@ -206,7 +206,7 @@ namespace core\application
 		/**
 		 * @param null $pCond
 		 * @param string $pFields
-		 * @return Array
+		 * @return array
 		 */
 		public function one($pCond = null, $pFields = "*")
 		{

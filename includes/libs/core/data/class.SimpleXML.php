@@ -20,7 +20,7 @@ namespace core\data
 		/**
 		 * Méthode de chargement de décodage d'un fichier XML
 		 * @param String $pFile
-		 * @return Array
+		 * @return array
 		 * @throws Exception
 		 */
 		static public function import ($pFile)
@@ -39,7 +39,7 @@ namespace core\data
 		/**
 		 * Méthode de récupération d'un tableau associatif multidimensionnel à partir d'un contenu écrit au format XML
 		 * @param String $pString		Contenu XML
-		 * @return Array
+		 * @return array
 		 */
 		static public function decode ($pString)
 		{
@@ -52,7 +52,7 @@ namespace core\data
 
 		/**
 		 * Méthode d'encodage d'un tableau en données formatées en XML
-		 * @param Array $pTableau		Tableau des données
+		 * @param array $pTableau		Tableau des données
 		 * @param bool  $pEncoding
 		 * @return String
 		 */
@@ -68,7 +68,7 @@ namespace core\data
 		/**
 		 * Méthode permettant de décoder de facon récursive un noeud XML en tableau
 		 * @param String $pString		Noeux XML
-		 * @return Array
+		 * @return array
 		 */
 		static private function getArrayFromNode($pString)
 		{
@@ -145,7 +145,7 @@ namespace core\data
 		/**
 		 * Méthode de récupération d'un noeud XML et de ses enfants
 		 * @param String $pNodeName		Nom du noeud à récupérer
-		 * @param Array $pTableau		Tableau des attributs et enfants du noeud
+		 * @param array $pTableau		Tableau des attributs et enfants du noeud
 		 * @return String
 		 */
 		static public function getNode($pNodeName, $pTableau)

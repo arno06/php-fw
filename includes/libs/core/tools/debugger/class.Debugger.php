@@ -127,7 +127,7 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode permettant d'ajouter le contenu d'un tableau &agrave; la liste de sortie du Debugger
-		 * @param Array	 	$pArray					Tableau dont on souhaite afficher le contenu
+		 * @param array	 	$pArray					Tableau dont on souhaite afficher le contenu
 		 * @param Boolean	$pOpen [optional]		Définit si le debugger est ouvert par défault
 		 * @return void
 		 */

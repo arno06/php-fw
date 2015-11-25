@@ -184,12 +184,12 @@ namespace core\tools\form
 		private $inputsRequire = array();
 
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $files;
 
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $post;
 
@@ -568,7 +568,7 @@ namespace core\tools\form
 
 		/**
 		 * Méthode de récupération des valeurs du formulaires
-		 * @return Array
+		 * @return array
 		 */
 		public function getValues()
 		{
@@ -606,7 +606,7 @@ namespace core\tools\form
 		 * Méthode permettant de créer un message d'erreur é partir d'un tableau de champs invalides
 		 * Récupére le message adéquate dans le Dictionnaire en fonction du nombre de champs
 		 * Renvoie le message d'erreur pour le tableau en cours
-		 * @param Array	 $pArray		Tableau de champs invalides
+		 * @param array	 $pArray		Tableau de champs invalides
 		 * @param String $pLibelle		Identification du message au singulier (1 seul champ invalide)
 		 * @param String $pLibelles		Identification du message au pluriel
 		 * @return String
@@ -692,7 +692,7 @@ namespace core\tools\form
 
 		/**
 		 * Méthode permettant d'injecter des valeurs dans le formulaire
-		 * @param Array $pValues				Tableau associatif des valeurs é injecter array(nomDuChamp=>valeur);
+		 * @param array $pValues				Tableau associatif des valeurs é injecter array(nomDuChamp=>valeur);
 		 * @return void
 		 */
 		public function injectValues(array $pValues)
@@ -1058,7 +1058,7 @@ namespace core\tools\form
 		/**
 		 * Méthode de récupération d'un input du formulaire en cours
 		 * @param String $pName
-		 * @return Array
+		 * @return array
 		 */
 		public function getInput($pName)
 		{
@@ -1068,7 +1068,7 @@ namespace core\tools\form
 		}
 
 		/**
-		 * @return Array
+		 * @return array
 		 */
 		public function getInputs()
 		{

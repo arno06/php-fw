@@ -89,7 +89,7 @@ namespace core\tools
 		/**
 		 * Méthode de récupération des informations du panier
 		 * Renvoie un tableau associatif : array("estimation"=>x, "countItems"=>y);
-		 * @return Array
+		 * @return array
 		 */
 		public function getResume()
 		{
@@ -99,7 +99,7 @@ namespace core\tools
 
 		/**
 		 * Méthode de récupération du tableau des items se trouvant dans le panier
-		 * @return Array
+		 * @return array
 		 */
 		public function getItems()
 		{

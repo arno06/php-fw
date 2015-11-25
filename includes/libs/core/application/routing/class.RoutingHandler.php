@@ -384,9 +384,9 @@ namespace core\application\routing
 				$pTexte = str_replace(mb_strtoupper($key, Configuration::$global_encoding), mb_strtoupper($change, Configuration::$global_encoding), $pTexte);
 			}
 			if ($pLower) $pTexte = strtolower($pTexte);
-			$pTexte = preg_replace("/[\s]/i", "_", $pTexte);
-			$pTexte = preg_replace("/[^\_0-9a-z]/i", "_", $pTexte);
-			$pTexte = preg_replace(array("/^_+/", "/_+$/", "/_+/"), array("", "", "_"), $pTexte);
+			$pTexte = preg_replace("/[\s]/i", "-", $pTexte);
+			$pTexte = preg_replace("/[^\_0-9a-z]/i", "-", $pTexte);
+			$pTexte = preg_replace(array("/^-+/", "/-+$/", "/-+/"), array("", "", "-"), $pTexte);
 			return $pTexte;
 		}
 	}

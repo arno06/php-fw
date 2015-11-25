@@ -20,7 +20,7 @@ namespace core\tools\form
 
 		/**
 		 * $_FILES du fichier &agrave; uploader
-		 * @var Array
+		 * @var array
 		 */
 		private $fileData;
 
@@ -44,13 +44,13 @@ namespace core\tools\form
 
 		/**
 		 * Nouvelles dimensions de l'image uploadée
-		 * @var Array
+		 * @var array
 		 */
 		private $newSize;
 
 		/**
 		 * Tableau des miniatures
-		 * @var	Array
+		 * @var	array
 		 */
 		private $miniatures = array();
 
@@ -81,7 +81,7 @@ namespace core\tools\form
 
 		/**
 		 * Constructor
-		 * @param Array $pFile					$_FILES cible
+		 * @param array $pFile					$_FILES cible
 		 * @param String $pFolder				Dossier cible
 		 * @param String $pFileName				Nouveau nom du fichier
 		 */

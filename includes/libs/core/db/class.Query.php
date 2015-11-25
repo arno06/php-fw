@@ -91,7 +91,7 @@ namespace core\db
 		const MATCH             =   " MATCH ";
 
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		static private $specials = array(
 			"NOW()",
@@ -152,7 +152,7 @@ namespace core\db
 
 		/**
 		 * Méthode de création d'une requête 'INSERT' d'insertion d'une tuple
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @return QueryInsert
 		 */
 		static public function insert($pValues)
@@ -162,7 +162,7 @@ namespace core\db
 
 		/**
 		 * Méthode de création d'une requête 'INSERT' d'insertion de N tuples
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @return QueryInsert
 		 */
 		static public function insertMultiple($pValues)
@@ -172,7 +172,7 @@ namespace core\db
 
 		/**
 		 * @static
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @return QueryReplace
 		 */
 		static public function replace($pValues)
@@ -182,7 +182,7 @@ namespace core\db
 
 		/**
 		 * @static
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @return QueryReplace
 		 */
 		static public function replaceMultiple($pValues)
@@ -339,11 +339,11 @@ namespace core\db
 	class QueryCondition
 	{
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $ands = array();
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $or = array();
 		/**
@@ -840,11 +840,11 @@ namespace core\db
 	class QuerySelect extends QueryWithCondition
 	{
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $tables = array();
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $fields = array();
 		/**
@@ -1030,7 +1030,7 @@ namespace core\db
 
 		/**
 		 * Méthode de définition des champs à mettre-à-jour
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @param bool $pEscape
 		 * @return QueryUpdate
 		 */
@@ -1077,13 +1077,13 @@ namespace core\db
 		protected $fields = "";
 		/**
 		 * Tableau de chaines de caract&egrave;res des valeurs à insérer
-		 * @var Array
+		 * @var array
 		 */
 		protected $values = array();
 
 		/**
 		 * Constructor
-		 * @param Array $pValues
+		 * @param array $pValues
 		 * @param String $pType
 		 */
 		public function __construct($pValues, $pType = "")
@@ -1104,7 +1104,7 @@ namespace core\db
 
 		/**
 		 * Méthode de définition des champs de la table en fonction des clés du tableau de valeurs envoyées
-		 * @param Array $pTuple
+		 * @param array $pTuple
 		 * @return QueryInsert
 		 */
 		private function setFields($pTuple)
@@ -1117,7 +1117,7 @@ namespace core\db
 
 		/**
 		 * Méthode de définition et d'échappement des valeurs à insérer
-		 * @param Array $pTuples
+		 * @param array $pTuples
 		 * @return QueryInsert
 		 */
 		private function setValues($pTuples)

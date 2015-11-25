@@ -268,7 +268,7 @@ namespace core\system
          * @param Number $pHeight			Hauteur actuelle
          * @param float $pMaxWidth			Largeur max
          * @param float $pMaxHeight		Hauteur max
-         * @return Array
+         * @return array
          */
         static public function getProportionResize($pWidth, $pHeight, $pMaxWidth, $pMaxHeight) {
             $TestW = round($pMaxHeight / $pHeight * $pWidth);
@@ -290,7 +290,7 @@ namespace core\system
         /**
          * Récup&egrave;re la hauteur et la largeur d'un fichier
          * @param String $pSourceImage				Fichier source dont on souhaite récupérer la taille
-         * @return Array
+         * @return array
          */
         static public function getSize($pSourceImage) {
             return getimagesize($pSourceImage);

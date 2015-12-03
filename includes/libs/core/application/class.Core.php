@@ -247,7 +247,7 @@ namespace core\application
                 }
             }
 
-            self::$path_to_application = Autoload::$folder."/includes/applications/".$application_name;
+            self::$path_to_application = Application::getInstance()->getFilesPath();
 
 			self::setDictionary();
 
@@ -407,7 +407,7 @@ namespace core\application
 		static public function setupSmarty(Smarty &$pSmarty)
 		{
 			$pSmarty->template_dir = Core::$path_to_templates;
-			$smartyDir = Core::$path_to_application."/_cache/".self::$module;
+			$smartyDir = Application::getInstance()->getTemplatesCachePath();
 			$pSmarty->cache_dir = $smartyDir;
 			$pSmarty->compile_dir = $smartyDir;
 		}

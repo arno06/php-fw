@@ -48,5 +48,6 @@
         "fieldLogin": "login_user",
         "fieldPermissions": "permissions_user",
         "useGroup": ""
-    }
+    },
+	"extra": {}
 }

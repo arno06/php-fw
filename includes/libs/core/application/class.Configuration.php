@@ -1,7 +1,10 @@
 <?php
 namespace core\application
 {
-	/**
+
+    use core\utils\Stack;
+
+    /**
 	 * Class Configuration
 	 * Sert de référence pour n'importe quelle propriété de configuration du framework
 	 *
@@ -119,5 +122,27 @@ namespace core\application
 		 * @var string
 		 */
 		static public $authentication_fieldPermissions = "permissions_user";
+
+        /**
+         * @var array
+         */
+        static private $_extra;
+
+        /**
+         * @param array $pExtra
+         */
+        static public function set_extra($pExtra)
+        {
+            self::$_extra = $pExtra;
+        }
+
+        /**
+         * @param string $pId
+         * @return mixed
+         */
+        static public function extra($pId)
+        {
+            return Stack::get($pId, self::$_extra);
+        }
 	}
 }

@@ -181,6 +181,10 @@ namespace core\application
 					}
 				}
 			}
+            if(isset($configurationData['extra']) && !empty($configurationData['extra']))
+            {
+                Configuration::set_extra($configurationData['extra']);
+            }
 		}
 
 		/**

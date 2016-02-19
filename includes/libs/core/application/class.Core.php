@@ -482,7 +482,10 @@ namespace core\application
 			else
 			{
 				$return = $pController->getGlobalVars();
-				$return = array_merge($return, Debugger::getGlobalVars());
+                if(Core::debug())
+                {
+                    $return = array_merge($return, Debugger::getGlobalVars());
+                }
 				if((isset($_POST)&&isset($_POST["render"])&&$_POST["render"]!="false"))
 					$return["html"] = $pController->render(false);
 				$response = SimpleJSON::encode($return);

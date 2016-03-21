@@ -262,7 +262,10 @@ namespace core\application
 			self::$controller = str_replace("-", "_", $parsedURL["controller"]);
 			self::$action = str_replace("-", "_", $parsedURL["action"]);
 
-			$_GET = array_merge($parsedURL["parameters"], $_GET);
+            if(isset($parsedURL["parameters"])&&is_array($parsedURL["parameters"])&&is_array($_GET))
+            {
+                $_GET = array_merge($_GET, $parsedURL["parameters"]);
+            }
 			self::$path_to_theme = Configuration::$server_url.$access.self::$application->getThemePath();
 			self::$path_to_templates = self::$application->getThemePath()."/views";
 		}

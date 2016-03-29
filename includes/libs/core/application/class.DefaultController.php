@@ -110,7 +110,7 @@ namespace core\application
 			{
 				$smarty->assign_by_ref($n, $v);
 			}
-			if(!Core::debug())
+			if(!Core::debug()&&!Core::$request_async)
 				$smarty->load_filter('output', 'gzip');
 			return $smarty->fetch($this->template, null, null, $pDisplay);
 		}

@@ -14,7 +14,7 @@ namespace core\data
 	{
 		/**
 		 * Méthode d'encodage d'un tableau en données formatées vers le format spécifique
-		 * @param Array $pArray		Tableau des données
+		 * @param array $pArray		Tableau des données
 		 * @return String
 		 */
 		static function encode(array $pArray)
@@ -26,7 +26,7 @@ namespace core\data
 		/**
 		 * Méthode de récupération d'un tableau associatif multidimensionnel &agrave; partir d'une chaine de caract&egrave;res
 		 * @param String $pString		Contenu au format spécifique
-		 * @return Array
+		 * @return array
 		 */
 		static function decode($pString)
 		{
@@ -37,7 +37,7 @@ namespace core\data
 		/**
 		 * Méthode de chargement de décodage d'un fichier au format spécifique
 		 * @param String $pFile
-		 * @return Array
+		 * @return array
 		 */
 		static function import($pFile)
 		{

@@ -1,5 +1,5 @@
 <?php
-namespace core\application\Authentication
+namespace core\application\authentication
 {
 	use core\application\Singleton;
 	use core\application\PrivateClass;

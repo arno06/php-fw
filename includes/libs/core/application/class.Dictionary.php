@@ -16,19 +16,19 @@ namespace core\application
 	{
 		/**
 		 * Tableau des alias
-		 * @var Array
+		 * @var array
 		 */
 		private $table_alias;
 
 		/**
 		 * Tableau des termes
-		 * @var Array
+		 * @var array
 		 */
 		private $table_terms;
 
 		/**
 		 * Tableau des infos de SEO (Search Engine Optimisation)
-		 * @var Array
+		 * @var array
 		 */
 		private $table_seo;
 
@@ -62,7 +62,7 @@ namespace core\application
 		{
 			$i = self::getInstance();
 			$value = Stack::get($pId, $i->table_terms);
-			while(preg_match("/\{([a-z\.]+)\}/", $value, $matches))
+			while(preg_match("/\{[a-z\.]+\}/", $value, $matches))
 			{
 				$value = preg_replace("/\{[a-z\.]+\}/", self::term($matches[1]), $value);
 			}
@@ -74,7 +74,7 @@ namespace core\application
 
 		/**
 		 * Méthode de récupération de l'ensemble des termes disponibles via le fichier de langue
-		 * @return Array
+		 * @return array
 		 */
 		static public function terms()
 		{
@@ -87,7 +87,7 @@ namespace core\application
 		 * Méthode de récupération des informations de SEO pour un controller et un action donné
 		 * @param String $pController		Nom du controller
 		 * @param String $pAction			Nom de l'action
-		 * @return Array
+		 * @return array
 		 */
 		static public function seoInfos($pController, $pAction)
 		{
@@ -127,9 +127,9 @@ namespace core\application
 		/**
 		 * Méthode de définition de l'objet Dictionary en fonction des paramètres
 		 * @param String $pLanguage		Langue en cours - fr/en/de
-		 * @param Array $pTerms			Tableau des termes accessibles de manière global à l'application
-		 * @param Array $pSeo			Tableau des informations relatives à la SEO (balise "title" et "description")
-		 * @param Array $pAlias			Tableau des alias pour la gestion de la réécriture d'url dynamique
+		 * @param array $pTerms			Tableau des termes accessibles de manière global à l'application
+		 * @param array $pSeo			Tableau des informations relatives à la SEO (balise "title" et "description")
+		 * @param array $pAlias			Tableau des alias pour la gestion de la réécriture d'url dynamique
 		 * @return void
 		 */
 		static public function defineLanguage($pLanguage, array $pTerms, array $pSeo, array $pAlias)

@@ -17,7 +17,7 @@ namespace core\data
 		/**
 		 * Méthode de chargement et de décodage d'un fichier JSON
 		 * @param String $pFile
-		 * @return Array
+		 * @return array
 		 * @throws \Exception
 		 */
 		static public function import($pFile)
@@ -46,7 +46,7 @@ namespace core\data
 
 		/**
 		 * Méthode d'encodage d'un String en Tableau
-		 * @param Array $pArray				Tableau &agrave; encoder
+		 * @param array $pArray				Tableau &agrave; encoder
 		 * @return String
 		 */
 		static public function encode(array $pArray)
@@ -56,8 +56,8 @@ namespace core\data
 
 		/**
 		 * Méthode de parsing récursif des valeurs d'un tableau dans leur format encodé numériquement (é ==> &#233;)
-		 * @param Array $pArray
-		 * @return Array
+		 * @param array $pArray
+		 * @return array
 		 */
 		static public function parseToNumericEntities(array $pArray)
 		{

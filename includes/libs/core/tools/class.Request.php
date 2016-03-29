@@ -7,7 +7,7 @@ namespace core\tools
 	 * Class Request - permet de gérer une surcouche nécessaire &agrave; CURL pour se simplifier les traitements
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.1
+	 * @version 1.2
 	 * @package core\tools
 	 */
 	class Request
@@ -30,6 +30,11 @@ namespace core\tools
         /**
          * @var string
          */
+        private $responseContentType;
+
+        /**
+         * @var string
+         */
         private $redirectURL;
 
 		/**
@@ -38,10 +43,14 @@ namespace core\tools
 		 */
 		public function __construct($pUrl)
 		{
-			$this->curlResource = curl_init();
+			$this->initResource();
 			$this->setUrl($pUrl);
 			$this->setOption(CURLOPT_HEADER, 0);
 		}
+
+        public function initResource() {
+            $this->curlResource = curl_init();
+        }
 
 		/**
 		 * Méthode de définition de l'url cible de la requête
@@ -97,6 +106,16 @@ namespace core\tools
 			$datas = ob_get_contents();
 			ob_end_clean();
 			$this->responseCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
+			$content_type = curl_getinfo($this->curlResource, CURLINFO_CONTENT_TYPE);
+            if (!empty($content_type)) {
+                if (is_numeric(strpos($content_type, ';'))) {
+                    $split = explode(';', $content_type);
+                    $this->responseContentType = $split[0];
+                } else {
+                    $this->responseContentType = $content_type;
+                }
+            }
+
             if(strpos($this->responseCode, "3") === 0)
                 $this->redirectURL = curl_getinfo($this->curlResource, CURLINFO_REDIRECT_URL);
 			curl_close($this->curlResource);
@@ -112,6 +131,15 @@ namespace core\tools
         public function getResponseHTTPCode()
         {
             return $this->responseCode;
+        }
+
+        /**
+         * Content-type de la réponse
+         * @return int
+         */
+        public function getResponseContentType()
+        {
+            return $this->responseContentType;
         }
 
         /**

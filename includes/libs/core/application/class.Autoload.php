@@ -38,7 +38,7 @@ namespace core\application
 		/**
 		 * @var array
 		 */
-		private $styleDependcies;
+		private $styleDependencies;
 
 		/**
 		 * @var array
@@ -54,7 +54,7 @@ namespace core\application
 			$this->scripts = array();
 			$this->scriptDependencies = array();
 			$this->styles = array();
-			$this->styleDependcies = array();
+			$this->styleDependencies = array();
 		}
 
 
@@ -64,7 +64,7 @@ namespace core\application
 		 * @return bool
 		 */
 		public function load($pClassName)
-        {
+		{
 			$path = '';
 			$packages = explode('\\', $pClassName);
 
@@ -170,8 +170,8 @@ namespace core\application
 			}
 			else
 			{
-				if(!in_array($pStyleSheet, self::getInstance()->styleDependcies, true))
-					self::getInstance()->styleDependcies[] = $pStyleSheet;
+				if(!in_array($pStyleSheet, self::getInstance()->styleDependencies, true))
+					self::getInstance()->styleDependencies[] = $pStyleSheet;
 			}
 		}
 
@@ -194,8 +194,8 @@ namespace core\application
 		 */
 		static public function styles()
 		{
-			if(!empty(self::getInstance()->styleDependcies))
-				self::getInstance()->styles[] = 'statique/dependencies/?type=css&need='.implode(',', self::getInstance()->styleDependcies);
+			if(!empty(self::getInstance()->styleDependencies))
+				self::getInstance()->styles[] = 'statique/dependencies/?type=css&need='.implode(',', self::getInstance()->styleDependencies);
 			return self::getInstance()->styles;
 		}
 

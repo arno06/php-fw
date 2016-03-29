@@ -184,12 +184,12 @@ namespace core\tools\form
 		private $inputsRequire = array();
 
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $files;
 
 		/**
-		 * @var Array
+		 * @var array
 		 */
 		private $post;
 
@@ -538,7 +538,7 @@ namespace core\tools\form
 		 * @param string $pName
 		 * @return void
 		 */
-		private function applyModifiers($pModifiers, $pName)
+		protected function applyModifiers($pModifiers, $pName)
 		{
 			if(!is_array($pModifiers))
 				return;
@@ -556,7 +556,7 @@ namespace core\tools\form
 		 * @param String $pRegExp		Valeur de l'expression régulière telle qu'elle est déclarée dans le JSON
 		 * @return String
 		 */
-		private function getRegExp($pRegExp)
+		protected function getRegExp($pRegExp)
 		{
 			if(preg_match("/^(custom\:)/", $pRegExp, $extract, PREG_OFFSET_CAPTURE))
 				return preg_replace("/^(custom\:)/", "", $pRegExp);
@@ -568,7 +568,7 @@ namespace core\tools\form
 
 		/**
 		 * Méthode de récupération des valeurs du formulaires
-		 * @return Array
+		 * @return array
 		 */
 		public function getValues()
 		{
@@ -606,7 +606,7 @@ namespace core\tools\form
 		 * Méthode permettant de créer un message d'erreur é partir d'un tableau de champs invalides
 		 * Récupére le message adéquate dans le Dictionnaire en fonction du nombre de champs
 		 * Renvoie le message d'erreur pour le tableau en cours
-		 * @param Array	 $pArray		Tableau de champs invalides
+		 * @param array	 $pArray		Tableau de champs invalides
 		 * @param String $pLibelle		Identification du message au singulier (1 seul champ invalide)
 		 * @param String $pLibelles		Identification du message au pluriel
 		 * @return String
@@ -692,7 +692,7 @@ namespace core\tools\form
 
 		/**
 		 * Méthode permettant d'injecter des valeurs dans le formulaire
-		 * @param Array $pValues				Tableau associatif des valeurs é injecter array(nomDuChamp=>valeur);
+		 * @param array $pValues				Tableau associatif des valeurs é injecter array(nomDuChamp=>valeur);
 		 * @return void
 		 */
 		public function injectValues(array $pValues)
@@ -796,8 +796,8 @@ namespace core\tools\form
 								}
 								else
 								{
-									$donnees_name = $donnees[$fm["name"]];
-									$donnees_value = $donnees[$fm["value"]];
+									$donnees_name = isset($donnees[$fm['name']])?$donnees[$fm["name"]]:'';
+									$donnees_value = isset($donnees[$fm['value']])?$donnees[$fm["value"]]:'';
 								}
 								$options[] = array("name"=>$donnees_name, "label"=>$donnees_name, "value"=>$donnees_value, "checked"=>$defaultChecked);
 							}
@@ -1058,7 +1058,7 @@ namespace core\tools\form
 		/**
 		 * Méthode de récupération d'un input du formulaire en cours
 		 * @param String $pName
-		 * @return Array
+		 * @return array
 		 */
 		public function getInput($pName)
 		{
@@ -1068,7 +1068,7 @@ namespace core\tools\form
 		}
 
 		/**
-		 * @return Array
+		 * @return array
 		 */
 		public function getInputs()
 		{
@@ -1433,6 +1433,8 @@ namespace core\tools\form
 					', "", true);
 					}
 					$options = "";
+                    if(!isset($pData["options"]))
+                        $pData["options"] = array();
 					if(!$pData["require"] && (!(isset($pData["attributes"]["multiple"]) || $pData["attributes"]["multiple"] == "multiple")))
 					{
 						$d = array("value"=>"", "name"=>"");

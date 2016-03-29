@@ -66,7 +66,7 @@ namespace core\tools
 
 		/**
 		 * Méthode de récupération des infos nécessaires &agrave; la mise en place de la pagination dans la vue
-		 * @return Array
+		 * @return array
 		 */
 		public function getPaginationInfo()
 		{

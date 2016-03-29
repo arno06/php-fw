@@ -111,7 +111,10 @@ namespace core\application\routing
                 foreach($rule["parameters"] as $name=>$re)
                 {
                     if(!preg_match('/\{\$'.$name.'\}/', $re_url))
+                    {
+                        $parameters[$name] = $re;
                         continue;
+                    }
 
                     $index_parameters[++$index_param] = $name;
                     $re_url = preg_replace('/\{\$'.$name.'\}/', '('.$re.')', $re_url);
@@ -239,11 +242,13 @@ namespace core\application\routing
 		static public function extractModule(&$pUrl, $pAvailableModule = array('default'))
 		{
             $modules = implode("|", $pAvailableModule);
+            $modules = str_replace('_', '-', $modules);
             $module = self::shift($pUrl, '/^('.$modules.')\//');
             if($module == Module::DEFAULT_MODULE)
                 Go::to();
             if($module === false)
                 $module = Module::DEFAULT_MODULE;
+            $module = str_replace('-', '_', $module);
             return $module;
 		}
 
@@ -379,9 +384,9 @@ namespace core\application\routing
 				$pTexte = str_replace(mb_strtoupper($key, Configuration::$global_encoding), mb_strtoupper($change, Configuration::$global_encoding), $pTexte);
 			}
 			if ($pLower) $pTexte = strtolower($pTexte);
-			$pTexte = preg_replace("/[\s]/i", "_", $pTexte);
-			$pTexte = preg_replace("/[^\_0-9a-z]/i", "_", $pTexte);
-			$pTexte = preg_replace(array("/^_+/", "/_+$/", "/_+/"), array("", "", "_"), $pTexte);
+			$pTexte = preg_replace("/[\s]/i", "-", $pTexte);
+			$pTexte = preg_replace("/[^\_0-9a-z]/i", "-", $pTexte);
+			$pTexte = preg_replace(array("/^-+/", "/-+$/", "/-+/"), array("", "", "-"), $pTexte);
 			return $pTexte;
 		}
 	}

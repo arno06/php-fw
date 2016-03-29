@@ -181,6 +181,10 @@ namespace core\application
 					}
 				}
 			}
+            if(isset($configurationData['extra']) && !empty($configurationData['extra']))
+            {
+                Configuration::set_extra($configurationData['extra']);
+            }
 		}
 
 		/**
@@ -247,7 +251,7 @@ namespace core\application
                 }
             }
 
-            self::$path_to_application = Autoload::$folder."/includes/applications/".$application_name;
+            self::$path_to_application = Application::getInstance()->getFilesPath();
 
 			self::setDictionary();
 
@@ -258,7 +262,10 @@ namespace core\application
 			self::$controller = str_replace("-", "_", $parsedURL["controller"]);
 			self::$action = str_replace("-", "_", $parsedURL["action"]);
 
-			$_GET = array_merge($parsedURL["parameters"], $_GET);
+            if(isset($parsedURL["parameters"])&&is_array($parsedURL["parameters"])&&is_array($_GET))
+            {
+                $_GET = array_merge($_GET, $parsedURL["parameters"]);
+            }
 			self::$path_to_theme = Configuration::$server_url.$access.self::$application->getThemePath();
 			self::$path_to_templates = self::$application->getThemePath()."/views";
 		}
@@ -407,7 +414,7 @@ namespace core\application
 		static public function setupSmarty(Smarty &$pSmarty)
 		{
 			$pSmarty->template_dir = Core::$path_to_templates;
-			$smartyDir = Core::$path_to_application."/_cache/".self::$module;
+			$smartyDir = Application::getInstance()->getTemplatesCachePath();
 			$pSmarty->cache_dir = $smartyDir;
 			$pSmarty->compile_dir = $smartyDir;
 		}
@@ -478,8 +485,11 @@ namespace core\application
 			else
 			{
 				$return = $pController->getGlobalVars();
-				$return = array_merge($return, Debugger::getGlobalVars());
-				if((isset($_POST)&&isset($_POST["render"])&&$_POST["render"]!="false"))
+                if(Core::debug())
+                {
+                    $return = array_merge($return, Debugger::getGlobalVars());
+                }
+				if((isset($_POST)&&isset($_POST["render"])&&$_POST["render"]!=="false"))
 					$return["html"] = $pController->render(false);
 				$response = SimpleJSON::encode($return);
 				$type = "json";

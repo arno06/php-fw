@@ -17,7 +17,7 @@ namespace core\application
 	{
 		/**
 		 * Tableau contenant les instances des Singletons invoqués
-		 * @var Array
+		 * @var array
 		 */
 		protected static $instances = array();
 

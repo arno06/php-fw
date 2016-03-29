@@ -21,7 +21,7 @@ namespace core\data
 
 		/**
 		 * Méthode de conversion de données au format Tableau en chaine de caract&egrave;res formatée en CSV
-		 * @param Array $pData				Donnée &agrave; convertir
+		 * @param array $pData				Donnée &agrave; convertir
 		 * @return String
 		 */
 		static public function encode(array $pData, $skipLabels = false)
@@ -86,7 +86,7 @@ namespace core\data
 		/**
 		 * Méthode de conversion d'une chaine de caract&egrave;res formatée en CSV vers un Tableau
 		 * @param String $pString				Chaine &agrave; convertir
-		 * @return Array
+		 * @return array
 		 */
 		static public function decode($pString)
 		{
@@ -117,7 +117,7 @@ namespace core\data
 		/**
 		 * Méthode d'exportation de données provenant de la base vers un fichier CSV
 		 * Renvoie le résultat de l'écriture du fichier
-		 * @param Array $pData					Tableau des données
+		 * @param array $pData					Tableau des données
 		 * @param String $pFileName				Nom du fichier
 		 * @return Boolean
 		 */
@@ -134,7 +134,7 @@ namespace core\data
 		/**
 		 * Méthode d'import de données &agrave; partir d'un fichier CSV
 		 * @param String $pFileName				Nom du fichier
-		 * @return Array
+		 * @return array
 		 */
 		static public function import($pFileName)
 		{

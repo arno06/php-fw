@@ -47,7 +47,7 @@ namespace core\application\authentication
 
 		/**
 		 * Données de l'utilisateur si son authentication est vérifiée
-		 * @var	Array
+		 * @var	array
 		 */
 		public $data;
 

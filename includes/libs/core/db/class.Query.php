@@ -187,7 +187,7 @@ namespace core\db
 		 */
 		static public function replaceMultiple($pValues)
 		{
-			return new QueryReplace($pValues, QueryInsert::UNIQUE);
+			return new QueryReplace($pValues, QueryInsert::MULTIPLE);
 		}
 
 		/**

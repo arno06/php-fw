@@ -31,6 +31,12 @@ namespace core\data
 			$result = '';
 			$libelles = array();
 			$donnees = "";
+
+			// if a unique entry is sent, put it in an envelope
+			if (!isset($pData[0])) {
+				$pData = array($pData);
+			}
+
 			for($i = 0, $max = count($pData); $i<$max;$i++)
 			{
 				foreach($pData[$i] as $champs=>$value)

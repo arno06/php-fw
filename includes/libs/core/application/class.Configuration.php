@@ -49,12 +49,6 @@ namespace core\application
 		 */
 		static public $global_permissions = array();
 
-		/**
-		 * Définit si Smarty supprime les retours à la ligne à l'écriture des fichiers de cache des templates
-		 * @var bool
-		 */
-		static public $global_inlineHTMLCode = false;
-
         /**
          * @var bool
          */

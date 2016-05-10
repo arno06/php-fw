@@ -11,7 +11,6 @@ namespace core\tools\form
 	use core\db\Query;
     use core\models\ModelUpload;
     use \Exception;
-	use Smarty;
 
 	/**
 	 * Classe de gestion des formulaires (création / vérification des données)

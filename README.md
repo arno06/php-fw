@@ -23,7 +23,6 @@ Features
 * Centralized component system for front-end
 * Autoload class
 * Forms handling (declaration, validation, display)
-* Smarty templating engine (an old version tho)
 
 Namespaces
 -----------

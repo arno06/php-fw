@@ -9,7 +9,6 @@ namespace core\tools\debugger
     use core\utils\Logs;
 	use core\application\Autoload;
 	use core\application\Header;
-	use \Smarty;
 	use \Exception;
 
 	/**

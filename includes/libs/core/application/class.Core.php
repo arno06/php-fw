@@ -413,9 +413,7 @@ namespace core\application
 		 */
 		static public function setupRenderer(&$pRenderer)
 		{
-            $pRenderer->templateDir = Core::$path_to_templates;
-            $pRendererDir = Application::getInstance()->getTemplatesCachePath();
-            $pRenderer->cacheDir = $pRendererDir;
+            $pRenderer->setup(Core::$path_to_templates, Application::getInstance()->getTemplatesCachePath());
 		}
 
 		/***

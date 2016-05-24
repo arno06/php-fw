@@ -20,6 +20,11 @@ namespace core\tools\template
             $this->data[$pName] = $pValue;
         }
 
+        public function include_tpl($pName)
+        {
+            trace("include : ".$pName);
+        }
+
         public function get($pName)
         {
             return Stack::get($pName, $this->data);

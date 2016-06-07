@@ -4,6 +4,6 @@
         {if $content.error!=""}
         <div class='error'>{$content.error}</div>
         {/if}
-        {form_login->display}
+        {form.login->display}
 	</div>
 {include file="includes/template.footer.tpl"}

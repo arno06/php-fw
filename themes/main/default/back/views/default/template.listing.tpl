@@ -2,7 +2,7 @@
 
 <h1>{$content.h1}</h1>
 <div class="new-entry">
-    <a href="{$controller}/add/" class="button {if not isset($content.actions.add)}disabled{/if}">Ajouter une entr&eacute;e</a>
+    <a href="{$controller}/add/" class="button {if null==$content.actions.add}disabled{/if}">Ajouter une entr&eacute;e</a>
 </div>
 <table>
     <thead>
@@ -30,7 +30,7 @@
             {foreach from=$content.actions item="action" key="className"}
                 {if $action.applyToEntry}
                     <td class="{$className}">
-                        <a href="{rewriteurl action=$action.name controller=$controller id=$item[$content.id]}" class="button {$className}"><span></span></a>
+                        <a href="{$controller}/{$action.name}/id:{$item[$content.id]}/" class="button {$className}"><span></span></a>
                     </td>
                 {/if}
             {/foreach}
@@ -45,7 +45,7 @@
     {/foreach}
     </tbody>
 </table>
-{if $content.paginationInfo}
-    {getPagination info=$content.paginationInfo}
+{if $content.pagination}
+    {content.pagination->display}
 {/if}
 {include file="includes/template.footer.tpl"}

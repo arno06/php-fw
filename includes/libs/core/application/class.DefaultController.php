@@ -96,11 +96,11 @@ namespace core\application
 			{
                 $t->assign($n, $v);
 			}
+            $global = array('get'=>$_GET, 'post', $_POST);
+            $t->assign('global', $global);
             $t->assign("dictionary", $terms);
             $t->assign("request_asyn", Core::$request_async);
-			foreach($this->forms as $n=>&$form) {
-                $t->assign("form_" . $n, $form);
-            }
+            $t->assign("form", $this->forms);
             Core::setupRenderer($t);
             $t->render($this->template, $pDisplay);
             return true;

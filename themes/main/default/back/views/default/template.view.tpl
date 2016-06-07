@@ -2,7 +2,7 @@
 
 <h1>{$content.h1}</h1>
 <div class="back">
-    <a href="{$controller}/" class="button {if not isset($content.actions.listing)}disabled{/if}">Retour à la liste</a>
+    <a href="{$controller}/" class="button {if null == $content.actions.listing}disabled{/if}">Retour à la liste</a>
 </div>
 <div class="details">
     <table class="data">

@@ -17,9 +17,20 @@ namespace core\tools\template
         public $safeMode = true;
         public $cacheEnabled = true;
 
-        public function __construct()
-        {
+        private $context;
 
+        public function __construct($pDefaultData = null)
+        {
+            $this->context = new RenderingContext();
+            if(!is_null($pDefaultData))
+            {
+                $this->context->setData($pDefaultData);
+            }
+        }
+
+        public function assign($pName, &$pValue)
+        {
+            $this->context->assign($pName, $pValue);
         }
 
         public function setup($pTemplateDir, $pCacheDir)
@@ -36,16 +47,13 @@ namespace core\tools\template
             $this->cacheFile = str_replace("/", "%", $this->templateFile).".php";
             $this->cachePath = $this->cacheDir."/".$this->cacheFile;
 
+            $this->context->setFile($this->cachePath);
+
             if($this->pullFromCache())
             {
                 $this->execute($pDisplay);
                 return;
             }
-            //Check cache existence
-            //Check cache validity
-            //Check template existence
-
-
 
             $this->evaluate();
             $this->execute($pDisplay);
@@ -84,8 +92,7 @@ namespace core\tools\template
         private function execute($pDisplay = true)
         {
             trace("execute");
-            $context = new RenderingContext($this->cachePath);
-            $context->render($pDisplay);
+            $this->context->render($pDisplay);
         }
 
         private function evaluate()
@@ -121,7 +128,8 @@ namespace core\tools\template
 
             $re_block = "/(\\".$to."(".$blocks.")|\\".$to."\/(".$blocks."))([^\\".$tc."]*)\\".$tc."/i";
 
-            $re_vars = "/\\$([a-z\_\.]+)/i";
+
+//            $re_vars = "/\\$([a-z\_\.]+)/i";
 
             /**
             $content = preg_replace_callback($re_vars, function($pMatches)
@@ -132,12 +140,12 @@ namespace core\tools\template
 
             trace($re_block);
 
-//            preg_match_all($re_block, $content, $matches);
             $step = 0;
             $opened = [];
             $content = preg_replace_callback($re_block, function($pMatches){
                 global $step;
                 global $opened;
+                global $re_object;
 
                 $opener = !empty(trim($pMatches[2]));
                 $name = $opener?$pMatches[2]:$pMatches[3];
@@ -166,10 +174,10 @@ namespace core\tools\template
 
                             $this->parseParameters($params, $default);
 
-                            $table = $default["from"];
+                            $table = str_replace('$', '', $default["from"]);
 
                             $array_var = 'data_'.$step;
-                            $var = '$'.$array_var.'=$this->get(\''.str_replace('$', '',$table).'\');';
+                            $var = '$'.$array_var.'='.$this->extractVar($table).';';
 
                             return '<?php '.$var.' if($'.$array_var.'&&is_array($'.$array_var.')&&!empty($'.$array_var.')):
 foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->assign("'.$default['item'].'", $'.$default['item'].'); $this->assign("'.$default['key'].'", $'.$default['key'].'); ?>';
@@ -197,6 +205,16 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                         break;
                     default:
 
+                        $re_object = "/\\".TemplateDictionary::$TAGS[0]."([a-z0-9\\.\\_]+)(\\-\\>[a-z\\_]+)*\\".TemplateDictionary::$TAGS[1]."/i";
+                        preg_match($re_object, $pMatches[0], $matches);
+
+                        trace_r($matches);
+
+                        if(isset($matches)&&!empty($matches))
+                        {
+                            return "<?php ".$this->extractVar($matches[1]).$matches[2]."(); ?>";
+                        }
+
                         trace_r($pMatches);
 
                         return $pMatches[0];
@@ -206,10 +224,10 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
             unset($step);
             unset($opened);
 
-            $re_vars = $otag."\\$([a-z0-9\.\_]+)([a-z\_\\\\|]+)*".$etag;
+            $re_vars = $otag."\\$([a-z0-9\\.\\_]+)([a-z\\_\\\\|]+)*".$etag;
 
             $content = preg_replace_callback("/".$re_vars."/i", function($pMatches){
-                $var = '$this->get("'.$pMatches[1].'")';
+                $var = $this->extractVar($pMatches[1]);
                 if(isset($pMatches[2])&&!empty($pMatches[2]))
                 {
                     $modifiers = explode("|", $pMatches[2]);
@@ -221,6 +239,10 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                             continue;
                         $var = $m."(".$var.")";
                     }
+                }
+                if(isset($pMatches[3])&&!empty($pMatches[3]))
+                {
+                    trace_r($pMatches[3]);
                 }
                 return '<?php echo '.$var.'; ?>';
             }, $content);
@@ -253,6 +275,11 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                 $v = explode("=", $pv);
                 $pParams[trim($v[0])] = str_replace("'", "", str_replace('"', '', trim($v[1])));
             }
+        }
+
+        private function extractVar($pId)
+        {
+            return '$this->get("'.$pId.'")';
         }
     }
 

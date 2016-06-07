@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset={$configuration.global_encoding}" >
         <base href="{$configuration.server_url}"/>
 		<title>{$head.title}</title>
-        {if isset($content.canonical) && !empty($content.canonical)}
+        {if !null == $content.canonical && !empty($content.canonical)}
             <link rel="canonical" href="{$content.canonical}">
         {/if}
 		<meta name="description" content="{$head.description}"/>

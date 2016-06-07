@@ -14,7 +14,7 @@
 {/foreach}
 	</head>
 	<body>
-
+{if $user_is.ADMIN}
 {include file="includes/template.menu.tpl"}
-
+{/if}
 		<div id="content">

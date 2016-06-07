@@ -1,6 +1,8 @@
 <?php
 namespace core\tools\template
 {
+
+    use core\application\Core;
     use core\utils\Stack;
 
     class RenderingContext
@@ -9,20 +11,33 @@ namespace core\tools\template
         private $file;
         private $data;
 
-        public function __construct($pFile)
+        public function __construct($pFile = null)
         {
             $this->file = $pFile;
             $this->data = array();
         }
 
-        public function assign($pName, $pValue)
+        public function setFile($pFile)
+        {
+            $this->file = $pFile;
+        }
+
+        public function assign($pName, &$pValue)
         {
             $this->data[$pName] = $pValue;
         }
 
         public function include_tpl($pName)
         {
+            $tpl = new Template($this->data);
+            Core::setupRenderer($tpl);
+            $tpl->render($pName, true);
             trace("include : ".$pName);
+        }
+
+        public function setData($pData)
+        {
+            $this->data = $pData;
         }
 
         public function get($pName)

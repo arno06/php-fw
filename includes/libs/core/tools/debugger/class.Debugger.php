@@ -157,9 +157,10 @@ namespace core\tools\debugger
 		 */
 		static public function render($pDisplay = true, $pError = false)
 		{
+            $dir_to_theme = "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger";
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
             $ctx->assign('is_error', $pError);
-            $ctx->assign('dir_to_theme', "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger");
+            $ctx->assign('dir_to_theme', $dir_to_theme);
             $ctx->assign('dir_to_components', Core::$path_to_components);
             $ctx->assign('server_url', Configuration::$server_url);
 			$globalVars = self::getGlobalVars();

@@ -362,7 +362,7 @@ namespace core\application
 		 */
 		static public function getTemplate()
 		{
-			return self::$controller."/template.".self::$action.".tpl";
+			return self::$controller."/".self::$action.".tpl";
 		}
 
 

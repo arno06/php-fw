@@ -1,4 +1,4 @@
-{if !$request_async}{include file="includes/template.head.tpl"}{/if}
+{if !$request_async}{include file="includes/head.tpl"}{/if}
 <?php print_r(Core); ?>
 {*
 test
@@ -14,6 +14,7 @@ comments
 {foreachelse}
 	<div>pas woot</div>
 {/foreach}
+{$content.bouboup|ucfirst|strtolower}
 {$content.some.var|ucfirst|strtolower}
 <?php
 //test
@@ -21,4 +22,4 @@ trace("bouboup");
 ?>
 {* test *}
 {$test.foo}
-{if !$request_async}{include file="includes/template.footer.tpl"}{/if}
+{if !$request_async}{include file="includes/footer.tpl"}{/if}

@@ -76,7 +76,7 @@ namespace core\application
             {
                 Go::to404();
             }
-            $this->setTemplate(null, null, 'template.404.tpl');
+            $this->setTemplate(null, null, 'not_found.tpl');
         }
 
 
@@ -222,7 +222,7 @@ namespace core\application
 			if(!empty($pFile))
 				$this->template = $pFile;
 			else
-				$this->template = $pFolder."/template.".$pName.".tpl";
+				$this->template = $pFolder."/".$pName.".tpl";
 		}
 
 		/**

@@ -1,4 +1,4 @@
-{include file="includes/template.head.tpl"}
+{include file="includes/head.tpl"}
 	<div id="connexion">
         <h1>Identification</h1>
         {if $content.error!=""}
@@ -6,4 +6,4 @@
         {/if}
         {form.login->display}
 	</div>
-{include file="includes/template.footer.tpl"}
+{include file="includes/footer.tpl"}

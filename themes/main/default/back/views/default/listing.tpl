@@ -1,4 +1,4 @@
-{include file="includes/template.head.tpl"}
+{include file="includes/head.tpl"}
 
 <h1>{$content.h1}</h1>
 <div class="new-entry">
@@ -48,4 +48,4 @@
 {if $content.pagination}
     {content.pagination->display}
 {/if}
-{include file="includes/template.footer.tpl"}
+{include file="includes/footer.tpl"}

@@ -47,7 +47,8 @@ namespace core\tools\template
             {
                 foreach($pModifiers as $m)
                 {
-                    $value = $m($value);
+                    if(is_callable($m)||($m = TemplateModifiers::get($m)))
+                        $value = call_user_func($m, $value);
                 }
             }
             return $value;

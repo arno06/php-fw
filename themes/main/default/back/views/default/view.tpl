@@ -1,4 +1,4 @@
-{include file="includes/template.head.tpl"}
+{include file="includes/head.tpl"}
 
 <h1>{$content.h1}</h1>
 <div class="back">
@@ -44,4 +44,4 @@
         {/if}
     {/foreach}
 </div>
-{include file="includes/template.footer.tpl"}
+{include file="includes/footer.tpl"}

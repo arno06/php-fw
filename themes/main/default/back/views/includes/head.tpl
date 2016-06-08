@@ -15,6 +15,6 @@
 	</head>
 	<body>
 {if $user_is.ADMIN}
-{include file="includes/template.menu.tpl"}
+{include file="includes/menu.tpl"}
 {/if}
 		<div id="content">

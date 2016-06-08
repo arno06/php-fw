@@ -128,11 +128,13 @@ namespace core\tools\template
 
             $re_block = "/(\\".$to."(".$blocks.")|\\".$to."\/(".$blocks."))([^\\".$tc."]*)\\".$tc."/i";
 
-            $re_vars = "/\\$([a-z0-9\_\.]+)/i";
+            $re_vars = "/\\$([a-z0-9\_\.\|]+)/i";
 
             $content = preg_replace_callback($re_vars, function($pMatches)
             {
-                return $this->extractVar($pMatches[1]);
+                $modifiers = explode('|', $pMatches[1]);
+                $var = $this->extractVar(array_shift($modifiers), array_reverse($modifiers));
+                return $var;
             }, $content);
 
             $re_vars = "/".$to."\\$([^".$tc."]+)".$tc."/i";
@@ -275,9 +277,12 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
             }
         }
 
-        private function extractVar($pId)
+        private function extractVar($pId, $pModifiers = array())
         {
-            return '$this->get("'.$pId.'")';
+            $modifiers = "[]";
+            if(!empty($pModifiers))
+                $modifiers = "['".implode("','", $pModifiers)."']";
+            return '$this->get("'.$pId.'",'.$modifiers.')';
         }
     }
 

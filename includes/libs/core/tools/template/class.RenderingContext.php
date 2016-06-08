@@ -40,9 +40,17 @@ namespace core\tools\template
             $this->data = $pData;
         }
 
-        public function get($pName)
+        public function get($pName, $pModifiers = array())
         {
-            return Stack::get($pName, $this->data);
+            $value = Stack::get($pName, $this->data);
+            if(!empty($pModifiers))
+            {
+                foreach($pModifiers as $m)
+                {
+                    $value = $m($value);
+                }
+            }
+            return $value;
         }
 
         public function render($pDisplay)

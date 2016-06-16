@@ -4,21 +4,65 @@ namespace core\tools\template
 
     use core\system\File;
 
+    /**
+     * Class Template
+     *
+     * @author Arnaud NICOLAS <arno06@gmail.com>
+     * @version 0.1
+     * @package core\tools\template
+     */
     class Template
     {
+        /**
+         * @var string
+         */
         public $cacheDir;
+
+        /**
+         * @var string
+         */
         public $templateDir;
+
+        /**
+         * @var string
+         */
         public $templateFile;
+
+        /**
+         * @var string
+         */
         private $templatePath;
 
+        /**
+         * @var string
+         */
         private $cacheFile;
+
+        /**
+         * @var string
+         */
         private $cachePath;
 
+        /**
+         * @var bool
+         */
         public $safeMode = true;
+
+        /**
+         * @var bool
+         */
         public $cacheEnabled = true;
 
+        /**
+         * @var RenderingContext
+         */
         private $context;
 
+
+        /**
+         * Template constructor.
+         * @param null $pDefaultData
+         */
         public function __construct($pDefaultData = null)
         {
             $this->context = new RenderingContext();
@@ -28,11 +72,21 @@ namespace core\tools\template
             }
         }
 
+
+        /**
+         * @param string $pName
+         * @param mixed $pValue
+         */
         public function assign($pName, &$pValue)
         {
             $this->context->assign($pName, $pValue);
         }
 
+
+        /**
+         * @param $pTemplateDir
+         * @param $pCacheDir
+         */
         public function setup($pTemplateDir, $pCacheDir)
         {
             $currentDir = dirname($_SERVER['SCRIPT_FILENAME']).'/';
@@ -40,6 +94,12 @@ namespace core\tools\template
             $this->cacheDir = $pCacheDir;
         }
 
+
+        /**
+         * @param string $pTemplateFile
+         * @param bool $pDisplay
+         * @return bool|string
+         */
         public function render($pTemplateFile, $pDisplay = true)
         {
             $this->templateFile = $pTemplateFile;
@@ -51,14 +111,17 @@ namespace core\tools\template
 
             if($this->pullFromCache())
             {
-                $this->execute($pDisplay);
-                return;
+                return $this->execute($pDisplay);
             }
 
             $this->evaluate();
-            $this->execute($pDisplay);
+            return $this->execute($pDisplay);
         }
 
+
+        /**
+         * @return bool
+         */
         private function pullFromCache()
         {
             if(!$this->cacheEnabled)
@@ -76,6 +139,10 @@ namespace core\tools\template
             return true;
         }
 
+
+        /**
+         * @param string $pContent
+         */
         private function storeInCache($pContent)
         {
             if(!$this->cacheEnabled)
@@ -89,12 +156,20 @@ namespace core\tools\template
             file_put_contents($this->cachePath, $pContent);
         }
 
+
+        /**
+         * @param bool $pDisplay
+         * @return bool|string
+         */
         private function execute($pDisplay = true)
         {
-            trace("execute");
-            $this->context->render($pDisplay);
+            return $this->context->render($pDisplay);
         }
 
+
+        /**
+         * Retrieve template source then evaluate it to a PHP compliant version
+         */
         private function evaluate()
         {
             try
@@ -108,8 +183,6 @@ namespace core\tools\template
             }
             
             $startTime = microtime(true);
-
-            trace_r(htmlentities($content));
 
             $otag = TemplateDictionary::$TAGS[0];
             $etag = TemplateDictionary::$TAGS[1];
@@ -143,8 +216,6 @@ namespace core\tools\template
             {
                 return "<?php echo \$".$pMatches[1]."; ?>";
             }, $content);
-
-            trace($re_block);
 
             $step = 0;
             $opened = [];
@@ -233,10 +304,8 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                         }
                         else
                         {
-                            trace_r($pMatches);
-                        }
 
-                        trace_r($pMatches);
+                        }
 
                         return $pMatches[0];
                         break;
@@ -249,11 +318,16 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
 
             trace("evaluate duration : ".($endTime-$startTime)." ");
 
-            trace_r(htmlentities($content));
-
             $this->storeInCache($content);
         }
 
+
+        /**
+         * @param string $content
+         * @param string $pStartTag
+         * @param string $pEndTag
+         * @return mixed
+         */
         private function escapeBlock($content, $pStartTag, $pEndTag)
         {
             while(($s = strpos($content, $pStartTag))!==false)
@@ -265,6 +339,11 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
             return $content;
         }
 
+
+        /**
+         * @param string $pString
+         * @param array &$pParams
+         */
         private function parseParameters($pString, &$pParams)
         {
             $p = explode(" ", $pString);
@@ -277,6 +356,12 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
             }
         }
 
+
+        /**
+         * @param string $pId
+         * @param array $pModifiers
+         * @return string
+         */
         private function extractVar($pId, $pModifiers = array())
         {
             $modifiers = "[]";
@@ -286,13 +371,30 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
         }
     }
 
+    /**
+     * Class TemplateDictionary
+     *
+     * @author Arnaud NICOLAS <arno06@gmail.com>
+     * @package core\tools\template
+     */
     class TemplateDictionary
     {
+        /**
+         * @var array
+         */
         static public $TAGS = ["{", "}"];
+
+        /**
+         * @var array
+         */
         static public $BLOCKS = [
             "foreach",
             "if"
         ];
+
+        /**
+         * @var array
+         */
         static public $NEUTRALS = [
             "foreachelse",
             "else"

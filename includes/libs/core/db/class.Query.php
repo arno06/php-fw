@@ -511,7 +511,9 @@ namespace core\db
 		 */
 		public function andCondition(QueryCondition $pCondition)
 		{
-			array_push($this->ands, "(".preg_replace("/^ WHERE /i","",$pCondition->getWhere()).")");
+            $condition = $pCondition->getWhere();
+            if(!empty($condition))
+			    array_push($this->ands, "(".preg_replace("/^ WHERE /i","",$condition).")");
 			return $this;
 		}
 

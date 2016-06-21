@@ -1,7 +1,10 @@
 <?php
 namespace core\tools
 {
-	use core\db\Query;
+
+    use core\application\Core;
+    use core\application\Dictionary;
+    use core\db\Query;
 	use core\db\QueryCondition;
 
 	/**
@@ -80,5 +83,49 @@ namespace core\tools
 		{
 			return Query::condition()->limit($this->first, $this->number);
 		}
+
+        public function display($params = array())
+        {
+            $info = $this->getPaginationInfo();
+            $noPage = 0;
+            $url = Core::$url."?";
+            extract($params);
+            if(empty($info)||$info["nbPages"]<2)
+                return;
+            if (isset($info["noPage"])) $noPage = $info["noPage"];
+            $parameters = $_GET;
+            $parameters["page"] = $info["currentPage"]-1;
+
+            echo '<div class="pagination"><div class="previous">';
+            echo '<a href="'.$url.http_build_query($parameters).'" class="button '.(($info["currentPage"]==1)?'disabled':'').'">'.Dictionary::term("global.pagination.previous").'</a> ';
+            echo '</div><div class="pages">';
+            if ($noPage)
+            {
+                echo $info["currentPage"]." / ".$info["nbPages"];
+            }
+            else
+            {
+                for($i = 1; $i<=$info["nbPages"]; ++$i)
+                {
+                    if($i==1||$i==$info["currentPage"]||$i==($info["currentPage"]+1)||$i==($info["currentPage"]-1)||$i==$info["nbPages"])
+                    {
+                        $parameters["page"] = $i;
+                        if($i>1)
+                            echo ' - ';
+                        if($i==$info["currentPage"])
+                            echo '<span class="current_page">'.$i.'</span>';
+                        else
+                            echo '<a href="'.$url.http_build_query($parameters).'" class="button">'.$i.'</a>';
+                    }
+                    if(($i == $info["currentPage"]+2 || $i == $info["currentPage"]-2)&&($i!=1&&$i!=$info["nbPages"]))
+                        echo " - ... ";
+                }
+            }
+            echo '</div>';
+            $parameters["page"] = $info["currentPage"]+1;
+            echo '<div class="next">';
+            echo '<a href="'.$url.http_build_query($parameters).'" class="button '.(($info["currentPage"]==$info["nbPages"]||!$info["nbPages"])?'disabled':'').'">'.Dictionary::term("global.pagination.next").'</a>';
+            echo "</div></div>";
+        }
 	}
 }

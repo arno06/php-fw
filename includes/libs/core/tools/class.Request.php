@@ -151,6 +151,14 @@ namespace core\tools
             return $this->redirectURL;
         }
 
+        /**
+         * @param $pValue
+         */
+        public function setMethod($pValue)
+        {
+            curl_setopt($this->curlResource, CURLOPT_CUSTOMREQUEST, $pValue);
+        }
+
 		/**
 		 * Exécute une requête HTTP via CURL
 		 * Renvoie le résultat

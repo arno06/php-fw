@@ -3,9 +3,9 @@ namespace core\application
 {
 	use core\tools\form\Form;
     use core\application\event\EventDispatcher;
-	use Smarty;
+    use core\tools\template\Template;
 
-	/**
+    /**
 	 * Controller de base
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
@@ -76,7 +76,7 @@ namespace core\application
             {
                 Go::to404();
             }
-            $this->setTemplate(null, null, 'template.404.tpl');
+            $this->setTemplate(null, null, 'not_found.tpl');
         }
 
 
@@ -87,32 +87,23 @@ namespace core\application
 		 */
 		public function render($pDisplay = true)
 		{
-            $smarty = new Smarty();
-			Core::setupSmarty($smarty);
-			if(!$smarty->template_exists($this->template))
-			{
-				if(Core::debug())
-					trigger_error("Le template <b>".$this->template."</b> est introuvable", E_USER_ERROR);
-				else
-					Go::to404();
-			}
 			$conf = get_class_vars('core\application\Configuration');
-			$terms =Dictionary::terms();
+            $terms = Dictionary::terms();
 			$globalVars = $this->getGlobalVars();
-			$smarty->assign_by_ref("configuration", $conf);
-			$smarty->assign_by_ref("request_async", Core::$request_async);
-			$smarty->assign_by_ref("dictionary", $terms);
-			foreach($this->forms as $n=>&$form)
-			{
-				$smarty->register_object("form_".$n, $form, array("display", "name", "getValue", "getLabel", "getOptions", "isChecked"));
-			}
+            $t = new Template();
+            $t->assign("configuration", $conf);
 			foreach($globalVars as $n=>&$v)
 			{
-				$smarty->assign_by_ref($n, $v);
+                $t->assign($n, $v);
 			}
-			if(!Core::debug()&&!Core::$request_async)
-				$smarty->load_filter('output', 'gzip');
-			return $smarty->fetch($this->template, null, null, $pDisplay);
+            $global = array('get'=>$_GET, 'post', $_POST);
+            $t->assign('global', $global);
+            $t->assign("dictionary", $terms);
+            $t->assign("request_asyn", Core::$request_async);
+            $t->assign("form", $this->forms);
+            Core::setupRenderer($t);
+            $t->render($this->template, $pDisplay);
+            return true;
 		}
 
 		/**
@@ -231,7 +222,7 @@ namespace core\application
 			if(!empty($pFile))
 				$this->template = $pFile;
 			else
-				$this->template = $pFolder."/template.".$pName.".tpl";
+				$this->template = $pFolder."/".$pName.".tpl";
 		}
 
 		/**

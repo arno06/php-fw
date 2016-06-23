@@ -68,7 +68,7 @@ namespace core\tools
 			if(!empty($pFile))
 				$this->template = $pFile;
 			else
-				$this->template = $pFolder."/template.".$pName.".tpl";
+				$this->template = $pFolder."/".$pName.".tpl";
 		}
 
 

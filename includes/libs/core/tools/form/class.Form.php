@@ -11,7 +11,6 @@ namespace core\tools\form
 	use core\db\Query;
     use core\models\ModelUpload;
     use \Exception;
-	use Smarty;
 
 	/**
 	 * Classe de gestion des formulaires (création / vérification des données)
@@ -833,11 +832,9 @@ namespace core\tools\form
 		}
 
 		/**
-		 * @param array|null $pParams
-		 * @param Smarty $pSmarty
 		 * @return void
 		 */
-		public function getValue(array $pParams = null, &$pSmarty = null)
+		public function getValue(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
@@ -849,16 +846,14 @@ namespace core\tools\form
 					echo $this->data[$name]["attributes"]["value"];
 				else
 				{
-					$pSmarty->assign($toVar, $this->data[$name]["attributes"]["value"]);
+//					$pSmarty->assign($toVar, $this->data[$name]["attributes"]["value"]);
 				}
 			}
 		}
 
 		/**
-		 * @param array $pParams
-		 * @param Smarty $pSmarty
 		 */
-		public function isChecked(array $pParams = null, &$pSmarty = null)
+		public function isChecked(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
@@ -870,16 +865,14 @@ namespace core\tools\form
 					echo isset($this->data[$name]["attributes"]["checked"]) ? "checked" : "";
 				else
 				{
-					$pSmarty->assign($toVar, isset($this->data[$name]["attributes"]["checked"]));
+//					$pSmarty->assign($toVar, isset($this->data[$name]["attributes"]["checked"]));
 				}
 			}
 		}
 
 		/**
-		 * @param array $pParams
-		 * @param Smarty $pSmarty
 		 */
-		public function getOptions(array $pParams = null, &$pSmarty = null)
+		public function getOptions(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
@@ -891,16 +884,14 @@ namespace core\tools\form
 					echo $this->data[$name]["options"];
 				else
 				{
-					$pSmarty->assign($toVar, $this->data[$name]["options"]);
+//					$pSmarty->assign($toVar, $this->data[$name]["options"]);
 				}
 			}
 		}
 
 		/**
-		 * @param array $pParams
-		 * @param Smarty $pSmarty
 		 */
-		public function getLabel(array $pParams = null, &$pSmarty = null)
+		public function getLabel(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
@@ -912,19 +903,18 @@ namespace core\tools\form
 					echo $this->data[$name]["label"];
 				else
 				{
-					$pSmarty->assign($toVar, $this->data[$name]["label"]);
+//					$pSmarty->assign($toVar, $this->data[$name]["label"]);
 				}
 			}
 		}
 
 
 		/**
-		 * @param array|null $pParams
-		 * @param Smarty $pSmarty
-		 * @param bool $pReturn
+         * @param $pParams
+         * @param $pReturn
 		 * @return string|void
 		 */
-		public function display(array $pParams = null, &$pSmarty = null, $pReturn = false)
+		public function display(array $pParams = null, $pReturn = false)
 		{
 			$noForm = false;
 			$noMandatory = false;
@@ -934,6 +924,8 @@ namespace core\tools\form
 			$helper = "core\\tools\\form\\FormHelpers";
 			if($pParams != null)
 				extract($pParams, EXTR_REFS);
+            else
+                $pParams = array();
 
 			if(!$noForm)
 			{

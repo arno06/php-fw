@@ -147,7 +147,7 @@ namespace core\application
             {
                 Go::to404();
             }
-            $this->setTemplate(null, null, 'template.404.tpl');
+            $this->setTemplate(null, null, 'not_found.tpl');
         }
 
 		/**

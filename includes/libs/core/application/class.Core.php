@@ -5,8 +5,8 @@ namespace core\application
 	use core\tools\debugger\Debugger;
 	use core\db\DBManager;
 	use core\application\routing\RoutingHandler;
-	use \Exception;
-	use \Smarty;
+    use core\tools\template\Template;
+    use \Exception;
 
 
 	/**
@@ -362,7 +362,7 @@ namespace core\application
 		 */
 		static public function getTemplate()
 		{
-			return self::$controller."/template.".self::$action.".tpl";
+			return self::$controller."/".self::$action.".tpl";
 		}
 
 
@@ -407,16 +407,13 @@ namespace core\application
 
 
 		/**
-		 * Méthode de configuration de Smarty
-		 * @param Smarty $pSmarty				Instance de smarty
+		 * Méthode de configuration de moteur de rendu
+		 * @param Template $pRenderer				Instance de
 		 * @return void
 		 */
-		static public function setupSmarty(Smarty &$pSmarty)
+		static public function setupRenderer(&$pRenderer)
 		{
-			$pSmarty->template_dir = Core::$path_to_templates;
-			$smartyDir = Application::getInstance()->getTemplatesCachePath();
-			$pSmarty->cache_dir = $smartyDir;
-			$pSmarty->compile_dir = $smartyDir;
+            $pRenderer->setup(Core::$path_to_templates, Application::getInstance()->getTemplatesCachePath());
 		}
 
 		/***

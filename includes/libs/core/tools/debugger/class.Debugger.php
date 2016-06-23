@@ -5,10 +5,10 @@ namespace core\tools\debugger
 	use core\application\Singleton;
 	use core\application\Core;
 	use core\application\Configuration;
-	use core\utils\Logs;
+    use core\tools\template\RenderingContext;
+    use core\utils\Logs;
 	use core\application\Autoload;
 	use core\application\Header;
-	use \Smarty;
 	use \Exception;
 
 	/**
@@ -157,35 +157,16 @@ namespace core\tools\debugger
 		 */
 		static public function render($pDisplay = true, $pError = false)
 		{
-            $className = "Smarty";
-            if(!class_exists('Smarty'))
-            {
-                /**
-                 * 20150827 - Note from me to me : if Smarty is not defined, then we load it manually
-                 * And because of namespace handling in PHP, if an error occurs while defining a class,
-                 * the current definition namespace will be stuck and there will be no way to load a new
-                 * class in another one.
-                 * If you dont trust the young you look up to $classes.
-                 */
-                Autoload::getInstance()->load("Smarty");
-                $classes = get_declared_classes();
-                $className = end($classes);
-            }
-            /** @var Smarty $smarty */
-            $smarty = new $className();
-			$smarty->clear_all_assign();
-			$smartyDir = "includes/libs/core/tools/debugger/templates/_cache/";
-			$smarty->template_dir = "includes/libs/core/tools/debugger/templates";
-			$smarty->cache_dir = $smartyDir;
-			$smarty->compile_dir = $smartyDir;
+            $dir_to_theme = "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger";
+            $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
+            $ctx->assign('is_error', $pError);
+            $ctx->assign('dir_to_theme', $dir_to_theme);
+            $ctx->assign('dir_to_components', Core::$path_to_components);
+            $ctx->assign('server_url', Configuration::$server_url);
 			$globalVars = self::getGlobalVars();
 			foreach($globalVars as $n=>&$v)
-				$smarty->assign_by_ref($n, $v);
-			$smarty->assign("is_error", $pError);
-			$smarty->assign("dir_to_theme", "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger");
-			$smarty->assign("dir_to_components", Core::$path_to_components);
-			$smarty->assign("server_url", Configuration::$server_url);
-			return $smarty->fetch("template.debugger.tpl", null, null, $pDisplay);
+                $ctx->assign($n, $v);
+            return $ctx->render($pDisplay);
 		}
 
 

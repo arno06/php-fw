@@ -226,7 +226,7 @@ namespace core\utils
 			foreach($keys as &$k)
 			{
 				if(!isset($value[$k]))
-					return "";
+					return null;
 				$value = $value[$k];
 			}
 			return $value;

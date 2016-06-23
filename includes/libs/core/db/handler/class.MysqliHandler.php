@@ -24,6 +24,8 @@ namespace core\db\handler
 
 		protected function close()
 		{
+            if($this->mysqliInstance->connect_error)
+                return;
 			if($this->mysqliInstance->store_result())
 				$this->mysqliInstance->store_result()->free();
 			$this->mysqliInstance->close();
@@ -31,7 +33,7 @@ namespace core\db\handler
 
 		protected function connect()
 		{
-			$this->mysqliInstance = new mysqli($this->host, $this->user, $this->mdp, $this->bdd);
+            $this->mysqliInstance = new mysqli($this->host, $this->user, $this->mdp, $this->bdd);
 			if($this->mysqliInstance->connect_error)
 				trigger_error("Connexion au serveur de gestion de base de données impossible", E_USER_ERROR);
 		}

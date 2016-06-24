@@ -141,11 +141,17 @@ namespace core\application
             return "themes/".$this->name."/".$this->theme."/".$this->module->name;
         }
 
+        /**
+         * @return string
+         */
         public function getTemplatesCachePath()
         {
             return $this->getFilesPath()."/_cache/".$this->module->name."/".$this->theme;
         }
 
+        /**
+         * @return string
+         */
         public function getFilesPath()
         {
             return Autoload::$folder."/includes/applications/".$this->name;

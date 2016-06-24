@@ -972,7 +972,7 @@ namespace core\tools\form
 
 			if(!$noForm)
 				$output .= "</form>";
-			if($pReturn == true)
+			if($pReturn === true)
 				return $output;
 			echo $output;
             return true;
@@ -1398,7 +1398,7 @@ namespace core\tools\form
 					}
 					break;
 				case "select":
-					if(isset($pData["chosen"]) && $pData["chosen"] == true)
+					if(isset($pData["chosen"]) && $pData["chosen"] === true)
 					{
 						$no_result = Dictionary::term("global.forms.chosen.no_result_text");
 						$default_text =Dictionary::term("global.forms.chosen.default_text");

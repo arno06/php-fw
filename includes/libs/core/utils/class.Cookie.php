@@ -7,7 +7,7 @@ namespace core\utils
      * Class Cookie Permet une gestion simple des cookie
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package core\utils
      * @todo affiner la suppression d'un cookie
      */
@@ -25,16 +25,23 @@ namespace core\utils
         {
             $ids = explode(".", $pId);
             $t = "";
-            $string = "";
+            $cookies = &$_COOKIE;
             for($i = 0, $max = count($ids); $i<$max;$i++)
             {
-                $string .= "[".$ids[$i]."]";
+                $n = $ids[$i];
+                if($i == $max-1)
+                {
+                    $cookies[$n] = $pValue;
+                }
+                else{
+                    if(!isset($cookies[$n]) || !is_array($cookies[$n]))
+                        $cookies[$n] = array();
+                    $cookies = &$cookies[$n];
+                }
                 $t.= ($i>0?"[":"").$ids[$i].($i>0?"]":"");
             }
             if($pTime == "default")
                 $pTime = time() + 3600;
-
-            eval('$_COOKIE'.$string.'="'.$pValue.'";');
             setcookie($t, $pValue, $pTime, "/".(!empty(Configuration::$server_folder)?Configuration::$server_folder."/":""), $pDomain);
         }
 
@@ -46,15 +53,7 @@ namespace core\utils
          */
         static public function get($pId)
         {
-            $ids = explode(".", $pId);
-            $d = &$_COOKIE;
-            for($i = 0, $max = count($ids); $i<$max;$i++)
-            {
-                if(!isset($d[$ids[$i]]))
-                    return false;
-                $d = &$d[$ids[$i]];
-            }
-            return $d;
+            return Stack::get($pId, $_COOKIE);
         }
 
         /**
@@ -65,14 +64,11 @@ namespace core\utils
         static public function delete($pId)
         {
             $ids = explode(".", $pId);
-            $value = self::get($pId);
-            $string = "";
-            for($i = 0, $max = count($ids); $i<$max;$i++)
-                $string .= "[".$ids[$i]."]";
-            if($value===false)
-                return;
-            self::set($pId, $value, time()-3600);
-            eval('unset($_COOKIE'.$string.');');
+            self::set($pId, "", time()-3600);
+            if(count($ids) === 1)
+            {
+                unset($_COOKIE[$pId]);
+            }
         }
     }
 

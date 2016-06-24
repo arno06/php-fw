@@ -595,7 +595,7 @@
 			"host":"localhost",
 			"user":"root",
 			"name":"phpfw",
-			"handler":"MysqlHandler"
+			"handler":"core\\data\\handler\\MysqliHandler"
 		}
 	},
 	"application":

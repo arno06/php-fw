@@ -46,10 +46,10 @@ namespace core\tools
                 $item = $this->items[0];
             foreach($this->items as $i)
             {
-                if(isset($i['default']) && $i['default'] == true)
+                if(isset($i['default']) && $i['default'] === true)
                     $item = $i;
             }
-            if($item === null)
+            if(is_null($item))
             {
                 trigger_error("[Object Menu] No default item found", E_USER_WARNING);
                 return;

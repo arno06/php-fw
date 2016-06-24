@@ -4,8 +4,6 @@ namespace core\models
 
     use core\application\Application;
     use core\application\BaseModel;
-	use core\application\Configuration;
-    use core\application\Core;
     use core\system\File;
 	use core\db\Query;
 

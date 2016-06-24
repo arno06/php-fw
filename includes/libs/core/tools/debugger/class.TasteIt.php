@@ -4,9 +4,7 @@ namespace core\tools\debugger
 	use core\system\Image;
 	use core\db\Query;
 
-	/**
-	 * @TODO TBD
-	 */
+
 	class TasteIt
 	{
 
@@ -171,12 +169,6 @@ namespace core\tools\debugger
 					trace("i : ".$i);
 			}
 
-			trace("before sleep 10 secondes");
-
-			sleep(10);
-
-			trace("after sleep 10 secondes");
-
 			trace("derni&egrave;re action trace");
 
 			Query::select("*", "ma_table")
@@ -185,14 +177,6 @@ namespace core\tools\debugger
 				->limit(0, 1)
 				->groupBy("some_id")
 				->execute();
-		}
-
-		static public function SVNTransaction()
-		{
-			$svn = new SVNTransaction("anicolas", "test");
-			$svn->add("unfichier.jpg");
-			$svn->add("unautre_fichier.jpg");
-			$svn->commit("Test d'utilisation de la class SVNTransation");
 		}
 	}
 }

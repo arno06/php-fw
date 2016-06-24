@@ -457,11 +457,11 @@ namespace core\db
 
 			$keywords = explode(" ", $pValue);
 			$against = "";
-			for($i = 0 ; $i < sizeof($keywords) ; $i++)
+			for($i = 0, $max = count($keywords) ; $i < $max ; $i++)
 				if (!empty($keywords[$i]))
 				{
 					$against .= "+".$keywords[$i];
-					if ($i < sizeof($keywords)-1) $against .= " ";
+					if ($i < $max-1) $against .= " ";
 				}
 
 			if ($pValue{strlen($pValue)-1} != " ")
@@ -939,7 +939,7 @@ namespace core\db
 		public function execute($pHandler = "default")
 		{
 			$result = parent::execute($pHandler);
-			if (Configuration::$global_explainOnSelect == true)
+			if (Configuration::$global_explainOnSelect === true)
 				$this->explain($pHandler);
 			return $result;
 		}

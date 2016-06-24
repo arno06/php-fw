@@ -3,7 +3,6 @@ namespace app\main\controllers\back
 {
 
     use core\application\Application;
-    use core\application\Configuration;
     use core\application\DefaultController;
 	use core\application\InterfaceController;
 	use core\application\Go;

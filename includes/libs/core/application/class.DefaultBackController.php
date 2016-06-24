@@ -1,7 +1,6 @@
 <?php
 namespace core\application
 {
-	use core\application\authentification\AuthentificationHandler;
 	use core\application\event\Event;
 	use core\db\Query;
 	use core\tools\form\Form;

@@ -150,7 +150,7 @@ namespace core\application
 		 */
 		static public function setConfiguration($pConfigurationFile = null)
 		{
-			if($pConfigurationFile == null)
+			if(is_null($pConfigurationFile))
 				$pConfigurationFile = Autoload::$folder.self::$config_file;
 			$configurationData = array();
 			try
@@ -411,7 +411,7 @@ namespace core\application
 		 * @param Template $pRenderer				Instance de
 		 * @return void
 		 */
-		static public function setupRenderer(&$pRenderer)
+		static public function setupRenderer(Template &$pRenderer)
 		{
             $pRenderer->setup(Core::$path_to_templates, Application::getInstance()->getTemplatesCachePath());
 		}
@@ -466,11 +466,11 @@ namespace core\application
 		 * @param string $pTemplate
 		 * @return void
 		 */
-		static public function execute($pController = null, $pAction = null, $pTemplate = "")
+		static public function execute(DefaultController $pController = null, $pAction = null, $pTemplate = "")
 		{
 			if($pController != "statique")
 				$pController->setTemplate(self::$controller, self::$action, $pTemplate);
-			if($pAction!=null)
+			if(!is_null($pAction))
 				$pController->$pAction();
 			if(!Core::$request_async)
 			{

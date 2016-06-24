@@ -1,27 +1,73 @@
 <?php
 namespace core\db\handler
 {
-	use core\tools\debugger\Debugger;
+
+    use core\db\InterfaceDatabaseHandler;
+    use core\tools\debugger\Debugger;
 	use \mysqli_result;
 	use \mysqli;
 
 	/**
 	 * Couche d'abstraction &agrave; la base de données (type mysql improved)
-	 * Version spécifique au framework cbi
-	 *  - Définition des informations relatives &agrave; la base de données en fonction de la class Configuration
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .2
+	 * @version 1.0
 	 * @package core\db\handler
 	 */
-	class MysqliHandler extends MysqlHandler
+	class MysqliHandler implements InterfaceDatabaseHandler
 	{
+        /**
+         * Chemin d'acc&egrave;s &agrave; la base de données
+         * @var String
+         */
+        protected $host;
+
+
+        /**
+         * Nom d'utilisateur
+         * @var String
+         */
+        protected $user;
+
+
+        /**
+         * Mot de passe d'acc&egrave;s &agrave; la base de données
+         * @var String
+         */
+        protected $mdp;
+
+        /**
+         * Nom de la base de données
+         * @var String
+         */
+        protected $bdd;
+
 		/**
 		 * Instance mysqli
 		 * @var mysqli
 		 */
 		private $mysqliInstance;
 
+
+        /**
+         * @param $pHost
+         * @param $pUser
+         * @param $pPassword
+         * @param $pName
+         */
+        public function __construct($pHost, $pUser, $pPassword, $pName)
+        {
+            $this->host = $pHost;
+            $this->user = $pUser;
+            $this->mdp = $pPassword;
+            $this->bdd = $pName;
+            $this->connect();
+        }
+
+
+        /**
+         *
+         */
 		protected function close()
 		{
             if($this->mysqliInstance->connect_error)
@@ -31,12 +77,17 @@ namespace core\db\handler
 			$this->mysqliInstance->close();
 		}
 
+
+        /**
+         *
+         */
 		protected function connect()
 		{
             $this->mysqliInstance = new mysqli($this->host, $this->user, $this->mdp, $this->bdd);
 			if($this->mysqliInstance->connect_error)
 				trigger_error("Connexion au serveur de gestion de base de données impossible", E_USER_ERROR);
 		}
+
 
 		/**
 		 * Méthode permettant de récupérer les donnée d'une requêtes SQL
@@ -58,6 +109,7 @@ namespace core\db\handler
 			return $return;
 		}
 
+
 		/**
 		 * @return string
 		 */
@@ -65,6 +117,7 @@ namespace core\db\handler
 		{
 			return $this->mysqliInstance->error;
 		}
+
 
 		/**
 		 * @return int
@@ -84,6 +137,7 @@ namespace core\db\handler
 			return $this->mysqliInstance->insert_id;
 		}
 
+
 		/**
 		 * Méthode permettant de centraliser les commandes &agrave; effectuer avant l'excécution d'une requête
 		 * @param String $pQuery				Requête &agrave; excécuter
@@ -94,6 +148,7 @@ namespace core\db\handler
 			Debugger::query($pQuery, "db", $this->bdd);
 			return $this->mysqliInstance->query($pQuery);
 		}
+
 
 		/**
 		 * ToString()

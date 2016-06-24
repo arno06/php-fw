@@ -34,8 +34,6 @@ namespace core\application\routing
 		 */
 		static public function parse($pUrl)
 		{
-			$extract = null;
-
             $static = preg_match('/^statique\//', $pUrl, $matches);
 
 			if(!$static && Application::getInstance()->getModule()->useRoutingFile)

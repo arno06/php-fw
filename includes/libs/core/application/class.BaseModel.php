@@ -210,7 +210,7 @@ namespace core\application
 		 */
 		public function one($pCond = null, $pFields = "*")
 		{
-			if($pCond==null)
+			if(is_null($pCond))
 				$pCond = Query::condition();
 			$res = $this->all($pCond->limit(0, 1), $pFields);
 			if(!isset($res[0]))

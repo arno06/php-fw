@@ -488,12 +488,12 @@ namespace core\tools\form
 					}
 				}
 
-				if($data["require"]==false&&empty($this->post[$name]))
+				if($data["require"]===false&&empty($this->post[$name]))
 				{
 					$this->applyModifiers($data["outputModifiers"], $name);
 					continue;
 				}
-				if($data["require"]==true&&empty($data["regExp"]))
+				if($data["require"]===true&&empty($data["regExp"]))
 				{
 					trigger_error("Les champs obligatoires doivent nécessairement renseigner une expression régulière &agrave; respecter !<br/>Formulaire <b>".$this->name."</b> champ <b>".$name."</b>", E_USER_ERROR);
 				}
@@ -507,7 +507,7 @@ namespace core\tools\form
 					&& isset($data["attributes"]["multiple"])
 					&& $data["attributes"]["multiple"]=="multiple")
 				{
-					if($data["require"] == false)
+					if($data["require"] === false)
 						array_shift($this->post[$name]);
 				}
 				$valid = false;
@@ -672,7 +672,7 @@ namespace core\tools\form
 				$name = $upload["name"];
 				/** @var Upload $up */
 				$up = $upload["instance"];
-                if($pId == null)
+                if(is_null($pId))
 				    $pId = $up->id_upload;
 				if($this->data[$name]["fileName"])
 				{
@@ -805,7 +805,7 @@ namespace core\tools\form
 							else
 								$data["options"] = array_merge($data["options"], $options);
 						}
-						if(isset($data["chosen"]) && $data["chosen"]==true)
+						if(isset($data["chosen"]) && $data["chosen"]===true)
 						{
 							Autoload::addScript("chosen/chosen.min.js");
                             /** @todo componentify this */
@@ -831,80 +831,67 @@ namespace core\tools\form
 			}
 		}
 
-		/**
-		 * @return void
-		 */
+        /**
+         * @param array|null $pParams
+         */
 		public function getValue(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
-			if($pParams != null)
+			if(!is_null($pParams))
 				extract($pParams, EXTR_REFS);
 			if($this->data[$name])
 			{
 				if(!$toVar)
 					echo $this->data[$name]["attributes"]["value"];
-				else
-				{
-//					$pSmarty->assign($toVar, $this->data[$name]["attributes"]["value"]);
-				}
 			}
 		}
 
-		/**
-		 */
+        /**
+         * @param array|null $pParams
+         */
 		public function isChecked(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
-			if($pParams != null)
+			if(!is_null($pParams))
 				extract($pParams, EXTR_REFS);
 			if($this->data[$name])
 			{
 				if(!$toVar)
 					echo isset($this->data[$name]["attributes"]["checked"]) ? "checked" : "";
-				else
-				{
-//					$pSmarty->assign($toVar, isset($this->data[$name]["attributes"]["checked"]));
-				}
 			}
 		}
 
-		/**
-		 */
+        /**
+         * @param array|null $pParams
+         */
 		public function getOptions(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
-			if($pParams != null)
+			if(!is_null($pParams))
 				extract($pParams, EXTR_REFS);
 			if($this->data[$name])
 			{
 				if(!$toVar)
 					echo $this->data[$name]["options"];
-				else
-				{
-//					$pSmarty->assign($toVar, $this->data[$name]["options"]);
-				}
 			}
 		}
 
-		/**
-		 */
+        /**
+         * @param array|null $pParams
+         */
 		public function getLabel(array $pParams = null)
 		{
 			$name = "";
 			$toVar = false;
-			if($pParams != null)
+			if(!is_null($pParams))
 				extract($pParams, EXTR_REFS);
 			if($this->data[$name])
 			{
 				if(!$toVar)
 					echo $this->data[$name]["label"];
-				else
-				{
-//					$pSmarty->assign($toVar, $this->data[$name]["label"]);
-				}
 			}
 		}
 
@@ -922,7 +909,7 @@ namespace core\tools\form
             $controller = Core::$controller;
             $action = Core::$action;
 			$helper = "core\\tools\\form\\FormHelpers";
-			if($pParams != null)
+			if(!is_null($pParams))
 				extract($pParams, EXTR_REFS);
             else
                 $pParams = array();
@@ -959,7 +946,7 @@ namespace core\tools\form
 			foreach($this->data as $n=>$d)
 			{
 				$require = "";
-				if($d["require"]==true)
+				if($d["require"]===true)
 					$require = "*";
 				if(!isset($d["tag"]))
 					continue;
@@ -988,6 +975,7 @@ namespace core\tools\form
 			if($pReturn == true)
 				return $output;
 			echo $output;
+            return true;
 		}
 
 

@@ -84,13 +84,15 @@ namespace core\tools\debugger
 		 */
 		static private function addToConsole($pClass, $pMessage, $pFile, $pLine)
 		{
+            /** @var Debugger $i */
+            $i = self::getInstance();
 			$time = explode(".", microtime(true));
 			if (!isset($time[1])) $time[1] = "000";
 			$decalage = (60 * 60) * ((date("I") == 0) ?1:2);
-			self::getInstance()->count[$pClass]++;
+			$i->count[$pClass]++;
 			$pClass .= " ".self::$state;
 			self::$state = self::$state == "odd"?"even":"odd";
-			self::getInstance()->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
+            $i->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
 		}
 
 		/**
@@ -178,6 +180,8 @@ namespace core\tools\debugger
 		{
 			global $timeInit;
 			global $memInit;
+
+            /** @var Debugger $i */
 			$i = self::getInstance();
 			$i->setTimeToGenerate($timeInit, microtime(true));
 			$i->setMemoryUsage($memInit, memory_get_usage(MEMORY_REAL_USAGE));
@@ -208,6 +212,7 @@ namespace core\tools\debugger
 		 */
 		static public function setTimeToGenerate($pStartTime, $pEndTime)
 		{
+            /** @var Debugger $i */
 			$i = self::getInstance();
 			if(!$pEndTime)
 				$pEndTime = microtime(true);
@@ -221,6 +226,7 @@ namespace core\tools\debugger
 		 */
 		static public function setMemoryUsage($pStartMem, $pEndMem)
 		{
+            /** @var Debugger $i */
 			$i = self::getInstance();
 			$mem = $pEndMem - $pStartMem;
 			$units = array("o", "ko", "Mo", "Go");

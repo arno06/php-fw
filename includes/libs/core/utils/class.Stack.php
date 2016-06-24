@@ -16,7 +16,7 @@ namespace core\utils
 
 		public function __construct($pStack = null)
 		{
-			if($pStack!=null)
+			if(!is_null($pStack))
 				$this->source = $pStack;
 			else
 				$this->source = array();
@@ -29,7 +29,7 @@ namespace core\utils
 			$index = -1;
 			foreach($this->source as $k=>$v)
 			{
-				if($pStrict==true && $v === $pNeedle)
+				if($pStrict===true && $v === $pNeedle)
 					$index = $k;
 				else if ($v == $pNeedle)
 					$index = $k;
@@ -99,7 +99,7 @@ namespace core\utils
 		 */
 		public function offsetSet($offset, $value)
 		{
-			if($offset==null)
+			if(is_null($offset))
 				$this->source[] = $value;
 			else
 				$this->source[$offset] = $value;

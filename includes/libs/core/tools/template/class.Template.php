@@ -275,7 +275,7 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                     case "include":
                         $default = array();
                         $this->parseParameters($params, $default);
-                        return "<?php \$this->include_tpl('".$default["file"]."'); ?>";
+                        return "<?php \$this->includeTpl('".$default["file"]."'); ?>";
                         break;
                     default:
 

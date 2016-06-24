@@ -56,7 +56,7 @@ namespace core\tools\template
         /**
          * @param string $pName
          */
-        public function include_tpl($pName)
+        public function includeTpl($pName)
         {
             $tpl = new Template($this->data);
             Core::setupRenderer($tpl);

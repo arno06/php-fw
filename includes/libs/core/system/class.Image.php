@@ -2,6 +2,8 @@
 namespace core\system
 {
 
+    use core\application\Core;
+
     /**
      * Class Image
      * Permet de gérer les traitements en rapport avec les fichiers de type Image
@@ -112,7 +114,7 @@ namespace core\system
         {
             header('Content-Type: image/'.$this->type);
             $this->draw();
-            exit();
+            Core::endApplication();
         }
 
         /**

@@ -1,7 +1,9 @@
 <?php
 namespace core\tools\debugger
 {
-	use core\system\Image;
+
+    use core\application\Core;
+    use core\system\Image;
 	use core\db\Query;
 
 
@@ -64,7 +66,7 @@ namespace core\tools\debugger
 			$img->endFill();
 
 			$img->render();
-			exit();
+            Core::endApplication();
 		}
 
 		static public function graph()
@@ -119,7 +121,7 @@ namespace core\tools\debugger
 			$img->endFill();
 
 			$img->render();
-			exit();
+            Core::endApplication();
 		}
 
 		static public function sample()

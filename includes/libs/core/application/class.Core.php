@@ -477,14 +477,14 @@ namespace core\application
 				Header::content_type("text/html");
 				$pController->render();
 				if(Core::debug())
-					Debugger::render();
+					Debugger::getInstance()->render();
 			}
 			else
 			{
 				$return = $pController->getGlobalVars();
                 if(Core::debug())
                 {
-                    $return = array_merge($return, Debugger::getGlobalVars());
+                    $return = array_merge($return, Debugger::getInstance()->getGlobalVars());
                 }
 				if((isset($_POST)&&isset($_POST["render"])&&$_POST["render"]!=="false"))
 					$return["html"] = $pController->render(false);

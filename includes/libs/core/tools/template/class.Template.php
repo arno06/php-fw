@@ -8,7 +8,7 @@ namespace core\tools\template
      * Class Template
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 0.1
+     * @version 0.3
      * @package core\tools\template
      */
     class Template
@@ -57,6 +57,16 @@ namespace core\tools\template
          * @var RenderingContext
          */
         private $context;
+
+        /**
+         * @var number
+         */
+        private $step;
+
+        /**
+         * @var array
+         */
+        private $opened;
 
 
         /**
@@ -217,102 +227,11 @@ namespace core\tools\template
                 return "<?php echo \$".$pMatches[1]."; ?>";
             }, $content);
 
-            $step = 0;
-            $opened = [];
+            $this->step = 0;
+            $this->opened = [];
             $content = preg_replace_callback($re_block, function($pMatches){
-                global $step;
-                global $opened;
-                global $re_object;
-
-                $opener = !empty(trim($pMatches[2]));
-                $name = $opener?$pMatches[2]:$pMatches[3];
-                $params = trim($pMatches[4]);
-
-                switch($name)
-                {
-                    case "if":
-                        if($opener)
-                        {
-                            return "<?php if(".$params."): ?>";
-                        }
-                        else
-                        {
-                            return "<?php endif; ?>";
-                        }
-                        break;
-                    case "foreach":
-                        if($opener)
-                        {
-                            $step++;
-                            $opened[$step] = true;
-
-                            $default = ["key"=>'key', "item"=>'value'];
-
-                            $this->parseParameters($params, $default);
-
-                            $array_var = 'data_'.$step;
-                            $var = '$'.$array_var.'='.$default["from"].';';
-
-                            return '<?php '.$var.' if($'.$array_var.'&&is_array($'.$array_var.')&&!empty($'.$array_var.')):
-foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->assign("'.$default['item'].'", $'.$default['item'].'); $this->assign("'.$default['key'].'", $'.$default['key'].'); ?>';
-                        }
-                        else
-                        {
-                            $array_var = 'data_'.$step;
-                            $extra = isset($opened[$step])?"endforeach; unset(\$".$array_var."); ":"";
-                            unset($opened[$step--]);
-                            return "<?php ".$extra."endif; ?>";
-                        }
-                        break;
-                    case "foreachelse":
-                        unset($opened[$step]);
-                        $array_var = 'data_'.$step;
-                        return "<?php endforeach; unset(\$".$array_var."); else: ?>";
-                        break;
-                    case "else":
-                        return "<?php else: ?>";
-                        break;
-                    case "include":
-                        $default = array();
-                        $this->parseParameters($params, $default);
-                        return "<?php \$this->includeTpl('".$default["file"]."'); ?>";
-                        break;
-                    default:
-
-                        $re_object = "/\\".TemplateDictionary::$TAGS[0]."([a-z0-9\\.\\_]+)(\\-\\>[a-z\\_]+)*([^\\".TemplateDictionary::$TAGS[1]."]+)*\\".TemplateDictionary::$TAGS[1]."/i";
-                        preg_match($re_object, $pMatches[0], $matches);
-
-
-                        if(isset($matches)&&!empty($matches)&&!empty($matches[1])&&!empty($matches[2]))
-                        {
-                            $p = "";
-                            if(isset($matches[3])&&!empty($matches[3]))
-                            {
-                                $ptr = array();
-                                $this->parseParameters($matches[3], $ptr);
-                                foreach($ptr as $n=>$v)
-                                {
-                                    if(empty($n)||empty($v))
-                                        continue;
-                                    if(!empty($p))
-                                        $p .= ', ';
-                                    $p .= '"'.$n.'"=>'.$v;
-                                }
-                                $p = "array(".$p.")";
-                            }
-                            return "<?php ".$this->extractVar($matches[1]).$matches[2]."(".$p."); ?>";
-                        }
-                        else
-                        {
-
-                        }
-
-                        return $pMatches[0];
-                        break;
-                }
+                return $this->parseBlock($pMatches);
             }, $content);
-            unset($step);
-            unset($opened);
 
             $endTime = microtime(true);
 
@@ -320,6 +239,97 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
 
             $this->storeInCache($content);
         }
+
+        private function parseBlock($pMatches)
+        {
+            $opener = !empty(trim($pMatches[2]));
+            $name = $opener?$pMatches[2]:$pMatches[3];
+            $params = trim($pMatches[4]);
+
+            switch($name)
+            {
+                case "if":
+                    if($opener)
+                    {
+                        return "<?php if(".$params."): ?>";
+                    }
+                    else
+                    {
+                        return "<?php endif; ?>";
+                    }
+                    break;
+                case "foreach":
+                    if($opener)
+                    {
+                        $this->step++;
+                        $this->opened[$this->step] = true;
+
+                        $default = ["key"=>'key', "item"=>'value'];
+
+                        $this->parseParameters($params, $default);
+
+                        $array_var = 'data_'.$this->step;
+                        $var = '$'.$array_var.'='.$default["from"].';';
+
+                        return '<?php '.$var.' if($'.$array_var.'&&is_array($'.$array_var.')&&!empty($'.$array_var.')):
+foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->assign("'.$default['item'].'", $'.$default['item'].'); $this->assign("'.$default['key'].'", $'.$default['key'].'); ?>';
+                    }
+                    else
+                    {
+                        $array_var = 'data_'.$this->step;
+                        $extra = isset($this->opened[$this->step])?"endforeach; unset(\$".$array_var."); ":"";
+                        unset($this->opened[$this->step--]);
+                        return "<?php ".$extra."endif; ?>";
+                    }
+                    break;
+                case "foreachelse":
+                    unset($this->opened[$this->step]);
+                    $array_var = 'data_'.$this->step;
+                    return "<?php endforeach; unset(\$".$array_var."); else: ?>";
+                    break;
+                case "else":
+                    return "<?php else: ?>";
+                    break;
+                case "include":
+                    $default = array();
+                    $this->parseParameters($params, $default);
+                    return "<?php \$this->includeTpl('".$default["file"]."'); ?>";
+                    break;
+                default:
+
+                    $re_object = "/\\".TemplateDictionary::$TAGS[0]."([a-z0-9\\.\\_]+)(\\-\\>[a-z\\_]+)*([^\\".TemplateDictionary::$TAGS[1]."]+)*\\".TemplateDictionary::$TAGS[1]."/i";
+                    preg_match($re_object, $pMatches[0], $matches);
+
+
+                    if(isset($matches)&&!empty($matches)&&!empty($matches[1])&&!empty($matches[2]))
+                    {
+                        $p = "";
+                        if(isset($matches[3])&&!empty($matches[3]))
+                        {
+                            $ptr = array();
+                            $this->parseParameters($matches[3], $ptr);
+                            foreach($ptr as $n=>$v)
+                            {
+                                if(empty($n)||empty($v))
+                                    continue;
+                                if(!empty($p))
+                                    $p .= ', ';
+                                $p .= '"'.$n.'"=>'.$v;
+                            }
+                            $p = "array(".$p.")";
+                        }
+                        return "<?php ".$this->extractVar($matches[1]).$matches[2]."(".$p."); ?>";
+                    }
+                    else
+                    {
+
+                    }
+
+                    return $pMatches[0];
+                    break;
+            }
+        }
+
 
 
         /**

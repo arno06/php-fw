@@ -157,7 +157,7 @@ namespace core\tools\debugger
 		 * @param bool $pError
 		 * @return string
 		 */
-		static public function render($pDisplay = true, $pError = false)
+		public function render($pDisplay = true, $pError = false)
 		{
             $dir_to_theme = "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger";
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
@@ -165,7 +165,7 @@ namespace core\tools\debugger
             $ctx->assign('dir_to_theme', $dir_to_theme);
             $ctx->assign('dir_to_components', Core::$path_to_components);
             $ctx->assign('server_url', Configuration::$server_url);
-			$globalVars = self::getGlobalVars();
+			$globalVars = $this->getGlobalVars();
 			foreach($globalVars as $n=>&$v)
                 $ctx->assign($n, $v);
             return $ctx->render($pDisplay);
@@ -173,32 +173,26 @@ namespace core\tools\debugger
 
 
 		/**
-		 * @static
 		 * @return array
 		 */
-		static public function getGlobalVars()
+		public function getGlobalVars()
 		{
-			global $timeInit;
-			global $memInit;
-
-            /** @var Debugger $i */
-			$i = self::getInstance();
-			$i->setTimeToGenerate($timeInit, microtime(true));
-			$i->setMemoryUsage($memInit, memory_get_usage(MEMORY_REAL_USAGE));
-			$i->count["get"] = count($_GET);
-			$i->count["post"] = count($_POST);
-			$i->count["cookie"] = count($_COOKIE);
-			$i->count["session"] = count($_SESSION);
+			$this->setTimeToGenerate(INIT_TIME, microtime(true));
+			$this->setMemoryUsage(INIT_MEMORY, memory_get_usage(MEMORY_REAL_USAGE));
+			$this->count["get"] = count($_GET);
+			$this->count["post"] = count($_POST);
+			$this->count["cookie"] = count($_COOKIE);
+			$this->count["session"] = count($_SESSION);
 			return array(
-				"console"=>$i->consoles,
-				"timeToGenerate"=>(round($i->timeToGenerate,3))." sec",
-				"memUsage"=>$i->memUsage,
+				"console"=>$this->consoles,
+				"timeToGenerate"=>(round($this->timeToGenerate,3))." sec",
+				"memUsage"=>$this->memUsage,
 				"vars"=>array("get"=>print_r($_GET, true),
 					"post"=>print_r($_POST, true),
 					"cookie"=>print_r($_COOKIE, true),
 					"session"=>print_r($_SESSION, true)
 				),
-				"count"=>$i->count,
+				"count"=>$this->count,
 				"open"=>self::$open
 			);
 		}
@@ -210,31 +204,26 @@ namespace core\tools\debugger
 		 * @param String $pEndTime          Microtime de fin
 		 * @return void
 		 */
-		static public function setTimeToGenerate($pStartTime, $pEndTime)
+		private function setTimeToGenerate($pStartTime, $pEndTime)
 		{
-            /** @var Debugger $i */
-			$i = self::getInstance();
 			if(!$pEndTime)
 				$pEndTime = microtime(true);
-			$i->timeToGenerate = ($pEndTime - $pStartTime);
+			$this->timeToGenerate = ($pEndTime - $pStartTime);
 		}
 
 		/**
-		 * @static
 		 * @param $pStartMem
 		 * @param $pEndMem
 		 */
-		static public function setMemoryUsage($pStartMem, $pEndMem)
+		private function setMemoryUsage($pStartMem, $pEndMem)
 		{
-            /** @var Debugger $i */
-			$i = self::getInstance();
 			$mem = $pEndMem - $pStartMem;
 			$units = array("o", "ko", "Mo", "Go");
 			$k = 0;
 			while($units[$k++] && $mem>1024)
 				$mem /= 1024;
 			$mem = round($mem*100)/100;
-			$i->memUsage = $mem." ".$units[--$k];
+			$this->memUsage = $mem." ".$units[--$k];
 		}
 
 		/**
@@ -288,7 +277,7 @@ namespace core\tools\debugger
 				}
 				Header::content_type("text/html", Configuration::$global_encoding);
 				self::$open = true;
-				self::render(true, true);
+				self::getInstance()->render(true, true);
                 Core::endApplication();
 			}
 		}

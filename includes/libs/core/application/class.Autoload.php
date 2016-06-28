@@ -141,16 +141,18 @@ namespace core\application
 		 */
 		static public function addScript($pScript)
 		{
+            /** @var Autoload $instance */
+            $instance = self::getInstance();
 			if(preg_match('/\.js$/', $pScript))
 			{
 				$script = (strpos($pScript, 'http') === 0) ? $pScript : Core::$path_to_components . '/' . $pScript;
-				if(!in_array($script, self::getInstance()->scripts, true))
-					self::getInstance()->scripts[] = $script;
+				if(!in_array($script, $instance->scripts, true))
+                    $instance->scripts[] = $script;
 			}
 			else
 			{
-				if(!in_array($pScript, self::getInstance()->scriptDependencies, true))
-					self::getInstance()->scriptDependencies[] = $pScript;
+				if(!in_array($pScript, $instance->scriptDependencies, true))
+                    $instance->scriptDependencies[] = $pScript;
 			}
 		}
 
@@ -162,16 +164,18 @@ namespace core\application
 		 */
 		static public function addStyle($pStyleSheet)
 		{
+            /** @var Autoload $instance */
+            $instance = self::getInstance();
 			if(preg_match('/\.css$/', $pStyleSheet))
 			{
 				$pStyleSheet = (strpos($pStyleSheet, 'http') === 0) ? $pStyleSheet : Core::$path_to_components . '/' . $pStyleSheet;
-				if(!in_array($pStyleSheet, self::getInstance()->styles, true))
-					self::getInstance()->styles[] = $pStyleSheet;
+				if(!in_array($pStyleSheet, $instance->styles, true))
+                    $instance->styles[] = $pStyleSheet;
 			}
 			else
 			{
-				if(!in_array($pStyleSheet, self::getInstance()->styleDependencies, true))
-					self::getInstance()->styleDependencies[] = $pStyleSheet;
+				if(!in_array($pStyleSheet, $instance->styleDependencies, true))
+                    $instance->styleDependencies[] = $pStyleSheet;
 			}
 		}
 
@@ -182,9 +186,11 @@ namespace core\application
 		 */
 		static public function scripts()
 		{
-			if(!empty(self::getInstance()->scriptDependencies))
-				self::getInstance()->scripts[] = 'statique/dependencies/?need='.implode(',', self::getInstance()->scriptDependencies);
-			return self::getInstance()->scripts;
+            /** @var Autoload $instance */
+            $instance = self::getInstance();
+			if(!empty($instance->scriptDependencies))
+                $instance->scripts[] = 'statique/dependencies/?need='.implode(',', self::getInstance()->scriptDependencies);
+			return $instance->scripts;
 		}
 
 
@@ -194,9 +200,11 @@ namespace core\application
 		 */
 		static public function styles()
 		{
-			if(!empty(self::getInstance()->styleDependencies))
-				self::getInstance()->styles[] = 'statique/dependencies/?type=css&need='.implode(',', self::getInstance()->styleDependencies);
-			return self::getInstance()->styles;
+            /** @var Autoload $instance */
+            $instance = self::getInstance();
+			if(!empty($instance->styleDependencies))
+                $instance->styles[] = 'statique/dependencies/?type=css&need='.implode(',', $instance->styleDependencies);
+			return $instance->styles;
 		}
 
 	}

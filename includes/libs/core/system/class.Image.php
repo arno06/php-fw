@@ -52,6 +52,7 @@ namespace core\system
          */
         public $type;
 
+
         /**
          * constructor
          * @param int  $pWidth
@@ -61,6 +62,7 @@ namespace core\system
          */
         public function __construct($pWidth, $pHeight, $pType = self::JPG, $pOverSampling = 1)
         {
+            parent::__construct();
             if($pOverSampling<1)
                 $pOverSampling = 1;
             $this->width = $pWidth;
@@ -75,37 +77,38 @@ namespace core\system
          */
         private function draw()
         {
-            $ressource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
+            $resource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
             if($this->type == self::PNG)
-                $this->preparePNG($ressource, $this->width*$this->oversampling, $this->height*$this->oversampling);
+                $this->preparePNG($resource, $this->width*$this->oversampling, $this->height*$this->oversampling);
 
-            $this->drawCommands($ressource);
+            $this->drawCommands($resource);
 
             if($this->oversampling>1)
             {
                 $overSampled = imagecreatetruecolor($this->width, $this->height);
                 if($this->type == self::PNG)
                     self::preparePNG($overSampled, $this->width, $this->height);
-                imagecopyresampled($overSampled,$ressource,0,0,0,0,$this->width, $this->height,$this->width*$this->oversampling, $this->height*$this->oversampling);
-                imagedestroy($ressource);
-                $ressource = &$overSampled;
+                imagecopyresampled($overSampled,$resource,0,0,0,0,$this->width, $this->height,$this->width*$this->oversampling, $this->height*$this->oversampling);
+                imagedestroy($resource);
+                $resource = &$overSampled;
             }
 
             switch($this->type)
             {
                 case self::PNG:
-                    imagepng($ressource);
+                    imagepng($resource);
                     break;
                 case self::JPG:
                 case self::JPEG:
-                    imagejpeg($ressource);
+                    imagejpeg($resource);
                     break;
                 case self::GIF:
-                    imagegif($ressource);
+                    imagegif($resource);
                     break;
             }
-            imagedestroy($ressource);
+            imagedestroy($resource);
         }
+
 
         /**
          * @return void
@@ -116,6 +119,7 @@ namespace core\system
             $this->draw();
             Core::endApplication();
         }
+
 
         /**
          * @param $pFile
@@ -135,23 +139,27 @@ namespace core\system
 
         /**
          * @static
-         * @param resource $pRessource
+         * @param resource $pResource
          * @param int $pWidth
          * @param int $pHeight
          * @return void
          */
-        static private function preparePNG(&$pRessource, $pWidth, $pHeight)
+        static private function preparePNG(&$pResource, $pWidth, $pHeight)
         {
-            imagesavealpha($pRessource, true);
-            imagealphablending($pRessource, false);
-            $transparent = imagecolorallocatealpha($pRessource, 0, 0, 0, 127);
-            imagefilledrectangle($pRessource, 0, 0, ($pWidth)-1, ($pHeight)-1, $transparent);
-            imagealphablending($pRessource, true);
+            imagesavealpha($pResource, true);
+            imagealphablending($pResource, false);
+            $transparent = imagecolorallocatealpha($pResource, 0, 0, 0, 127);
+            imagefilledrectangle($pResource, 0, 0, ($pWidth)-1, ($pHeight)-1, $transparent);
+            imagealphablending($pResource, true);
         }
 
 
-
-
+        /**
+         * @param $pFinalImage
+         * @param $pMaxWidth
+         * @param $pMaxHeight
+         * @return bool
+         */
         public function createCache($pFinalImage, $pMaxWidth, $pMaxHeight)
         {
             $ressource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
@@ -195,6 +203,7 @@ namespace core\system
             chmod($pFinalImage, 0666);
             return true;
         }
+
 
         /**
          * Méthode static de creation d'une copie d'une image avec redimensionnement
@@ -568,10 +577,10 @@ namespace core\system
 
 
         /**
-         * @param resource  $pRessource
+         * @param resource  $pResource
          * @return void
          */
-        protected function drawCommands($pRessource)
+        protected function drawCommands($pResource)
         {
             $tmp = array("x"=>"0", "y"=>"0");
             $path = array();
@@ -594,47 +603,46 @@ namespace core\system
                         $type = Image::isImage($cmd["src"]);
                         if(empty($type))
                             trigger_error("L'image à copier ne correspond pas à un type compatible", E_USER_ERROR);
-                        $ress = null;
+                        $res = null;
                         switch($type)
                         {
                             case Image::PNG:
-                                $ress = imagecreatefrompng($cmd["src"]);
+                                $res = imagecreatefrompng($cmd["src"]);
                                 break;
                             case Image::JPEG:
                             case Image::JPG:
-                                $ress = imagecreatefromjpeg($cmd["src"]);
+                                $res = imagecreatefromjpeg($cmd["src"]);
                                 break;
                             case Image::GIF:
-                                $ress = imagecreatefromgif($cmd["src"]);
+                                $res = imagecreatefromgif($cmd["src"]);
                                 break;
                         }
-                        imagecopyresampled($pRessource, $ress, $cmd["x"], $cmd["y"], 0, 0, $cmd["width"], $cmd["height"], $cmd["srcWidth"], $cmd["srcHeight"]);
+                        imagecopyresampled($pResource, $res, $cmd["x"], $cmd["y"], 0, 0, $cmd["width"], $cmd["height"], $cmd["srcWidth"], $cmd["srcHeight"]);
                         break;
                     case self::COMMAND_CREATEIMAGE:
                         $type = Image::isImage($cmd["src"]);
                         if(empty($type))
                             trigger_error("L'image à copier ne correspond pas à un type compatible", E_USER_ERROR);
-                        $ress = null;
+                        $res = null;
                         switch($type)
                         {
                             case Image::PNG:
-                                $ress = imagecreatefrompng($cmd["src"]);
+                                $res = imagecreatefrompng($cmd["src"]);
                                 break;
                             case Image::JPEG:
                             case Image::JPG:
-                                $ress = imagecreatefromjpeg($cmd["src"]);
+                                $res = imagecreatefromjpeg($cmd["src"]);
                                 break;
                             case Image::GIF:
-                                $ress = imagecreatefromgif($cmd["src"]);
+                                $res = imagecreatefromgif($cmd["src"]);
                                 break;
                         }
-
 
                         for($x = 0 ; $x < 50 ; $x++)
                         {
                             for($y = 0 ; $y < 50 ; $y++)
                             {
-                                $color = imagecolorat($ress, $x, $y);
+                                $color = imagecolorat($res, $x, $y);
                                 $r = ($color >> 16) & 0xFF;
                                 $g = ($color >> 8) & 0xFF;
                                 $b = $color & 0xFF;
@@ -646,24 +654,23 @@ namespace core\system
                             }
                         }
 
-
-                        $rgb = imagecolorat($ress, $cmd["width"]/2, 0);
+                        $rgb = imagecolorat($res, $cmd["width"]/2, 0);
                         $r = ($rgb >> 16) & 0xFF;
                         $g = ($rgb >> 8) & 0xFF;
                         $b = $rgb & 0xFF;
 
-                        $background = imagecolorallocate($pRessource, $r, $g, $b);
-                        imagefill($pRessource, 0, 0, $background);
-                        imagecopy($pRessource, $ress, $cmd["padding"][3], $cmd["padding"][0], 0, 0, $cmd["width"], $cmd["height"]);
+                        $background = imagecolorallocate($pResource, $r, $g, $b);
+                        imagefill($pResource, 0, 0, $background);
+                        imagecopy($pResource, $res, $cmd["padding"][3], $cmd["padding"][0], 0, 0, $cmd["width"], $cmd["height"]);
 
                         break;
                     case self::COMMAND_SETLINESTYLE:
-                        $line_color = imagecolorallocate($pRessource, $cmd["r"], $cmd["g"], $cmd["b"]);
-                        imagesetstyle($pRessource, array($line_color));
-                        imagesetthickness ($pRessource, $cmd["size"]);
+                        $line_color = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
+                        imagesetstyle($pResource, array($line_color));
+                        imagesetthickness ($pResource, $cmd["size"]);
                         break;
                     case self::COMMAND_BEGINFILL:
-                        $fill_color = imagecolorallocate($pRessource, $cmd["r"], $cmd["g"], $cmd["b"]);
+                        $fill_color = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
                         $drawingPolygon = true;
                         $path = array();
                         break;
@@ -676,9 +683,9 @@ namespace core\system
                             continue;
                         }
                         if($fill_color>-1)
-                            imagefilledpolygon($pRessource, $path, count($path)/2, $fill_color);
+                            imagefilledpolygon($pResource, $path, count($path)/2, $fill_color);
                         if($line_color>-1)
-                            imagepolygon($pRessource, $path, count($path)/2, $line_color);
+                            imagepolygon($pResource, $path, count($path)/2, $line_color);
                         $drawingPolygon = false;
                         $fill_color = -1;
                         $path = array();
@@ -695,29 +702,29 @@ namespace core\system
                         if($drawingPolygon)
                             array_push($path, $cmd["x"], $cmd["y"]);
                         else
-                            imageline($pRessource, $tmp["x"], $tmp["y"], $cmd["x"], $cmd["y"], IMG_COLOR_STYLED);
+                            imageline($pResource, $tmp["x"], $tmp["y"], $cmd["x"], $cmd["y"], IMG_COLOR_STYLED);
                         $tmp = array("x"=>$cmd["x"], "y"=>$cmd["y"]);
                         break;
                     case self::COMMAND_DRAWCIRCLE:
                     case self::COMMAND_DRAWELLIPSE:
                         if($fill_color>-1)
-                            imagefilledellipse($pRessource, $cmd["x"], $cmd["y"], $cmd["width"], $cmd["height"], $fill_color);
+                            imagefilledellipse($pResource, $cmd["x"], $cmd["y"], $cmd["width"], $cmd["height"], $fill_color);
                         if($line_color>-1)
-                            imageellipse($pRessource, $cmd["x"], $cmd["y"], $cmd["width"], $cmd["height"], $line_color);
+                            imageellipse($pResource, $cmd["x"], $cmd["y"], $cmd["width"], $cmd["height"], $line_color);
                         break;
                     case self::COMMAND_DRAWTEXT:
-                        $c = imagecolorallocate($pRessource, $cmd["r"], $cmd["g"], $cmd["b"]);
-                        imagettftext($pRessource, $cmd["size"], $cmd["rotation"], $cmd["x"], $cmd["y"], $c, $cmd["font"], $cmd["text"]);
+                        $c = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
+                        imagettftext($pResource, $cmd["size"], $cmd["rotation"], $cmd["x"], $cmd["y"], $c, $cmd["font"], $cmd["text"]);
                         break;
                     case self::COMMAND_DRAWRECT:
                         if($fill_color>-1)
-                            imagefilledrectangle($pRessource, $cmd["x"], $cmd["y"], $cmd["x1"], $cmd["y1"], $fill_color);
+                            imagefilledrectangle($pResource, $cmd["x"], $cmd["y"], $cmd["x1"], $cmd["y1"], $fill_color);
                         if($line_color>-1)
-                            imagerectangle($pRessource, $cmd["x"], $cmd["y"], $cmd["x1"], $cmd["y1"], $line_color);
+                            imagerectangle($pResource, $cmd["x"], $cmd["y"], $cmd["x1"], $cmd["y1"], $line_color);
                         break;
                     case self::COMMAND_SETPIXEL:
-                        $c = imagecolorallocate($pRessource, $cmd["r"], $cmd["g"], $cmd["b"]);
-                        imagesetpixel($pRessource, $cmd["x"], $cmd["y"], $c);
+                        $c = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
+                        imagesetpixel($pResource, $cmd["x"], $cmd["y"], $c);
                         break;
                     default:
                         continue;

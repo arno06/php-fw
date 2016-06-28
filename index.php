@@ -1,8 +1,8 @@
 <?php
 date_default_timezone_set("Europe/Paris");
 define("MEMORY_REAL_USAGE", true);
-$timeInit = microtime(true);
-$memInit = memory_get_usage(MEMORY_REAL_USAGE);
+define('INIT_TIME', microtime(true));
+define('INIT_MEMORY', memory_get_usage(MEMORY_REAL_USAGE));
 
 require_once(__DIR__."/includes/libs/core/application/class.Singleton.php");
 require_once(__DIR__."/includes/libs/core/application/class.Autoload.php");

@@ -101,8 +101,6 @@ namespace core\application
 		 */
 		static public function init()
 		{
-			ini_set("session.use_trans_sid", 0);
-
 			session_name(Configuration::$global_session);
 			session_start();
 			set_error_handler('\core\tools\debugger\Debugger::errorHandler');
@@ -185,7 +183,7 @@ namespace core\application
 			}
             if(isset($configurationData['extra']) && !empty($configurationData['extra']))
             {
-                Configuration::set_extra($configurationData['extra']);
+                Configuration::setExtra($configurationData['extra']);
             }
 		}
 
@@ -441,7 +439,7 @@ namespace core\application
 					$content = "text/plain";
 					break;
 			}
-			Header::content_type($content);
+			Header::contentType($content);
 			echo $pContent;
 			self::endApplication();
 		}
@@ -476,7 +474,7 @@ namespace core\application
 				$pController->$pAction();
 			if(!Core::$request_async)
 			{
-				Header::content_type("text/html");
+				Header::contentType("text/html");
 				$pController->render();
 				if(Core::debug())
 					Debugger::getInstance()->render();

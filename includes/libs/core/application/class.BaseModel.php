@@ -69,7 +69,7 @@ namespace core\application
 		 * @param array $pValues				Tableau multi-dimensionnel contenant les données &agrave; insérer
 		 * @return resource
 		 */
-		public function insert_multiple(array $pValues)
+		public function insertMultiple(array $pValues)
 		{
 			return Query::insertMultiple($pValues)->into($this->table)->execute($this->handler);
 		}

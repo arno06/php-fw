@@ -67,16 +67,17 @@ namespace core\application
 			Go::to404();
 		}
 
+
         /**
          * Méthode par défaut de page introuvable
          */
-        public function not_found()
+        public function notFound()
         {
             if(get_called_class() != __CLASS__)
             {
                 Go::to404();
             }
-            $this->setTemplate(null, null, 'not_found.tpl');
+            $this->setTemplate(null, null, 'notFound.tpl');
         }
 
 
@@ -105,6 +106,7 @@ namespace core\application
             $t->render($this->template, $pDisplay);
             return true;
 		}
+
 
 		/**
 		 * @return array

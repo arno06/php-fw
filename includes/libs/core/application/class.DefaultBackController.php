@@ -140,14 +140,15 @@ namespace core\application
         /**
          * Méthode par défaut de page introuvable
          */
-        public function not_found()
+        public function notFound()
         {
             if(get_called_class() != __CLASS__)
             {
                 Go::to404();
             }
-            $this->setTemplate(null, null, 'not_found.tpl');
+            $this->setTemplate(null, null, 'notFound.tpl');
         }
+
 
 		/**
 		 * Méthode appelé par défault en cas de non-existance d'action
@@ -158,6 +159,7 @@ namespace core\application
 		{
 			Go::to($this->className, "listing");
 		}
+
 
 		/**
 		 * Méthode d'ajout d'une nouvel entrée
@@ -207,6 +209,7 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('add'));
 		}
 
+
 		/**
 		 * Méthode permettant de lister toutes les entrées du model
 		 * Gestion automatique du ORDER BY
@@ -247,6 +250,7 @@ namespace core\application
 			$this->addContent("liste", $data);
 			$this->addContent("h1", $this->h1->get('listing'));
 		}
+
 
 		/**
 		 * Méthode de modification d'une entrée
@@ -301,6 +305,7 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('edit'));
 		}
 
+
 		/**
 		 * Méthode de suppression d'une entrée
 		 * Renvoie systématiquement à l'action "lister"
@@ -315,6 +320,11 @@ namespace core\application
 			Go::to($this->className);
 		}
 
+
+        /**
+         * Méthode de lecture seul des données d'une entrée
+         * @return void
+         */
 		public function view()
 		{
 			if(!$this->actions->isEnabled('view'))
@@ -329,6 +339,7 @@ namespace core\application
 			$this->addContent("data", $data);
 			$this->addContent("h1", $this->h1->get('view'));
 		}
+
 
 		/**
 		 * @param string $pField

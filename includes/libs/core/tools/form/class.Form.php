@@ -1177,7 +1177,7 @@ namespace core\tools\form
 		static private function upload($pName, $pId, $pData, $pRequire = "")
 		{
 			self::$ct_upload++;
-			$file = $style = $value = "";
+			$file = $value = "";
 			$server_url = Configuration::$server_url;
             /**
              * @todo concaténer la valeur du relative path de l'application en cours à $server_url ?

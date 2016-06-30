@@ -43,6 +43,9 @@ namespace core\application
             self::write();
         }
 
+        /**
+         * Méthode de définition des différents header en fonction du pool prédéfinit
+         */
         static private function write()
         {
             foreach(self::$pool as $n=>$v)
@@ -74,7 +77,7 @@ namespace core\application
 		 * @param string $pValue	ex : text/html, application/xml...
 		 * @param string|bool $pCharset	Définit le charset à spécifier
 		 */
-		static public function content_type($pValue, $pCharset = false)
+		static public function contentType($pValue, $pCharset = false)
 		{
 			if(!$pCharset)
 				$pCharset = Configuration::$global_encoding;
@@ -84,7 +87,7 @@ namespace core\application
         /**
          * @param string $pValue
          */
-        static public function content_encoding($pValue)
+        static public function contentEncoding($pValue)
         {
             header("Content-Encoding: ".$pValue);
         }
@@ -92,7 +95,7 @@ namespace core\application
         /**
          * @param int $pValue
          */
-        static public function content_length($pValue)
+        static public function contentLength($pValue)
         {
             header("Content-Length: ".$pValue);
         }

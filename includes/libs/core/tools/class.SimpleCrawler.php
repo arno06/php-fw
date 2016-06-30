@@ -62,9 +62,7 @@ namespace core\tools
             }
             $this->log("url", "title", "description", "date");
 
-            while($running = $this->next()){}
-
-
+            while($this->next()){}
         }
 
         /**

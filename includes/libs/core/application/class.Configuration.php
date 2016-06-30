@@ -125,7 +125,7 @@ namespace core\application
         /**
          * @param array $pExtra
          */
-        static public function set_extra($pExtra)
+        static public function setExtra($pExtra)
         {
             self::$_extra = $pExtra;
         }

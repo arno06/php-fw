@@ -74,10 +74,10 @@ namespace core\tools
             switch($this->type)
             {
                 case self::TYPE_JS:
-                    Header::content_type("application/javascript");
+                    Header::contentType("application/javascript");
                     break;
                 case self::TYPE_CSS:
-                    Header::content_type("text/css");
+                    Header::contentType("text/css");
                     break;
             }
 
@@ -168,7 +168,7 @@ namespace core\tools
             $accept_gzip = preg_match('/gzip/', $_SERVER['HTTP_ACCEPT_ENCODING'], $matches)&&!Core::checkRequiredGetVars("output");
             if($accept_gzip)
             {
-                Header::content_encoding("gzip");
+                Header::contentEncoding("gzip");
                 $this->output = gzencode($this->output);
             }
 
@@ -224,7 +224,7 @@ namespace core\tools
         private function output($pContent)
         {
 
-            Header::content_length(strlen($pContent));
+            Header::contentLength(strlen($pContent));
             echo $pContent;
             Core::endApplication();
         }

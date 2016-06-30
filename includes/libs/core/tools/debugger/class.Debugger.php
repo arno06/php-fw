@@ -133,7 +133,7 @@ namespace core\tools\debugger
 		 * @param Boolean	$pOpen [optional]		Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
-		static public function trace_r($pArray, $pOpen = false)
+		static public function traceR($pArray, $pOpen = false)
 		{
 			$string = "<pre>".print_r($pArray,true)."</pre>";
 			self::trace($string,$pOpen);
@@ -275,7 +275,7 @@ namespace core\tools\debugger
 				{
 					Logs::write($pErrorMessage." ".$pErrorFile." ".$pErrorLine." ".$pErrorContext, $pErrorLevel);
 				}
-				Header::content_type("text/html", Configuration::$global_encoding);
+				Header::contentType("text/html", Configuration::$global_encoding);
 				self::$open = true;
 				self::getInstance()->render(true, true);
                 Core::endApplication();
@@ -333,6 +333,6 @@ namespace
 
 	function trace_r($pArray, $pOpen = false)
 	{
-		Debugger::trace_r($pArray, $pOpen);
+		Debugger::traceR($pArray, $pOpen);
 	}
 }

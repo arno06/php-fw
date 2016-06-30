@@ -1,13 +1,15 @@
 <?php
 namespace core\data
 {
-	use \ZipArchive;
+
+    use core\system\File;
+    use \ZipArchive;
 
 	/**
 	 * Class de gestion des fichiers CSV
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .1
+	 * @version .2
 	 * @package data
 	 */
 	abstract class SimpleExcel implements InterfaceData
@@ -19,8 +21,7 @@ namespace core\data
 		 */
 		static function encode(array $pArray)
 		{
-			// TODO: Implement encode() method.
-			trigger_error("Non implémentée !", E_USER_ERROR);
+			trigger_error("Not implemented yet.", E_USER_ERROR);
 		}
 
 		/**
@@ -30,8 +31,7 @@ namespace core\data
 		 */
 		static function decode($pString)
 		{
-			// TODO: Implement decode() method.
-			trigger_error("Non implémentée !", E_USER_ERROR);
+			trigger_error("Not implemented yet.", E_USER_ERROR);
 		}
 
 		/**
@@ -44,7 +44,7 @@ namespace core\data
 			switch(strtolower(File::getExtension($pFile)))
 			{
 				case "xlsx";
-					return self::import_xlsx($pFile);
+					return self::importXlsx($pFile);
 					break;
 			}
 			return false;
@@ -54,7 +54,7 @@ namespace core\data
 		 * @param $pFile
 		 * @return array|bool
 		 */
-		static private function import_xlsx($pFile)
+		static private function importXlsx($pFile)
 		{
 			$xlsxHandler = new XLSXHandler($pFile);
 			$data = $xlsxHandler->read();

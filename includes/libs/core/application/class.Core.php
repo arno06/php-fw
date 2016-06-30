@@ -23,6 +23,11 @@ namespace core\application
 		 */
 		const VERSION = "3.0";
 
+        /**
+         * Erreur de configuration
+         */
+        const ERROR_CONFIG = "Unable to parse the base configuration file \"includes/applications/config.json\". Please check the data formatting (quotation marks, commas, accents ...).";
+
 		/**
 		 * @var string
 		 */
@@ -157,13 +162,10 @@ namespace core\application
 			{
 				$configurationData = SimpleJSON::import($pConfigurationFile);
 			}
-			catch(Exception $e)
-			{
-				if ($pConfigurationFile == Autoload::$folder.self::$config_file)
-					die("Impossible de charger le fichier de configuration de base : <b>".$pConfigurationFile."</b>");
-			}
-			if (!is_array($configurationData) && $pConfigurationFile == Autoload::$folder.self::$config_file)
-				trigger_error('Impossible de parser le fichier de configuration de base <b>includes/applications/config.json</b>. Veuillez vérifier le formatage des données (guillements, virgules, accents...).', E_USER_ERROR);
+			catch(Exception $e) {}
+			if ((!is_array($configurationData) || empty($configurationData))&& $pConfigurationFile == Autoload::$folder.self::$config_file)
+				trigger_error(self::ERROR_CONFIG, E_USER_ERROR);
+
 			foreach ($configurationData as $prefix=>$property)
 			{
 				if (property_exists('core\application\Configuration', $prefix))
@@ -512,7 +514,7 @@ namespace core\application
 			self::$path_to_templates = null;
 			Singleton::dispose();
 			DBManager::dispose();
-			exit();
+			exit(0);
 		}
 	}
 }

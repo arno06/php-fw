@@ -228,7 +228,7 @@ namespace core\system
 				readfile($pFile);
 			else
 				echo $pSource;
-			exit();
+			exit(0);
 		}
 	}
 }

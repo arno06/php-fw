@@ -6,8 +6,6 @@ namespace core\application
 	/**
 	 * Class Dictionary - Permet la gestion d'un fichier de langue global à l'application
 	 *
-	 * @TODO Voir pour une gestion mi-dynamique/mi static des balises "title" et "description" comme les "terms"
-	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version 1.0
 	 * @package application

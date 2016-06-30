@@ -182,7 +182,7 @@ namespace core\db\handler
 		 */
 		public function getErrorNumber()
 		{
-			// TODO: TBD
+            trigger_error("SqliteHandler::getErrorNumber not implemented yet.", E_USER_WARNING);
 		}
 
 		/**
@@ -190,7 +190,7 @@ namespace core\db\handler
 		 */
 		public function getError()
 		{
-			// TODO: TBD
+            trigger_error("SqliteHandler::getError not implemented yet.", E_USER_WARNING);
 		}
 	}
 

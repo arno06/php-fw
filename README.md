@@ -192,3 +192,4 @@ Todo (nice to have)
 * [ ] Develop an Autocomplete component
 * [ ] Dependencies : Add minified option
 * [ ] SimpleCrawler : use Events for logging
+* [ ] Dictionary : Implement dynamic "title" and "description" tags (like terms)

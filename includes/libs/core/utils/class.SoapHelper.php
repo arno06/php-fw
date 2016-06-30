@@ -10,7 +10,6 @@ namespace core\utils
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @version 0.1
      * @package core\utils
-     * @todo gestion des méthodes sans output (one way request)
      */
     class SoapHelper
     {

@@ -184,9 +184,11 @@ trace_r($pObject, $pDisplay);
 ```
 
 
-Todo 
+Todo (nice to have)
 ---------
 * [ ] Integrate a light Dictionary class with the Dependencies's loaded scripts
 * [ ] RoutingHandler : method to get a route depending upon controller/action/method/parameters
 * [ ] Integrate services managing
 * [ ] Develop an Autocomplete component
+* [ ] Dependencies : Add minified option
+* [ ] SimpleCrawler : use Events for logging

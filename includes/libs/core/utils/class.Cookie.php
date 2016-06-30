@@ -9,7 +9,6 @@ namespace core\utils
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @version .2
      * @package core\utils
-     * @todo affiner la suppression d'un cookie
      */
     class Cookie
     {
@@ -71,5 +70,4 @@ namespace core\utils
             }
         }
     }
-
 }

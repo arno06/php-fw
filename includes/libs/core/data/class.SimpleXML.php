@@ -5,7 +5,6 @@ namespace core\data
 	use core\system\File;
 	use \Exception;
 
-	// todo Voir pour ajouter une gestion de l'encodage des caract&egrave;res (cas où le xml est en utf-8)
 	/**
 	 * Class SimpleXML
 	 * Permet de manipuler des données au format XML

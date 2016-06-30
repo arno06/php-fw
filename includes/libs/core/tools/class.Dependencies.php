@@ -14,7 +14,6 @@ namespace core\tools
      * Gère deux types de dépendences JS & CSS
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @version 1.4
-     * @todo minified
      */
     class Dependencies
     {

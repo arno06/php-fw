@@ -11,7 +11,6 @@ namespace core\tools
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @version 1.0
      * @package core\tools
-     * @todo utiliser les event pour les logs ?
      * $sc = new SimpleCrawler("http://localhost/test/");
      * $sc->addEventListener(SimpleCrawlerEvent::OUTPUT, 'callableHandler', $instance);
      * $sc->logFile = 'localhost.csv';

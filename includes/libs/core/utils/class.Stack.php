@@ -232,7 +232,14 @@ namespace core\utils
 			return $value;
 		}
 
-		static public function in_array_key($pValue ,$pKey, &$pArray)
+
+        /**
+         * @param $pValue
+         * @param $pKey
+         * @param $pArray
+         * @return bool
+         */
+		static public function inArrayKey($pValue ,$pKey, &$pArray)
 		{
 			foreach($pArray as &$obj)
 			{

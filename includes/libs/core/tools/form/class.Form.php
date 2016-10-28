@@ -899,7 +899,7 @@ namespace core\tools\form
 		{
 			$noForm = false;
 			$noMandatory = false;
-			$output = $idForm = $classes = "";
+			$output = $idForm = $classes = $url = "";
             $controller = Core::$controller;
             $action = Core::$action;
 			$helper = "core\\tools\\form\\FormHelpers";
@@ -908,18 +908,31 @@ namespace core\tools\form
             else
                 $pParams = array();
 
+            $n = array();
+            $s = array("controller", "action", "noForm", "noMandatory", "helper", "idForm", "classes", "url");
+            foreach($pParams as $np=>$vp)
+            {
+                if(in_array($np, $s))
+                    continue;
+                $n[$np] = $vp;
+            }
+            $pParams = $n;
+
+            if(empty($url))
+            {
+                $url = Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage);
+            }
+            else
+            {
+                if(!empty($pParams))
+                {
+                    $url .= "?".http_build_query($pParams);
+                }
+            }
+
 			if(!$noForm)
 			{
-				$n = array();
-				$s = array("controller", "action", "noForm", "noMandatory", "helper", "idForm", "classes");
-				foreach($pParams as $np=>$vp)
-				{
-					if(in_array($np, $s))
-						continue;
-					$n[$np] = $vp;
-				}
-				$pParams = $n;
-				$output .= '<form action="'.Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage).'" method="post"';
+				$output .= '<form action="'.$url.'" method="post"';
 				if($this->hasUpload)
 					$output .= ' enctype="multipart/form-data"';
 				if (!empty($idForm))

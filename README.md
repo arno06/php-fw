@@ -89,7 +89,7 @@ The 'addForm' method registers the Form object to Smarty and the current templat
 ```html
 <html>
 	<body>
-		{form_login->display}
+		{form.login->display url='action/route' param1='value1'}
 	</body>
 </html>
 ```

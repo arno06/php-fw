@@ -6,7 +6,7 @@ namespace core\application
 
     /**
 	 * Class Configuration
-	 * Sert de référence pour n'importe quelle propriété de configuration du framework
+	 * Sert de référence aux propriétés de configuration du framework
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version 1.1
@@ -87,15 +87,15 @@ namespace core\application
 				"host"=>"localhost",
 				"user"=>"root",
 				"password"=>"",
-				"name"=>"php-framework",
-				"handler"=>"MysqliHandler"
+				"name"=>"fwphp",
+				"handler"=>"\\core\\data\\handler\\MysqliHandler"
 			)
 		);
 
 		/**
 		 * @var string
 		 */
-		static public $authentication_tableName = "%s_user";
+		static public $authentication_tableName = "%s_users";
 
 		/**
 		 * @var string
@@ -105,7 +105,7 @@ namespace core\application
 		/**
 		 * @var string
 		 */
-		static public $authentication_fieldPassword = "mdp_user";
+		static public $authentication_fieldPassword = "password_user";
 
 		/**
 		 * @var string

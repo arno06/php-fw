@@ -10,13 +10,13 @@
 	"Request":
 	{
 		"javascript":[
-			"http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=Request"
+			"https://dependencies.arnaud-nicolas.fr/?need=Request"
 		]
 	},
     "M4Tween":
     {
         "javascript":[
-            "http://www.arnaud-nicolas.fr/projects/Dependencies/src/?need=M4Tween"
+            "https://dependencies.arnaud-nicolas.fr/?need=M4Tween"
         ]
     },
 	"Autocomplete":

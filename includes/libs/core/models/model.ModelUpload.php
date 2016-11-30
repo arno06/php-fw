@@ -19,7 +19,7 @@ namespace core\models
 
 		public function __construct()
 		{
-            parent::__construct(Application::getInstance()."_upload", "id_upload");
+            parent::__construct(Application::getInstance()."_uploads", "id_upload");
 		}
 
         public function renameById($pId, $pPath)

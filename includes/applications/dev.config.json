@@ -42,7 +42,7 @@
     },
     "authentication":
     {
-        "tableName": "%s_user",
+        "tableName": "%s_users",
         "tableId": "id_user",
         "fieldPassword": "password_user",
         "fieldLogin": "login_user",

@@ -22,24 +22,26 @@ namespace core\application
 		public $id;
 
 		/**
-		 * Nom de la table &agrave; cibler
+		 * Nom de la table à cibler
 		 * @var String
 		 */
 		protected $table;
 
 		/**
+         * Identifiant du gestionnaire de la base de données à utiliser pour exécuter les requêtes du model
 		 * @var String
 		 */
 		protected $handler = "default";
 
 		/**
+         * Tableau contenant les informations de jointures à ajout systématiquement sur les SELECT
 		 * @var array
 		 */
 		private $joins;
 
 		/**
-		 * @param $pTable
-		 * @param $pId
+		 * @param string $pTable    Nom de la table par défaut du model
+		 * @param string $pId       Nom du champ de clé primaire
 		 */
 		public function __construct($pTable, $pId)
 		{
@@ -59,6 +61,11 @@ namespace core\application
 		}
 
 
+        /**
+         * Méthode d'exécution d'une requête REPLACE sur la table du model
+         * @param array $pValues            Tableau associatif contenant les valeurs à enregistrer
+         * @return array|resource
+         */
 		public function replace(array $pValues)
 		{
 			return Query::replace($pValues)->into($this->table)->execute($this->handler);
@@ -91,7 +98,7 @@ namespace core\application
 		 * Méthode de récupération d'une tuple particulière de la table en fonction de la valeur de sa clé primaire
 		 * Renvoie un tableau associatif des données correspondant au résultat de la requête
 		 * @param string $pId				Valeur de clé primaire &agrave; cibler
-		 * @param string $pFields
+		 * @param string $pFields           Liste des champs à sélectionner lors de la requête à la base
 		 * @return array
 		 */
 		public function getTupleById($pId, $pFields = "*")
@@ -177,9 +184,9 @@ namespace core\application
 
 		/**
 		 * Méthode d'ajout de jointure par défaut aux requêtes de type SELECT
-		 * @param String $pTable
-		 * @param null $pType
-		 * @param null $pOn
+		 * @param String $pTable        Nom de la table à cibler
+		 * @param null $pType           Type de jointure à appliquer
+		 * @param null $pOn             Condition de la jointure
 		 * @return void
 		 */
 		protected function addJoinOnSelect($pTable, $pType = null, $pOn = null)
@@ -190,7 +197,7 @@ namespace core\application
 		}
 
 		/**
-		 * @param QuerySelect $pQuery
+		 * @param QuerySelect $pQuery       Instance de QuerySelect sur laquelle appliquer les jointures par défault
 		 * @return QuerySelect
 		 */
 		protected function prepareJoin(QuerySelect $pQuery)
@@ -204,7 +211,8 @@ namespace core\application
 		}
 
 		/**
-		 * @param null $pCond
+         * Méthode de récupération d'une entrée de la table $this->table
+		 * @param null $pCond       Instance de QueryCondition
 		 * @param string $pFields
 		 * @return array
 		 */
@@ -220,8 +228,9 @@ namespace core\application
 
 
 		/**
-		 * @param null|QueryCondition $pCond
-		 * @param string $pFields
+         * Méthode de récupération d'un ensemble d'entrée de la table $this->table
+		 * @param null|QueryCondition $pCond        Instance de QueryCondition pour contraindre, limiter, ordonner et/ou grouper les résultats
+		 * @param string $pFields                   Liste des champs à récupérer
 		 * @return array|resource
 		 */
 		public function all($pCond = null, $pFields = "*")
@@ -230,7 +239,7 @@ namespace core\application
 		}
 
 		/**
-		 *
+		 * Méthode de génération d'un tableau d'inputs spécifique au formulaire du framework (class Form) à partir du schéma de la table
 		 */
 		public function generateInputsFromDescribe()
 		{

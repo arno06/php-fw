@@ -3,6 +3,7 @@ namespace core\tools\docs
 {
     use core\data\Encoding;
     use core\system\Folder;
+    use core\tools\template\Template;
 
     /**
      * Class Documentor
@@ -49,6 +50,7 @@ namespace core\tools\docs
 
             $this->sortName($props);
             $classInfo['properties'] = $props;
+            $classInfo['package'] = $pClassName;
 
             return $classInfo;
         }
@@ -56,7 +58,7 @@ namespace core\tools\docs
         public function parsePackage($pPath, $pPackage, $pOrigin = true)
         {
             $classes = array();
-            $excluded_ext = '/\.(tpl|tpl\.php|ttf)$/';
+            $excluded_ext = '/(template\.|\.(tpl|tpl\.php|ttf)$)/';
             $r = Folder::read($pPath, false);
 
             foreach($r as $name=>$folder)
@@ -79,6 +81,7 @@ namespace core\tools\docs
 
                 foreach($declared_classes as $classe)
                 {
+                    trace($classe);
                     if(preg_match('/^'.$pPackage.'/', $classe, $matches))
                     {
                         $details = $this->parseClass($classe);
@@ -98,13 +101,8 @@ namespace core\tools\docs
             Folder::create($pFolder);
             Folder::create($pFolder.'/classes');
 
-            $smarty = new \Smarty();
-            $smarty->clear_all_assign();
-            $smartyDir = "includes/libs/core/tools/docs/templates/_cache/";
-            $smarty->template_dir = "includes/libs/core/tools/docs/templates";
-            $smarty->cache_dir = $smartyDir;
-            $smarty->compile_dir = $smartyDir;
-
+            $template = new Template();
+            $template->setup("includes/libs/core/tools/docs/templates", "includes/libs/core/tools/docs/templates/_cache");
             $classIndex = array();
 
             foreach($this->packages as $className=>$details)
@@ -119,10 +117,10 @@ namespace core\tools\docs
 
                 $classIndex[] = array('name'=>$class, 'href'=>$file);
 
-                $smarty->clear_all_assign();
+                $template->clearData();
                 $details['name'] = $class;
-                $smarty->assign('details', $details);
-                file_put_contents($pFolder.$file, Encoding::BOM().$smarty->fetch("template.class_details.tpl"));
+                $template->assign('details', $details);
+                file_put_contents($pFolder.$file, Encoding::BOM().$template->render("template.class_details.tpl", false));
             }
 
             $this->sortName($classIndex);
@@ -137,12 +135,12 @@ namespace core\tools\docs
             }
             $classIndex = $prefixed_ndx;
 
-            $smarty->clear_all_assign();
-            $smarty->assign('classIndex', $classIndex);
-            file_put_contents($pFolder.'/classes.html', Encoding::BOM().$smarty->fetch("template.classes.tpl"));
+            $template->clearData();
+            $template->assign('classIndex', $classIndex);
+            file_put_contents($pFolder.'/classes.html', Encoding::BOM().$template->render("template.classes.tpl", false));
 
-            $smarty->clear_all_assign();
-            file_put_contents($pFolder.'/index.html', Encoding::BOM().$smarty->fetch("template.index.tpl"));
+            $template->clearData();
+            file_put_contents($pFolder.'/index.html', Encoding::BOM().$template ->render("template.index.tpl", false));
         }
 
         private function sortName(&$pArray)

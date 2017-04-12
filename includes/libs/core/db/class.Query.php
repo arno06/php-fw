@@ -1431,7 +1431,7 @@ namespace core\db
 				$field_prop[] = "COMMENT '".$pComments."'";
 			if(!empty($pWhere))
 				$field_prop[] = $pWhere;
-			return implode(" ", $field_prop);
+            return implode(" ", $field_prop);
 		}
 	}
 }

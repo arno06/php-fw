@@ -345,7 +345,6 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                 default:
                     if(isset($this->available_functions[$name]) && !empty($this->available_functions[$name]))
                     {
-                        trace_r($this->available_functions[$name]);
                         $default = $this->available_functions[$name]['parameters'];
                         $this->parseParameters($params, $default);
                         $tpl = $this->available_functions[$name]['template'];

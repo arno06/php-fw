@@ -302,7 +302,7 @@ namespace core\db {
                     array_push($parts, $field . $operator . $value);
                 }
             }
-            return implode($parts, $pSeparator);
+            return implode($pSeparator, $parts);
         }
     }
 
@@ -626,7 +626,7 @@ namespace core\db {
                 $query = $exist[1];
                 array_push($exists, $type . " (" . $query->get($pHandler) . ")");
             }
-            return implode($exists, $pOperator);
+            return implode($pOperator, $exists);
         }
     }
 
@@ -926,8 +926,8 @@ namespace core\db {
          */
         public function get($pHandler = "default", $pSemicolon = true)
         {
-            $field = implode($this->fields, ",");
-            $table = implode($this->tables, ",");
+            $field = implode(",", $this->fields);
+            $table = implode(",", $this->tables);
             $joins = $this->joins . " ";
             $condition = $this->getCondition()->get($pHandler);
             $union = "";
@@ -1015,7 +1015,7 @@ namespace core\db {
          */
         public function get($pHandler = "default")
         {
-            $values = implode($this->values, ",");
+            $values = implode(",", $this->values);
             return 'REPLACE INTO ' . $this->table . ' ' . $this->fields . ' VALUES ' . $values . ';';
         }
     }
@@ -1117,7 +1117,7 @@ namespace core\db {
             $f = array();
             foreach ($pTuple as $field => $value)
                 array_push($f, $field);
-            $this->fields = "(" . implode($f, ",") . ")";
+            $this->fields = "(" . implode(",", $f) . ")";
         }
 
         /**
@@ -1153,9 +1153,9 @@ namespace core\db {
             $values = array();
             foreach ($this->values as $v) {
                 $v = array_map(array(DBManager::get($pHandler), "escapeValue"), $v);
-                array_push($values, "(" . implode($v, ",") . ")");
+                array_push($values, "(" . implode(",", $v) . ")");
             }
-            $values = implode($values, ",");
+            $values = implode(",", $values);
             return "INSERT INTO " . $this->table . " " . $this->fields . " VALUES " . $values . ";";
         }
     }

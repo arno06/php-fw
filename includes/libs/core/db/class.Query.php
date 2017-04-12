@@ -932,9 +932,10 @@ namespace core\db
 
 		/**
 		 * Méthode de génération de la requête
-		 * @param Boolean $pSemicolon
-		 * @return string
-		 */
+         * @param string $pHandler
+         * @param bool $pSemicolon
+         * @return string
+         */
 		public function get($pHandler = "default", $pSemicolon = true)
 		{
 			$field = implode($this->fields, ",");
@@ -945,7 +946,7 @@ namespace core\db
 			if(isset($this->query_union)&&!empty($this->query_union))
 			{
 				foreach($this->query_union as $q)
-					$union .= " UNION ".preg_replace("/;$/", "", $q->get($pHandler));
+					$union .= " UNION ".$q->get($pHandler, false);
 			}
 			$str = "SELECT " . $field . " FROM " . $table . " " . $joins . $condition . $union;
 			if ($pSemicolon) $str .= ";";

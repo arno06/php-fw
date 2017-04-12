@@ -6,7 +6,7 @@ namespace core\db
 	 * Interface pour les gestionnaires de base de données
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package db
 	 */
 	interface InterfaceDatabaseHandler
@@ -45,5 +45,12 @@ namespace core\db
 		 * @return string
 		 */
 		public function getError();
+
+        /**
+         * Méthode d'échappement des caractères spéciaux
+         * @param string $pString
+         * @return string
+         */
+        public function escapeValue($pString);
 	}
 }

@@ -7,16 +7,22 @@ namespace core\db\handler
 	use \SQLite3Result;
 
 	/**
-	 * Couche d'abstraction &agrave; la base de données (type sqlite)
-	 * Version spécifique au framework cbi
-	 *  - Définition des informations relatives &agrave; la base de données en fonction de la class Configuration
+	 * Couche d'abstraction à la base de données (type sqlite)
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .2
+	 * @version .4
 	 * @package core\db\handler
 	 */
 	class SqliteHandler implements InterfaceDatabaseHandler
 	{
+        /**
+         * @var array
+         */
+        static private $specials = array(
+            "NOW()",
+            "NULL"
+        );
+
 		/**
 		 * Instance SQLite3 - natif php5
 		 * @var SQLite3
@@ -149,26 +155,6 @@ namespace core\db\handler
 		}
 
 		/**
-		 * Méthode permettant de filtrer une valeur avant son utilisation dans une requête &agrave; la base de données
-		 * @param String $pValue				Valeur &agrave; filtrer
-		 * @return String
-		 */
-		public function filterIn($pValue)
-		{
-			return preg_replace("/\'/","''", $pValue);
-		}
-
-		/**
-		 * Méthode permettant de filtrer les données lorsqu'on les récup&egrave;re via une requête &agrave; la base de données
-		 * @param String $pValue				Valeur &agrave; filtrer
-		 * @return String
-		 */
-		public function filterOut($pValue)
-		{
-			return $pValue;
-		}
-
-		/**
 		 * toString()
 		 * @return String
 		 */
@@ -192,6 +178,18 @@ namespace core\db\handler
 		{
             trigger_error("SqliteHandler::getError not implemented yet.", E_USER_WARNING);
 		}
-	}
+
+        /**
+         * Méthode d'échappement de la valeur
+         * @param string $pString
+         * @return string
+         */
+        public function escapeValue($pString)
+        {
+            if(!in_array(strtoupper($pString), self::$specials))
+                return "'".SQLite3::escapeString($pString)."'";
+            return strtoupper($pString);
+        }
+    }
 
 }

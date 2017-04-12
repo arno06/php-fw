@@ -81,7 +81,6 @@ namespace core\tools\docs
 
                 foreach($declared_classes as $classe)
                 {
-                    trace($classe);
                     if(preg_match('/^'.$pPackage.'/', $classe, $matches))
                     {
                         $details = $this->parseClass($classe);

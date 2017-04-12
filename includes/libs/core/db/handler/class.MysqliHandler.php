@@ -11,11 +11,19 @@ namespace core\db\handler
 	 * Couche d'abstraction &agrave; la base de données (type mysql improved)
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package core\db\handler
 	 */
 	class MysqliHandler implements InterfaceDatabaseHandler
 	{
+        /**
+         * @var array
+         */
+        static private $specials = array(
+            "NOW()",
+            "NULL"
+        );
+
         /**
          * Chemin d'acc&egrave;s &agrave; la base de données
          * @var String
@@ -36,11 +44,13 @@ namespace core\db\handler
          */
         protected $mdp;
 
+
         /**
          * Nom de la base de données
          * @var String
          */
         protected $bdd;
+
 
 		/**
 		 * Instance mysqli
@@ -158,5 +168,17 @@ namespace core\db\handler
 		{
 			return '[Object MysqliHandler database="'.$this->bdd.'" user="'.$this->user.'"]';
 		}
-	}
+
+
+        /**
+         * @param string $pString
+         * @return string
+         */
+        public function escapeValue($pString)
+        {
+            if(!in_array(strtoupper($pString), self::$specials))
+                    return "'".$this->mysqliInstance->escape_string($pString)."'";
+            return strtoupper($pString);
+        }
+    }
 }

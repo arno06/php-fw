@@ -6,18 +6,18 @@ namespace core\db
 
 	/**
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package db
 	 * @subpackage query
 	 */
 	class Query
 	{
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const LIKE 				= 	" LIKE ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const EQUAL				= 	" = ";
 		/**
@@ -25,83 +25,75 @@ namespace core\db
 		 */
 		const NOT_EQUAL         =   " != ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const UPPER 			= 	" > ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const UPPER_EQUAL		=	" >= ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const LOWER 			= 	" < ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const LOWER_EQUAL		=	" <= ";
 
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const IS				=	" IS ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const IS_NOT			=	" IS NOT ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN				=	" JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_NATURAL		=	" NATURAL JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_INNER 		= 	" INNER JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_OUTER_FULL 	= 	" FULL OUTER JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_OUTER_LEFT 	= 	" LEFT OUTER JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_OUTER_RIGHT 	= 	" RIGHT OUTER JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_CROSS 		= 	" CROSS JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const JOIN_UNION 		= 	" UNION JOIN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const IN                =   " IN ";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const MATCH             =   " MATCH ";
 
 		/**
-		 * @var array
-		 */
-		static private $specials = array(
-			"NOW()",
-			"NULL"
-		);
-
-		/**
 		 * Méthode d'execution d'une requêtes SQL
-		 * @param  String $pQuery
-		 * @param  String $pHandler
+		 * @param  string $pQuery
+		 * @param  string $pHandler
 		 * @return array|resource
 		 */
 		static public function execute($pQuery, $pHandler = "default")
@@ -119,8 +111,8 @@ namespace core\db
 
 		/**
 		 * Méthode de création d'une requête SQL SELECT
-		 * @param String $pFields
-		 * @param String $pTables
+		 * @param string $pFields
+		 * @param string $pTables
 		 * @return QuerySelect
 		 */
 		static public function select($pFields, $pTables)
@@ -132,7 +124,7 @@ namespace core\db
 		 * @static
 		 * @param $pTable
 		 * @param null|QueryCondition $pCondition
-		 * @param String $pHandler
+		 * @param string $pHandler
 		 * @return int
 		 */
 		static public function count($pTable, QueryCondition $pCondition = null, $pHandler = "default")
@@ -201,7 +193,7 @@ namespace core\db
 
 		/**
 		 * Méthode de création d'une requête UPDATE
-		 * @param String $pTable
+		 * @param string $pTable
 		 * @return QueryUpdate
 		 */
 		static public function update($pTable)
@@ -253,7 +245,7 @@ namespace core\db
 
 		/**
 		 * @static
-		 * @var String $pHandler
+		 * @var string $pHandler
 		 * @return string
 		 */
 		static public function getError($pHandler = "default")
@@ -263,7 +255,7 @@ namespace core\db
 
 		/**
 		 * @static
-		 * @var String $pHandler
+		 * @var string $pHandler
 		 * @return int
 		 */
 		static public function getErrorNumber($pHandler = "default")
@@ -271,21 +263,54 @@ namespace core\db
 			return DBManager::get($pHandler)->getErrorNumber();
 		}
 
-		/**
-		 * Méthode d'échappement d'une valeur (simple quote, double quote...)
-		 * @param String $pValue
-		 * @param Boolean $escape
-		 * @return String
-		 */
-		static public function escapeValue($pValue, $escape = true)
-		{
-			if (!$escape)
-				return $pValue;
-			elseif(!in_array(strtoupper($pValue), self::$specials))
-				return "'".addslashes($pValue)."'";
-			else
-				return strtoupper($pValue);
-		}
+        /**
+         * @param $pArray
+         * @param $pSeparator
+         * @param $pHandler
+         * @return string
+         */
+        static public function consolidateKeyValueOperator($pArray, $pSeparator, $pHandler)
+        {
+            if(empty($pArray))
+                return "";
+            $parts = array();
+            foreach($pArray as $part)
+            {
+                if ($part instanceof QueryCondition)
+                {
+                    $condition = $part->get($pHandler);
+                    if(!empty($condition))
+                        array_push($parts, "(".preg_replace("/^ WHERE /i","",$condition).")");
+                }
+                else if (is_array($part))
+                {
+                    $field = $part[0];
+                    $operator = $part[1];
+                    $value = $part[2];
+                    $escape = isset($part[3])?$part[3]:true;
+                    $surroundValue = false;
+                    if ($operator == Query::MATCH)
+                    {
+                        $surroundValue = true;
+                        $field = "MATCH(".$field.")";
+                        $operator = " AGAINST ";
+                    }
+                    if($escape === true)
+                        $value = DBManager::get($pHandler)->escapeValue($value);
+                    if($surroundValue === true)
+                    {
+                        $value = "(".$value;
+                        if ($operator == Query::MATCH)
+                        {
+                            $value .= " IN BOOLEAN MODE";
+                        }
+                        $value .= ")";
+                    }
+                    array_push($parts, $field.$operator.$value);
+                }
+            }
+            return implode($parts, $pSeparator);
+        }
 	}
 
 	/**
@@ -298,7 +323,7 @@ namespace core\db
 	{
 		/**
 		 * Nom de la table
-		 * @var String
+		 * @var string
 		 */
 		protected $table;
 
@@ -313,20 +338,21 @@ namespace core\db
 
 		/**
 		 * @throws Exception
+         * @param string $pHandler
 		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			throw new Exception("La méthode 'get' doit être surchargée.");
 		}
 
 		/**
-		 * @var String $pHandler
+		 * @var string $pHandler
 		 * @return array|resource
 		 */
 		public function execute($pHandler = "default")
 		{
-			return Query::execute($this->get(), $pHandler);
+			return Query::execute($this->get($pHandler), $pHandler);
 		}
 	}
 
@@ -363,15 +389,15 @@ namespace core\db
 		 */
 		private $existOr = array();
 		/**
-		 * @var String
+		 * @var string
 		 */
 		private $order = "";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		private $limit = "";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		private $group = "";
 
@@ -381,7 +407,7 @@ namespace core\db
 		 */
 		public function andExists(QuerySelect $pQuery)
 		{
-			array_push($this->existAnds, "EXISTS (".$pQuery->get().")");
+			array_push($this->existAnds, array("EXISTS", $pQuery));
 			return $this;
 		}
 
@@ -391,7 +417,7 @@ namespace core\db
 		 */
 		public function orExists(QuerySelect $pQuery)
 		{
-			array_push($this->existOr, "EXISTS (".$pQuery->get().")");
+			array_push($this->existOr, array("EXISTS", $pQuery));
 			return $this;
 		}
 
@@ -401,7 +427,7 @@ namespace core\db
 		 */
 		public function andNotExists(QuerySelect $pQuery)
 		{
-			array_push($this->existAnds, "NOT EXISTS (".$pQuery->get().")");
+			array_push($this->existAnds, array("NOT EXISTS", $pQuery));
 		}
 
 		/**
@@ -410,7 +436,7 @@ namespace core\db
 		 */
 		public function orNotExists(QuerySelect $pQuery)
 		{
-			array_push($this->existOr, "NOT EXISTS (".$pQuery->get().")");
+			array_push($this->existOr, array("NOT EXISTS", $pQuery));
 			return $this;
 		}
 
@@ -424,78 +450,49 @@ namespace core\db
 		 */
 		public function orWhere	($pField, $pType, $pValue, $pEscape = true)
 		{
-			if($pEscape)
-				$pValue = Query::escapeValue($pValue);
-			array_push($this->or, $pField.$pType.$pValue);
+			array_push($this->or, array($pField, $pType, $pValue, $pEscape));
 			return $this;
 		}
 
 		/**
 		 * Méthode d'ajout d'une condition 'AND' à l'instance de condition en cours
-		 * @param String $pField
-		 * @param String $pType
-		 * @param String $pValue
+		 * @param string $pField
+		 * @param string $pType
+		 * @param string $pValue
 		 * @param bool   $pEscape
 		 * @return QueryCondition
 		 */
 		public function andWhere($pField, $pType, $pValue, $pEscape = true)
 		{
-			if($pEscape)
-				$pValue = Query::escapeValue($pValue);
-			if ($pType == Query::MATCH)
-				array_push($this->ands, " MATCH(".$pField.") AGAINST (".$pValue.")");
-			else
-				array_push($this->ands, $pField.$pType.$pValue);
+            array_push($this->ands, array($pField, $pType, $pValue, $pEscape));
 			return $this;
 		}
-
-
-		public function andMatch($pField, $pValue)
-		{
-			$temp = trim($pValue);
-			if (empty($temp)) return $this;
-
-			$keywords = explode(" ", $pValue);
-			$against = "";
-			for($i = 0, $max = count($keywords) ; $i < $max ; $i++)
-				if (!empty($keywords[$i]))
-				{
-					$against .= "+".$keywords[$i];
-					if ($i < $max-1) $against .= " ";
-				}
-
-			if ($pValue{strlen($pValue)-1} != " ")
-				$against .= "*";
-			array_push($this->ands, " MATCH(".$pField.") AGAINST(".Query::escapeValue($against)." IN BOOLEAN MODE)");
-			return $this;
-		}
-
 
 		/**
 		 * Méthode d'ajout d'un HAVING 'OR' à l'instance de condition en cours
-		 * @param String $pField
+		 * @param string $pField
 		 * @return QueryCondition
 		 */
 		public function orHaving($pField)
 		{
-			array_push($this->havingOr, Query::escapeValue($pField));
+			array_push($this->havingOr, array("", "", $pField, true));
 			return $this;
 		}
 
 		/**
 		 * Méthode d'ajout d'un HAVING 'AND' à l'instance de condition en cours
-		 * @param String $pField
+		 * @param string $pField
 		 * @return QueryCondition
 		 */
 		public function andHaving($pField)
 		{
-			array_push($this->havingAnds, Query::escapeValue($pField));
+			array_push($this->havingAnds, array("", "", $pField, true));
 			return $this;
 		}
 
 		/**
 		 * Méthode d'ajout d'un 'GROUP BY'
-		 * @param String $pField
+		 * @param string $pField
 		 * @return QueryCondition
 		 */
 		public function groupBy($pField)
@@ -511,9 +508,7 @@ namespace core\db
 		 */
 		public function andCondition(QueryCondition $pCondition)
 		{
-            $condition = $pCondition->getWhere();
-            if(!empty($condition))
-			    array_push($this->ands, "(".preg_replace("/^ WHERE /i","",$condition).")");
+            array_push($this->ands, $pCondition);
 			return $this;
 		}
 
@@ -524,14 +519,14 @@ namespace core\db
 		 */
 		public function orCondition(QueryCondition $pCondition)
 		{
-			array_push($this->or, "(".preg_replace("/^ WHERE /i","",$pCondition->getWhere()).")");
+			array_push($this->or, $pCondition);
 			return $this;
 		}
 
 		/**
 		 * Méthode d'ajout d'un 'ORDER BY'
-		 * @param String $pField
-		 * @param String $pType		ASC|DESC
+		 * @param string $pField
+		 * @param string $pType		ASC|DESC
 		 * @return QueryCondition
 		 */
 		public function order($pField, $pType = "ASC")
@@ -557,24 +552,26 @@ namespace core\db
 
 		/**
 		 * Méthode de génération de la condition
-		 * @return String
-		 */
-		public function get()
+         * @param string $pHandler
+         * @return string
+         */
+		public function get($pHandler = "default")
 		{
-			return $this->getWhere().$this->group.$this->getHaving().$this->order.$this->limit;
+			return $this->getWhere($pHandler).$this->group.$this->getHaving($pHandler).$this->order.$this->limit;
 		}
 
 		/**
 		 * Méthode de génération de la section WHERE de l'instance de la condition en cours
-		 * @return string
-		 */
-		public function getWhere()
+         * @param $pHandler
+         * @return string
+         */
+		public function getWhere($pHandler)
 		{
 			$where = "";
-			$ands = implode($this->ands," AND ");
-			$or = implode($this->or, " OR ");
-			$existAnds = implode($this->existAnds, " AND ");
-			$existOr = implode($this->existOr, " OR ");
+			$ands = Query::consolidateKeyValueOperator($this->ands, " AND ", $pHandler);
+            $or = Query::consolidateKeyValueOperator($this->or, " OR ", $pHandler);
+            $existAnds = self::getExists($this->existAnds, " AND ", $pHandler);
+            $existOr = self::getExists($this->existOr, " OR ", $pHandler);
 			if(!empty($ands))
 				$where .= " WHERE ".$ands;
 			if(!empty($or))
@@ -601,14 +598,15 @@ namespace core\db
 			return $where;
 		}
 
-		/**
-		 * @return string
-		 */
-		public function getHaving()
+        /**
+         * @param $pHandler
+         * @return string
+         */
+		public function getHaving($pHandler)
 		{
 			$having = "";
-			$ands = implode($this->havingAnds," AND ");
-			$or = implode($this->havingOr, " OR ");
+            $ands = Query::consolidateKeyValueOperator($this->havingAnds, " AND ", $pHandler);
+            $or = Query::consolidateKeyValueOperator($this->havingOr, " OR ", $pHandler);
 			if(!empty($ands))
 				$having .= " HAVING ".$ands;
 			if(!empty($or))
@@ -620,6 +618,28 @@ namespace core\db
 			}
 			return $having;
 		}
+
+        /**
+         * @param $pData
+         * @param $pOperator
+         * @param $pHandler
+         * @return string
+         * @throws Exception
+         */
+        static private function getExists($pData, $pOperator, $pHandler)
+        {
+            if(empty($pData))
+                return "";
+            $exists = array();
+            foreach($pData as $exist)
+            {
+                $type = $exist[0];
+                /** @var BaseQuery $query */
+                $query = $exist[1];
+                array_push($exists, $type." (".$query->get($pHandler).")");
+            }
+            return implode($exists, $pOperator);
+        }
 	}
 
 	/**
@@ -681,9 +701,9 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'une condition 'WHERE' à la requête SELECT en cours
-		 * @param String $pField
-		 * @param String $pType
-		 * @param String $pValue
+		 * @param string $pField
+		 * @param string $pType
+		 * @param string $pValue
 		 * @param bool $pEscape
 		 * @return QueryWithCondition
 		 */
@@ -695,9 +715,9 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'une condition 'AND' à la requête SELECT en cours
-		 * @param String $pField
-		 * @param String $pType
-		 * @param String $pValue
+		 * @param string $pField
+		 * @param string $pType
+		 * @param string $pValue
 		 * @param bool $pEscape
 		 * @return QueryWithCondition
 		 */
@@ -709,9 +729,9 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'une condition 'OR' à la requête SELECT en cours
-		 * @param String $pField
-		 * @param String $pType
-		 * @param String $pValue
+		 * @param string $pField
+		 * @param string $pType
+		 * @param string $pValue
 		 * @return QueryWithCondition
 		 */
 		public function orWhere($pField, $pType, $pValue)
@@ -786,8 +806,8 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'un 'ORDER BY'
-		 * @param String $pField
-		 * @param String $pType		ASC|DESC
+		 * @param string $pField
+		 * @param string $pType		ASC|DESC
 		 * @return QueryWithCondition
 		 */
 		public function order($pField, $pType = "ASC")
@@ -812,7 +832,7 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'un 'GROUP BY'
-		 * @param String $pField
+		 * @param string $pField
 		 * @return QueryWithCondition
 		 */
 		public function groupBy($pField)
@@ -850,7 +870,7 @@ namespace core\db
 		 */
 		private $fields = array();
 		/**
-		 * @var String
+		 * @var string
 		 */
 		private $joins = "";
 
@@ -861,8 +881,8 @@ namespace core\db
 
 		/**
 		 * Constructor
-		 * @param String $pFields
-		 * @param String $pTables
+		 * @param string $pFields
+		 * @param string $pTables
 		 */
 		public function __construct($pFields, $pTables)
 		{
@@ -885,8 +905,8 @@ namespace core\db
 
 		/**
 		 * Méthode d'ajout d'une table et de champs au SELECT en cours
-		 * @param String $pFields
-		 * @param String $pTables
+		 * @param string $pFields
+		 * @param string $pTables
 		 * @return QuerySelect
 		 */
 		public function addFrom($pFields, $pTables)
@@ -913,19 +933,19 @@ namespace core\db
 		/**
 		 * Méthode de génération de la requête
 		 * @param Boolean $pSemicolon
-		 * @return String
+		 * @return string
 		 */
-		public function get($pSemicolon = true)
+		public function get($pHandler = "default", $pSemicolon = true)
 		{
 			$field = implode($this->fields, ",");
 			$table = implode($this->tables, ",");
 			$joins = $this->joins." ";
-			$condition = $this->getCondition()->get();
+			$condition = $this->getCondition()->get($pHandler);
 			$union = "";
 			if(isset($this->query_union)&&!empty($this->query_union))
 			{
 				foreach($this->query_union as $q)
-					$union .= " UNION ".preg_replace("/;$/", "", $q->get());
+					$union .= " UNION ".preg_replace("/;$/", "", $q->get($pHandler));
 			}
 			$str = "SELECT " . $field . " FROM " . $table . " " . $joins . $condition . $union;
 			if ($pSemicolon) $str .= ";";
@@ -951,7 +971,7 @@ namespace core\db
 		 */
 		public function explain($pHandler = "default")
 		{
-			$query = $this->get();
+			$query = $this->get($pHandler);
 			$result = Query::execute("EXPLAIN ".$query, $pHandler);
 			$useKey = true;
 			$useTemporary = false;
@@ -1007,9 +1027,9 @@ namespace core\db
 	{
 		/**
 		 * Méthode de génération de la requête
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			$values = implode($this->values, ",");
 			return 'REPLACE INTO '.$this->table.' '.$this->fields.' VALUES '.$values.';';
@@ -1039,18 +1059,18 @@ namespace core\db
 		public function values($pValues, $pEscape = true)
 		{
 			foreach($pValues as $field=>$value)
-				array_push($this->values, $field."=".Query::escapeValue($value, $pEscape));
+				array_push($this->values, array($field, Query::EQUAL, $value, $pEscape));
 			return $this;
 		}
 
 		/**
 		 * Méthode de génération de la méthode
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
-			$values = implode($this->values, ",");
-			$condition = $this->getCondition()->get();
+			$values = Query::consolidateKeyValueOperator($this->values, ",", $pHandler);
+			$condition = $this->getCondition()->get($pHandler);
 			return "UPDATE ".$this->table." SET ".$values.$condition.";";
 		}
 	}
@@ -1064,17 +1084,17 @@ namespace core\db
 	class QueryInsert extends BaseQuery
 	{
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const UNIQUE = "UNIQUE";
 		/**
-		 * @var String
+		 * @var string
 		 */
 		const MULTIPLE = "MULTIPLE";
 
 		/**
 		 * Chaine de caract&egrave;res des champs de la table à remplir
-		 * @var String
+		 * @var string
 		 */
 		protected $fields = "";
 		/**
@@ -1086,7 +1106,7 @@ namespace core\db
 		/**
 		 * Constructor
 		 * @param array $pValues
-		 * @param String $pType
+		 * @param string $pType
 		 */
 		public function __construct($pValues, $pType = "")
 		{
@@ -1127,14 +1147,13 @@ namespace core\db
 			$this->values = array();
 			for($i = 0, $max = count($pTuples); $i<$max; $i++)
 			{
-				$pTuples[$i] = array_map("core\\db\\Query::escapeValue", $pTuples[$i]);
-				array_push($this->values, "(".implode($pTuples[$i], ",").")");
+				array_push($this->values, $pTuples[$i]);
 			}
 		}
 
 		/**
 		 * Méthode de définition du nom de la table dans laquelle insérer les valeurs
-		 * @param String $pTable
+		 * @param string $pTable
 		 * @return QueryInsert
 		 */
 		public function into($pTable)
@@ -1145,11 +1164,17 @@ namespace core\db
 
 		/**
 		 * Méthode de génération de la requête
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
-			$values = implode($this->values, ",");
+            $values = array();
+            foreach($this->values as $v)
+            {
+                $v = array_map(array(DBManager::get($pHandler), "escapeValue"), $v);
+                array_push($values, "(".implode($v, ",").")");
+            }
+			$values = implode($values, ",");
 			return "INSERT INTO ".$this->table." ".$this->fields." VALUES ".$values.";";
 		}
 	}
@@ -1170,7 +1195,7 @@ namespace core\db
 
 		/**
 		 * Méthode de définition de la table à cibler pour la suppression
-		 * @param String $pTable
+		 * @param string $pTable
 		 * @return QueryDelete
 		 */
 		public function from($pTable)
@@ -1181,11 +1206,11 @@ namespace core\db
 
 		/**
 		 * Méthode de génération de la requête
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
-			$condition = $this->getCondition()->get();
+			$condition = $this->getCondition()->get($pHandler);
 			return "DELETE FROM ".$this->table.$condition.";";
 		}
 	}
@@ -1195,9 +1220,9 @@ namespace core\db
 	{
 		/**
 		 * Méthode de génération de la requête
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			return "TRUNCATE TABLE '".$this->table."';";
 		}
@@ -1208,9 +1233,9 @@ namespace core\db
 	{
 		/**
 		 * Méthode de génération de la requête
-		 * @return String
+		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			return "DROP TABLE '".$this->table."';";
 		}
@@ -1233,7 +1258,7 @@ namespace core\db
 		/**
 		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			$query = "CREATE TABLE IF NOT EXISTS `".$this->table."` (";
 			if(!empty($this->primary))
@@ -1301,7 +1326,7 @@ namespace core\db
 		/**
 		 * @return string
 		 */
-		public function get()
+		public function get($pHandler = "default")
 		{
 			$add = "";
 			if(!empty($this->add_fields))

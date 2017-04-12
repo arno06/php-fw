@@ -1,8 +1,6 @@
 <?php
 namespace core\tools\template
 {
-
-    use core\application\Core;
     use core\utils\Stack;
 
     /**
@@ -10,18 +8,29 @@ namespace core\tools\template
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @package core\tools\template
+     * @version 1.0
      */
     class RenderingContext
     {
         /**
          * @var string
          */
-
         private $file;
+
         /**
          * @var array
          */
         private $data;
+
+        /**
+         * @var string
+         */
+        private $templateDir;
+
+        /**
+         * @var string
+         */
+        private $cacheDir;
 
         /**
          * RenderingContext constructor.
@@ -33,6 +42,15 @@ namespace core\tools\template
             $this->data = array();
         }
 
+        /**
+         * @param $pTemplateDir
+         * @param $pCacheDir
+         */
+        public function prepare($pTemplateDir, $pCacheDir)
+        {
+            $this->templateDir = $pTemplateDir;
+            $this->cacheDir = $pCacheDir;
+        }
 
         /**
          * @param string $pFile
@@ -44,6 +62,7 @@ namespace core\tools\template
 
 
         /**
+         * Méthode d'ajout de l'assignation d'une variable
          * @param string $pName
          * @param mixed $pValue
          */
@@ -59,19 +78,36 @@ namespace core\tools\template
         public function includeTpl($pName)
         {
             $tpl = new Template($this->data);
-            Core::setupRenderer($tpl);
+            $tpl->setup($this->templateDir, $this->cacheDir);
             $tpl->render($pName, true);
+        }
+
+        /**
+         * @param string $pSeparator    Chaine de caractère servant de glue
+         * @param array $pData          Tableau à parcourir
+         * @param bool $pEcho           Default "true", définit si on affiche le résultat
+         * @return null|string
+         */
+        public function implode($pSeparator, $pData, $pEcho = true)
+        {
+            $res = implode($pSeparator, $pData);
+            if($pEcho)
+            {
+                echo $res;
+                return null;
+            }
+            return $res;
         }
 
 
         /**
+         * Méthode de définition du tableau de données
          * @param array $pData
          */
-        public function setData($pData)
+        public function setData(array $pData)
         {
             $this->data = $pData;
         }
-
 
         /**
          * @param string $pName
@@ -100,7 +136,7 @@ namespace core\tools\template
         public function render($pDisplay)
         {
             ob_start();
-            include_once($this->file);
+            include($this->file);
             $rendering = ob_get_contents();
             ob_end_clean();
             if($pDisplay)

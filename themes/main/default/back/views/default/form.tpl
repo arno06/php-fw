@@ -3,18 +3,18 @@
 <div class="back">
     <a href="{$controller}/" class="button {if null==$content.actions.listing}disabled{/if}">Retour à la liste</a>
 </div>
-{if null != $content.error}
+{if $content.error != null}
     <div class="error">
         {$content.error}
     </div>
 {/if}
-{if null != $content.confirmation}
+{if $content.confirmation != null}
 	<div class="confirmation">
 		{$content.confirmation}
 	</div>
 {/if}
 <div class="details form">
-	{if null !== $global.get.id}
+	{if $global.get.id !== null}
 		{form.instance->display id=$global.get.id}
 	{else}
 		{form.instance->display}

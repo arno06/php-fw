@@ -74,6 +74,11 @@ namespace core\db\handler
             $this->connect();
         }
 
+        public function __destruct()
+        {
+            $this->close();
+        }
+
 
         /**
          *

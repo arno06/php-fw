@@ -139,7 +139,7 @@ namespace core\tools
 
                     for($i = 0, $max = count($files); $i<$max;$i++)
                     {
-                        $absolute_link = preg_match('/^http\:\/\//', $files[$i], $matches);
+                        $absolute_link = preg_match('/^http(s*)\:\/\//', $files[$i], $matches);
                         if(!$absolute_link)
                         {
                             $files[$i] = dirname(self::MANIFEST)."/".$this->configuration["relative"].$files[$i];

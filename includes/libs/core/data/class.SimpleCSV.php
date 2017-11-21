@@ -14,14 +14,15 @@ namespace core\data
 	abstract class SimpleCSV implements InterfaceData
 	{
 		/**
-		 * Caract&egrave;re de séparation des champs
+		 * Caractère de séparation des champs
 		 * @var String
 		 */
 		const SEPARATOR = ";";
 
 		/**
-		 * Méthode de conversion de données au format Tableau en chaine de caract&egrave;res formatée en CSV
-		 * @param array $pData				Donnée &agrave; convertir
+		 * Méthode de conversion de données au format Tableau en chaine de caractères formatée en CSV
+		 * @param array $pData				Données à convertir
+         * @param bool $skipLabels
 		 * @return String
 		 */
 		static public function encode(array $pData, $skipLabels = false)
@@ -84,16 +85,19 @@ namespace core\data
 		}
 
 		/**
-		 * Méthode de conversion d'une chaine de caract&egrave;res formatée en CSV vers un Tableau
-		 * @param String $pString				Chaine &agrave; convertir
+		 * Méthode de conversion d'une chaine de caractères formatée en CSV vers un Tableau
+		 * @param String $pString				Chaine à convertir
 		 * @return array
 		 */
 		static public function decode($pString)
 		{
 			$return = array();
 			$dataArray = explode(PHP_EOL,$pString);
-			$champs = explode(self::SEPARATOR, $dataArray[0]);
-			unset($dataArray[0]);
+            $fields = explode(self::SEPARATOR, $dataArray[0]);
+            foreach($fields as &$field){
+                $field = preg_replace('/(\r|\n)$/', '', $field);
+            }
+            $maxFields = count($fields);
 			$max = count($dataArray);
 			for($i = 1; $i <= $max; $i++)
 			{
@@ -101,13 +105,12 @@ namespace core\data
 					continue;
 				$temp = explode(self::SEPARATOR, $dataArray[$i]);
 				$new = array();
-				$maxChamps = count($champs);
-				for($j = 0; $j<$maxChamps; $j++)
+				for($j = 0; $j<$maxFields; $j++)
 				{
 					$v = $temp[$j];
-					preg_replace("/^\"/", "", $v);
-					preg_replace("/\"$/", "", $v);
-					$new[$champs[$j]] = $v;
+					$v = preg_replace("/^\"/", "", $maxFields);
+					$v = preg_replace("/\"$/", "", $v);
+					$new[$fields[$j]] = $v;
 				}
 				$return[] = $new;
 			}
@@ -132,7 +135,7 @@ namespace core\data
 		}
 
 		/**
-		 * Méthode d'import de données &agrave; partir d'un fichier CSV
+		 * Méthode d'import de données à partir d'un fichier CSV
 		 * @param String $pFileName				Nom du fichier
 		 * @return array
 		 */

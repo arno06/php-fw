@@ -139,14 +139,14 @@ namespace core\application
                 foreach($domains as $domain){
                     if($_SERVER["SERVER_NAME"] === $domain){
                         self::$config_file = "/includes/applications/".$env.".config.json";
-                        trace("exact match");
+                        Debugger::trace("exact match");
                         break 2;
                     }
                     if(strpos($domain, "*") === 0){
                         $domain = str_replace("*", "", $domain);
                         $domain = str_replace(".", "\.", $domain);
                         if(preg_match('/'.$domain.'$/', $_SERVER["SERVER_NAME"], $matches)){
-                            trace("wildcard match");
+                            Debugger::trace("wildcard match");
                             self::$config_file = "/includes/applications/".$env.".config.json";
                         }
                     }

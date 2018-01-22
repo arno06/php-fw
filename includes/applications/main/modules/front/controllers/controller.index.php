@@ -13,7 +13,7 @@ namespace app\main\controllers\front
 
         public function index()
         {
-
+            trace("Hello Docker");
         }
     }
 }

@@ -2,5 +2,9 @@
 	"dev":[
 		"localhost",
 		"*.ama-doc.vidal.fr"
+	],
+	"docker":[
+		"test.ama-doc.vidal.fr",
+		"*.ama-doc.vidal.fr"
 	]
 }

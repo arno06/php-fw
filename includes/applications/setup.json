@@ -1,5 +1,6 @@
 {
 	"dev":[
-		"localhost"
+		"localhost",
+		"*.ama-doc.vidal.fr"
 	]
 }

@@ -99,7 +99,7 @@ namespace core\data
             }
             $maxFields = count($fields);
 			$max = count($dataArray);
-			for($i = 1; $i <= $max; $i++)
+			for($i = 1; $i < $max; $i++)
 			{
 				if($dataArray[$i]=="")
 					continue;
@@ -108,7 +108,7 @@ namespace core\data
 				for($j = 0; $j<$maxFields; $j++)
 				{
 					$v = $temp[$j];
-					$v = preg_replace("/^\"/", "", $maxFields);
+					$v = preg_replace("/^\"/", "", $v);
 					$v = preg_replace("/\"$/", "", $v);
 					$new[$fields[$j]] = $v;
 				}

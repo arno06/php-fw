@@ -59,7 +59,7 @@ endif;
 					</table>
 				</div>
 				<div class="debug_vars">
-					<pre rel="get"><?php $this->get('vars.get'); ?></pre>
+					<pre rel="get"><?php echo $this->get('vars.get'); ?></pre>
 					<pre rel="post" style="display:none;"><?php echo $this->get('vars.post'); ?></pre>
 					<pre rel="session" style="display:none;"><?php echo $this->get('vars.session'); ?></pre>
 					<pre rel="cookie" style="display:none;"><?php echo $this->get('vars.cookie'); ?></pre>

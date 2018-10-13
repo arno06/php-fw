@@ -135,15 +135,16 @@ namespace core\application {
             }
             foreach ($setup as $env => $domains) {
                 foreach ($domains as $domain) {
-                    if ($_SERVER["SERVER_NAME"] === $domain) {
+                    if((isset($_SERVER["SERVER_NAME"])&&$_SERVER["SERVER_NAME"] === $domain)|| (Core::isCli() && $domain == PHP_SAPI)){
                         self::$config_file = "/includes/applications/" . $env . ".config.json";
                         break 2;
                     }
-                    if (strpos($domain, "*") === 0) {
+                    else if (strpos($domain, "*") === 0) {
                         $domain = str_replace("*", "", $domain);
                         $domain = str_replace(".", "\.", $domain);
                         if (preg_match('/' . $domain . '$/', $_SERVER["SERVER_NAME"], $matches)) {
                             self::$config_file = "/includes/applications/" . $env . ".config.json";
+                            break 2;
                         }
                     }
                 }
@@ -392,6 +393,14 @@ namespace core\application {
                     return true;
             }
             return false;
+        }
+
+        /**
+         * @tatic
+         * @return bool
+         */
+        static public function isCli(){
+            return PHP_SAPI == "cli";
         }
 
 

@@ -115,8 +115,6 @@ namespace core\application {
          */
         static public function defineGlobalObjects()
         {
-            if (self::isBot())
-                self::deactivateDebug();
             if (self::debug())
                 Debugger::prepare();
         }
@@ -135,15 +133,16 @@ namespace core\application {
             }
             foreach ($setup as $env => $domains) {
                 foreach ($domains as $domain) {
-                    if ($_SERVER["SERVER_NAME"] === $domain) {
+                    if((isset($_SERVER["SERVER_NAME"])&&$_SERVER["SERVER_NAME"] === $domain)|| (Core::isCli() && $domain == PHP_SAPI)){
                         self::$config_file = "/includes/applications/" . $env . ".config.json";
                         break 2;
                     }
-                    if (strpos($domain, "*") === 0) {
+                    else if (strpos($domain, "*") === 0) {
                         $domain = str_replace("*", "", $domain);
                         $domain = str_replace(".", "\.", $domain);
                         if (preg_match('/' . $domain . '$/', $_SERVER["SERVER_NAME"], $matches)) {
                             self::$config_file = "/includes/applications/" . $env . ".config.json";
+                            break 2;
                         }
                     }
                 }
@@ -368,18 +367,6 @@ namespace core\application {
 
 
         /**
-         * Méthode de désactivation systématique du mode de debug
-         * @return void
-         */
-        static public function deactivateDebug()
-        {
-            Configuration::$global_debug = false;
-            $authHandler = Application::getInstance()->authenticationHandler;
-            $authHandler::$permissions = array();
-        }
-
-
-        /**
          * @static
          * @return bool
          */
@@ -392,6 +379,14 @@ namespace core\application {
                     return true;
             }
             return false;
+        }
+
+        /**
+         * @tatic
+         * @return bool
+         */
+        static public function isCli(){
+            return PHP_SAPI == "cli";
         }
 
 

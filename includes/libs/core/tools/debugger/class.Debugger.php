@@ -74,6 +74,11 @@ namespace core\tools\debugger
 			"cookie"=>0
 		);
 
+        /**
+         * @var bool
+         */
+        private $activated = true;
+
 		/**
 		 * @static
 		 * @param $pClass
@@ -86,6 +91,8 @@ namespace core\tools\debugger
 		{
             /** @var Debugger $i */
             $i = self::getInstance();
+            if(!$i->activated)
+                return;
 			$time = explode(".", microtime(true));
 			if (!isset($time[1])) $time[1] = "000";
 			$decalage = (60 * 60) * ((date("I") == 0) ?1:2);
@@ -159,6 +166,8 @@ namespace core\tools\debugger
 		 */
 		public function render($pDisplay = true, $pError = false)
 		{
+            if(!$this->activated)
+                return null;
             $dir_to_theme = "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger";
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
             $ctx->assign('is_error', $pError);
@@ -298,8 +307,20 @@ namespace core\tools\debugger
 		 */
 		static public function prepare()
 		{
+            if(Core::isCli()||Core::isBot()){
+                self::getInstance()->deactivate();
+                return;
+            }
 			Autoload::addComponent("Debugger");
 		}
+
+        public function activate(){
+            $this->activated = true;
+        }
+
+        public function deactivate(){
+            $this->activated = false;
+        }
 
 		/**
 		 * Construct

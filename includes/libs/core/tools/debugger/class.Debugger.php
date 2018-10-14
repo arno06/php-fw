@@ -307,7 +307,7 @@ namespace core\tools\debugger
 		 */
 		static public function prepare()
 		{
-            if(Core::isCli()){
+            if(Core::isCli()||Core::isBot()){
                 self::getInstance()->deactivate();
                 return;
             }

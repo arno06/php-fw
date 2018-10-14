@@ -115,8 +115,6 @@ namespace core\application {
          */
         static public function defineGlobalObjects()
         {
-            if (self::isBot())
-                self::deactivateDebug();
             if (self::debug())
                 Debugger::prepare();
         }
@@ -365,18 +363,6 @@ namespace core\application {
         {
             $authHandler = Application::getInstance()->authenticationHandler;
             return Configuration::$global_debug || call_user_func_array(array($authHandler, "is"), array($authHandler::DEVELOPER));
-        }
-
-
-        /**
-         * Méthode de désactivation systématique du mode de debug
-         * @return void
-         */
-        static public function deactivateDebug()
-        {
-            Configuration::$global_debug = false;
-            $authHandler = Application::getInstance()->authenticationHandler;
-            $authHandler::$permissions = array();
         }
 
 

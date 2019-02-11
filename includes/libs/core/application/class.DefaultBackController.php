@@ -243,7 +243,7 @@ namespace core\application
 				$pagination = new PaginationHandler($currentPage, $this->nbItemsByPage, $nbDatas);
 				$pCondition->limit($pagination->first, $pagination->number);
 				$data = $this->model->all($pCondition);
-				$this->addContent("paginationInfo", $pagination->getPaginationInfo());
+				$this->addContent("pagination", $pagination);
 			}
 			else
 				$data =  $this->model->all($pCondition);

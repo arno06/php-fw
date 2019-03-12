@@ -73,7 +73,6 @@ namespace core\application\routing
                 $pUrl = "/";
 
 			$request_url = $pUrl;
-			$parameters = array();
 
 			$rules_file = Core::$path_to_application."/src/routing_rules.json";
 			try
@@ -106,6 +105,7 @@ namespace core\application\routing
                 $index_param = 0;
                 if(!isset($rule["parameters"]))
                     $rule["parameters"] = array();
+                $parameters = array();
                 foreach($rule["parameters"] as $name=>$re)
                 {
                     if(!preg_match('/\{\$'.$name.'\}/', $re_url))

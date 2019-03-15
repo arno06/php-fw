@@ -1034,7 +1034,7 @@ namespace core\tools\form
 		/**
 		 * Méthode de définition d'un input dans le formulaire en cours
 		 * @param String $pName			Nom souhaité
-		 * @param object $pDetails		Tableau des données propriétés de l'input
+		 * @param array $pDetails		Tableau des données propriétés de l'input
 		 * @return void
 		 */
 		public function setInput($pName, $pDetails)

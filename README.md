@@ -113,14 +113,19 @@ CAPTCHA
 		"label":"Captcha",
 		"tag":"captcha",
 		"require":true|false,
-		"backgroundColor":"#ffffff",
-		"fontSizeMax":13,
-		"fontSizeMin":13,
-		"width":100,
-		"height":30,
-		"rotation":15,
-		"fontColors":["#444444","#ff0000","#000000"],
-		"transparent":true
+		"attributes":{
+			"backgroundColor":"#ffffff",
+			"fontSizeMax":13,
+			"fontSizeMin":13,
+			"width":100,
+			"height":30,
+			"rotation":15,
+			"fontColors":["#444444","#ff0000","#000000"],
+			"transparent":true,
+			"length":7,
+			"type":"random|calculus",
+			"valueMax":99
+		}
 	}
 DATEPICKER
 	{

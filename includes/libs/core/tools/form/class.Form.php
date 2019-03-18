@@ -260,7 +260,9 @@ namespace core\tools\form
 					"fileType"=>"txt|rtf|pdf|doc|docx|xls|xlsx|csv|ppt|pptx"
 				),
 				self::TAG_CAPTCHA=>array(
-					"length"=>5
+					"attributes"=>array(
+                        "length"=>5
+                    )
 				),
 				self::TAG_SELECT=>array(
 					"parameters"=>array()
@@ -387,8 +389,9 @@ namespace core\tools\form
 			{
 				if($data["tag"] == Form::TAG_CAPTCHA)
 				{
+                    $attr = $data["attributes"];
 					$data["label"] = "Captcha";
-					$c = new Captcha($data["length"], $name);
+					$c = new Captcha($attr["length"], $name);
 					if(!isset($this->post[$name]) || empty($this->post[$name]))
 					{
 						unset($this->post[$name]);
@@ -1034,7 +1037,7 @@ namespace core\tools\form
 		/**
 		 * Méthode de définition d'un input dans le formulaire en cours
 		 * @param String $pName			Nom souhaité
-		 * @param object $pDetails		Tableau des données propriétés de l'input
+		 * @param array $pDetails		Tableau des données propriétés de l'input
 		 * @return void
 		 */
 		public function setInput($pName, $pDetails)

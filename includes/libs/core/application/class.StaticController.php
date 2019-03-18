@@ -84,28 +84,29 @@ namespace core\application
             if(empty($captcha) || $captcha["tag"] != Form::TAG_CAPTCHA)
                 Go::to404();
 
-            $avaibles = array("backgroundColor", "fontSizeMax", "fontSizeMin", "width", "height", "rotation","transparent");
+            $attributes = $captcha["attributes"];
+            $available_attributes = array("backgroundColor", "fontSizeRange", "width", "height", "rotation", "transparent", "valueMax");
+            $available_collections = array(
+                "fontColors"=>"addFontColor",
+                "fontFace"=>"addFontFace"
+            );
 
-            if(!isset($captcha["length"]) || empty($captcha["length"])|| $captcha["length"]==0)
-                $captcha["length"] = 5;
+            if(!isset($attributes["length"]) || empty($attributes["length"])|| $attributes["length"]==0)
+                $attributes["length"] = 5;
+            if(!isset($attributes["type"]) || empty($attributes["type"]))
+                $attributes["type"] = "random";
 
-            $c = new Captcha($captcha["length"], $input);
-            if(isset($captcha["fontColors"]) && is_array($captcha["fontColors"]))
-            {
-                $a = $captcha["fontColors"];
-                for($i = 0, $max = count($a); $i<$max; $i++)
-                    $c->addFontColor($a[$i]);
+            $c = new Captcha($attributes["length"], $input, $attributes["type"]);
+
+            foreach($available_collections as $name=>$method){
+                if(!isset($attributes[$name]) || !is_array($attributes[$name]))
+                    continue;
+                array_map(array($c, $method), $attributes[$name]);
             }
-            if(isset($captcha["fontFace"]) && is_array($captcha["fontFace"]))
+            for($i = 0, $max = count($available_attributes); $i<$max; $i++)
             {
-                $a = $captcha["fontFace"];
-                for($i = 0, $max = count($a); $i<$max; $i++)
-                    $c->addFontFace($a[$i]);
-            }
-            for($i = 0, $max = count($avaibles); $i<$max; $i++)
-            {
-                if(isset($captcha[$avaibles[$i]])&&!empty($captcha[$avaibles[$i]]))
-                    $c->$avaibles[$i] = $captcha[$avaibles[$i]];
+                if(isset($attributes[$available_attributes[$i]])&&!empty($attributes[$available_attributes[$i]]))
+                    $c->{$available_attributes[$i]} = $attributes[$available_attributes[$i]];
             }
             $c->render();
             Core::endApplication();

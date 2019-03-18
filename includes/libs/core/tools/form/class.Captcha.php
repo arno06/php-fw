@@ -24,6 +24,11 @@ namespace core\tools\form
 		 */
 		const SESSION_VAR_NAME = "captcha";
 
+        /**
+         * @type string
+         */
+        const DEFAULT_TYPE = "random";
+
 		/**
 		 * @var int
 		 */
@@ -49,6 +54,16 @@ namespace core\tools\form
 		 */
 		public $rotation = 15;
 
+        /**
+         * @var array
+         */
+        public $fontSizeRange = [13];
+
+        /**
+         * @var int
+         */
+        public $valueMax = 20;
+
 		/**
 		 * @var array
 		 */
@@ -58,16 +73,6 @@ namespace core\tools\form
 		 * @var array
 		 */
 		private $fontColors = array();
-
-		/**
-		 * @var int
-		 */
-		public $fontSizeMax = 13;
-
-		/**
-		 * @var int
-		 */
-		public $fontSizeMin = 13;
 
 		/**
 		 * @var
@@ -84,19 +89,65 @@ namespace core\tools\form
 		 */
 		private $value;
 
+        /**
+         * @var string
+         */
+        private $displayedValue;
 
-		/**
-		 * Constructor
-		 * @param int $pLength
-		 * @param string $pName
-		 */
-		public function __construct($pLength, $pName)
+        /**
+         * @var string
+         */
+        private $type;
+
+
+        /**
+         * Captcha constructor.
+         * @param int $pLength
+         * @param string $pName
+         * @param string $pType
+         */
+		public function __construct($pLength, $pName, $pType = self::DEFAULT_TYPE)
 		{
 			$this->length = $pLength;
 			$this->name = $pName;
-			$this->value = SimpleRandom::string($this->length);
+            $this->type = strtolower($pType);
+            $method = "generate".ucfirst($this->type)."Value";
+            if(!method_exists($this, $method)){
+                $method = "generateRandomValue";
+            }
+            $this->{$method}();
 		}
 
+
+        private function generateRandomValue()
+        {
+            $this->value = SimpleRandom::string($this->length);
+            $this->displayedValue = $this->value;
+        }
+
+        private function generateCalculusValue()
+        {
+            $this->value = rand(0, $this->valueMax);
+            $operations = array(
+                "addition",
+                "substraction"
+            );
+
+            $operator = $operations[rand(0, count($operations)-1)];
+
+            switch($operator){
+                case "substraction":
+                    $y = rand($this->value+1, $this->value*2);
+                    $z = $this->value + $y;
+                    $this->displayedValue = $z."-".$y;
+                    break;
+                case "addition":
+                    $y = rand(1, $this->value-1);
+                    $z = $this->value - $y;
+                    $this->displayedValue = $y."+".$z;
+                    break;
+            }
+        }
 
 		/**
 		 * @param string $pColor  Format #rrggbb
@@ -145,10 +196,16 @@ namespace core\tools\form
 		{
 			if(empty($this->fontColors))
 				$this->fontColors[] = "#000000";
-			if(!$this->fontSizeMax)
-				$this->fontSizeMax = 12;
-			if(!$this->fontSizeMin)
-				$this->fontSizeMin = 12;
+            $fontSizeMin = 12;
+            $fontSizeMax = 12;
+			if(count($this->fontSizeRange)==2){
+                $fontSizeMin = $this->fontSizeRange[0];
+                $fontSizeMax = $this->fontSizeRange[1];
+            }
+            if(count($this->fontSizeRange)==1){
+                $fontSizeMin = $this->fontSizeRange[0];
+                $fontSizeMax = $this->fontSizeRange[0];
+            }
 			$distance = $this->width/$this->length;
 			$_SESSION[self::SESSION_VAR_NAME][$this->name]=$this->value;
 			$img = new Image($this->width, $this->height, Image::PNG, 1);
@@ -156,13 +213,12 @@ namespace core\tools\form
 				$img->beginFill(hexdec(substr($this->backgroundColor, 1,2)), hexdec(substr($this->backgroundColor, 3,2)), hexdec(substr($this->backgroundColor, 5,2)));
 			$img->drawRectangle(0, 0, $this->width, $this->height);
 			$img->endFill();
-			$value = $this->getValue();
-			for($i = 0, $max = strlen($value); $i<$max;$i++)
+			for($i = 0, $max = strlen($this->displayedValue); $i<$max;$i++)
 			{
 				$c = $this->fontColors[rand(0, count($this->fontColors)-1)];
 				$f = $this->fonts[rand(0, count($this->fonts)-1)];
-				$s = rand($this->fontSizeMin, $this->fontSizeMax);
-				$img->drawText(substr($value, $i, 1), $s, $f, ($distance/4) + $i*$distance, $s + (($this->height-$s)/2), hexdec(substr($c, 1,2)),hexdec(substr($c, 3,2)),hexdec(substr($c, 5,2)), rand(-$this->rotation,$this->rotation));
+				$s = rand($fontSizeMin, $fontSizeMax);
+				$img->drawText(substr($this->displayedValue, $i, 1), $s, $f, ($distance/4) + $i*$distance, $s + (($this->height-$s)/2), hexdec(substr($c, 1,2)),hexdec(substr($c, 3,2)),hexdec(substr($c, 5,2)), rand(-$this->rotation,$this->rotation));
 			}
 			$img->render();
 		}

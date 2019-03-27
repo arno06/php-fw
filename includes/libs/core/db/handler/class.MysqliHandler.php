@@ -8,10 +8,10 @@ namespace core\db\handler
 	use \mysqli;
 
 	/**
-	 * Couche d'abstraction &agrave; la base de données (type mysql improved)
+	 * Couche d'abstraction à la base de données (type mysql improved)
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.1
+	 * @version 1.2
 	 * @package core\db\handler
 	 */
 	class MysqliHandler implements InterfaceDatabaseHandler
@@ -25,7 +25,7 @@ namespace core\db\handler
         );
 
         /**
-         * Chemin d'acc&egrave;s &agrave; la base de données
+         * Chemin d'acc&egrave;s à la base de données
          * @var String
          */
         protected $host;
@@ -39,7 +39,7 @@ namespace core\db\handler
 
 
         /**
-         * Mot de passe d'acc&egrave;s &agrave; la base de données
+         * Mot de passe d'acc&egrave;s à la base de données
          * @var String
          */
         protected $mdp;
@@ -100,28 +100,7 @@ namespace core\db\handler
 		{
             $this->mysqliInstance = new mysqli($this->host, $this->user, $this->mdp, $this->bdd);
 			if($this->mysqliInstance->connect_error)
-				trigger_error("Connexion au serveur de gestion de base de données impossible", E_USER_ERROR);
-		}
-
-
-		/**
-		 * Méthode permettant de récupérer les donnée d'une requêtes SQL
-		 * Renvoie les données renvoyées sous forme d'un tableau associatif
-		 * @param String $pQuery				Requête SQL brute
-		 * @return array
-		 */
-		public function getResult($pQuery)
-		{
-			$result = $this->execute($pQuery);
-			if(!$result)
-				trigger_error("Une erreur est apparue lors de la requête <b>".$pQuery."</b><<br/>Error ".$this->getErrorNumber()." : <i>".$this->getError()."</i>", E_USER_ERROR);
-			$return = array();
-			while($donnee = $result->fetch_assoc())
-			{
-				array_push($return, $donnee);
-			}
-			$result->free();
-			return $return;
+				trigger_error("Connexion au serveur de gestion de base de données impossible (".$this->bdd.")", E_USER_ERROR);
 		}
 
 
@@ -144,7 +123,7 @@ namespace core\db\handler
 
 
 		/**
-		 * Méthode de récupération de la clé primaire générée &agrave; la suite d'une insertion
+		 * Méthode de récupération de la clé primaire générée à la suite d'une insertion
 		 * @return Number
 		 */
 		public function getInsertId()
@@ -154,14 +133,29 @@ namespace core\db\handler
 
 
 		/**
-		 * Méthode permettant de centraliser les commandes &agrave; effectuer avant l'excécution d'une requête
-		 * @param String $pQuery				Requête &agrave; excécuter
+		 * Méthode permettant de centraliser les commandes à effectuer avant l'excécution d'une requête
+		 * @param String $pQuery				Requête à excécuter
+         * @param bool   $pRaw
 		 * @return mysqli_result
 		 */
-		public function execute($pQuery)
+		public function execute($pQuery, $pRaw = false)
 		{
 			Debugger::query($pQuery, "db", $this->bdd);
-			return $this->mysqliInstance->query($pQuery);
+			$result = $this->mysqliInstance->query($pQuery);
+            if(!$result){
+                trigger_error("Une erreur est apparue lors de la requête <b>".$pQuery."</b><br/><a href='https://www.google.com/search?q=mysql+error+".$this->getErrorNumber()."' target='_blank'>Error ".$this->getErrorNumber()."</a> : <i>".$this->getError()."</i>", E_USER_WARNING);
+                return false;
+            }
+            if($pRaw){
+                return $result;
+            }
+            $return = array();
+            while($data = $result->fetch_assoc())
+            {
+                array_push($return, $data);
+            }
+            $result->free();
+            return $return;
 		}
 
 

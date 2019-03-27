@@ -6,7 +6,7 @@ namespace core\db
 	 * Interface pour les gestionnaires de base de données
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .4
+	 * @version .5
 	 * @package db
 	 */
 	interface InterfaceDatabaseHandler
@@ -14,19 +14,10 @@ namespace core\db
 		/**
 		 * Méthode d'execution d'une Requêtes SQL
 		 * @param String $pQuery				Requêtes SQL brute
-		 * @return resource
+         * @param bool   $pRaw                  Détermine si le gestionnaire doit renvoyer un tableau ou le résultat brute
+		 * @return array|resource
 		 */
-		public function execute($pQuery);
-
-
-		/**
-		 * Méthode permettant de récupérer les donnée d'une requêtes SQL
-		 * Renvoie les données renvoyées sous forme d'un tableau associatif
-		 * @param String $pQuery				Requêtes SQL brute
-		 * @return array
-		 */
-		public function getResult($pQuery);
-
+		public function execute($pQuery, $pRaw = false);
 
 		/**
 		 * Méthode de récupération de lé clé primaire venant d'être générée par la base de données

@@ -30,7 +30,7 @@ namespace core\db\handler
 		protected $sqlite;
 
 		/**
-		 * Chemin d'acc&egrave;s &agrave; la base de données
+		 * Chemin d'accès à la base de données
 		 * @var String
 		 */
 		protected $host;
@@ -42,7 +42,7 @@ namespace core\db\handler
 		protected $user;
 
 		/**
-		 * Mot de passe d'acc&egrave;s &agrave; la base de données
+		 * Mot de passe d'accès à la base de données
 		 * @var String
 		 */
 		protected $mdp;
@@ -85,7 +85,7 @@ namespace core\db\handler
 		}
 
 		/**
-		 * Méthode de connexion &agrave; la base
+		 * Méthode de connexion à la base
 		 * Stop l'exécution de l'application si la base n'est pas accessible
 		 * @return void
 		 */
@@ -96,18 +96,32 @@ namespace core\db\handler
 		}
 
 		/**
-		 * Méthode permettant de centraliser les commandes &agrave; effectuer avant l'excécution d'une requête
-		 * @param String $pQuery				Requête &agrave; excécuter
+		 * Méthode permettant de centraliser les commandes à effectuer avant l'excécution d'une requête
+		 * @param String $pQuery				Requête à excécuter
+         * @param bool   $pRaw
 		 * @return resource
 		 */
-		public function execute($pQuery)
+		public function execute($pQuery, $pRaw = false)
 		{
 			Debugger::query($pQuery, "db", $this->bdd);
-			return $this->sqlite->exec($pQuery);
+            if($pRaw){
+                return $this->sqlite->exec($pQuery);
+            }
+            $result = $this->sqlite->query($pQuery);
+            if(!$result){
+                trigger_error("Une erreur est apparue lors de la requête <b>".$pQuery."</b>", E_USER_WARNING);
+                return false;
+            }
+            $return = array();
+            while($data = $result->fetchArray(SQLITE3_ASSOC))
+            {
+                array_push($return, $data);
+            }
+            return $return;
 		}
 
 		/**
-		 * Méthode de récupération de la clé primaire générée &agrave; la suite d'une insertion
+		 * Méthode de récupération de la clé primaire générée à la suite d'une insertion
 		 * @return Number
 		 */
 		public function getInsertId()
@@ -116,42 +130,12 @@ namespace core\db\handler
 		}
 
 		/**
-		 * Méthode permettant de clore la connexion établie avec la base de donnée
+		 * Méthode permettant de clore la connexion établie avec la base de données
 		 * @return void
 		 **/
 		protected function close()
 		{
 			$this->sqlite->close();
-		}
-
-		/**
-		 * Méthode permettant d'effectuer une requête renvoyant une ou plusieurs tuples
-		 * @param String $pQuery		Requête &agrave; effectuer
-		 * @return SQLite3Result
-		 */
-		protected function query($pQuery)
-		{
-			Debugger::query($pQuery, "db", $this->bdd);
-			return $this->sqlite->query($pQuery);
-		}
-
-		/**
-		 * Méthode permettant de récupérer les donnée d'une requêtes SQL
-		 * Renvoie les données renvoyées sous forme d'un tableau associatif
-		 * @param String $pQuery				Requête SQL brute
-		 * @return array
-		 */
-		public function getResult($pQuery)
-		{
-			$result = $this->query($pQuery);
-			if(!$result)
-				trigger_error("Une erreur est apparue lors de la requête <b>".$pQuery."</b>", E_USER_ERROR);
-			$return = array();
-			while($donnee = $result->fetchArray(SQLITE3_ASSOC))
-			{
-				array_push($return, $donnee);
-			}
-			return $return;
 		}
 
 		/**

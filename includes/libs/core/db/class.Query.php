@@ -6,7 +6,7 @@ namespace core\db
 
 	/**
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package db
 	 * @subpackage query
 	 */
@@ -102,19 +102,18 @@ namespace core\db
 		 * Méthode d'execution d'une requêtes SQL
 		 * @param  String $pQuery
 		 * @param  String $pHandler
+         * @param  bool   $pRaw
 		 * @return array|resource
 		 */
-		static public function execute($pQuery, $pHandler = "default")
+		static public function execute($pQuery, $pHandler = "default", $pRaw = false)
 		{
 			if(!is_string($pQuery))
 				return null;
 			$dbHandler = DBManager::get($pHandler);
 			if(!$dbHandler)
 				return false;
-			if(preg_match("/^(select|show|describe|explain)/i", $pQuery, $matches))
-				return $dbHandler->getResult($pQuery);
-			else
-				return $dbHandler->execute($pQuery);
+            $raw = $pRaw||!preg_match("/^(select|show|describe|explain)/i", $pQuery, $matches);
+            return $dbHandler->execute($pQuery, $raw);
 		}
 
 		/**
@@ -333,12 +332,13 @@ namespace core\db
 		}
 
 		/**
-		 * @var String $pHandler
+		 * @param String $pHandler
+         * @param bool   $pRaw
 		 * @return array|resource
 		 */
-		public function execute($pHandler = "default")
+		public function execute($pHandler = "default", $pRaw = false)
 		{
-			return Query::execute($this->get(), $pHandler);
+			return Query::execute($this->get(), $pHandler, $pRaw);
 		}
 	}
 
@@ -946,11 +946,12 @@ namespace core\db
 
 		/**
 		 * @param string $pHandler
+         * @param bool   $pRaw
 		 * @return array|resource
 		 */
-		public function execute($pHandler = "default")
+		public function execute($pHandler = "default", $pRaw = false)
 		{
-			$result = parent::execute($pHandler);
+			$result = Query::execute($this->get(), $pHandler, $pRaw);
 			if (Configuration::$global_explainOnSelect === true)
 				$this->explain($pHandler);
 			return $result;

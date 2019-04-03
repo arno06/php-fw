@@ -33,7 +33,7 @@ namespace core\tools\debugger
 		const E_USER_EXCEPTION = -1;
 
 		/**
-		 * Temps nécessaire &agrave; l'excecution de l'ensemble de l'application
+		 * Temps nécessaire à l'excecution de l'ensemble de l'application
 		 * @var Number
 		 */
 		private $timeToGenerate;
@@ -58,6 +58,11 @@ namespace core\tools\debugger
 		 * @var string
 		 */
 		private $consoles = "";
+
+        /**
+         * @var array
+         */
+        private $tracked = array();
 
 		/**
 		 * @var array
@@ -102,9 +107,27 @@ namespace core\tools\debugger
             $i->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
 		}
 
+
+        static public function track($pId){
+            /** @var Debugger $instance */
+            $instance = self::getInstance();
+            if(!isset($instance->tracked[$pId])){
+                $instance->tracked[$pId] = array(
+                    "time"=>microtime(true),
+                    "memory"=>memory_get_usage(MEMORY_REAL_USAGE)
+                );
+            }else{
+                $tracked = $instance->tracked[$pId];
+                $message = $pId."<br/>execution time: <b>".(round(microtime(true)-$tracked["time"], 3))."sec</b><br/>memory usage: <b>".($instance->formatMemory(memory_get_usage(MEMORY_REAL_USAGE)-$tracked["memory"]))."</b>";
+                trace($message);
+                unset($instance->tracked);
+            }
+        }
+
+
 		/**
-		 * Méthode d'ajout d'une sortie &agrave; la variable dédiée &agrave; cet effet
-		 * @param String $pString					Chaine de caract&egrave;re &agrave; afficher
+		 * Méthode d'ajout d'une sortie à la variable dédiée à cet effet
+		 * @param String $pString					Chaine de caractère à afficher
 		 * @param Boolean $pOpen [optional]			Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
@@ -135,7 +158,7 @@ namespace core\tools\debugger
 		}
 
 		/**
-		 * Méthode permettant d'ajouter le contenu d'un tableau &agrave; la liste de sortie du Debugger
+		 * Méthode permettant d'ajouter le contenu d'un tableau à la liste de sortie du Debugger
 		 * @param array	 	$pArray					Tableau dont on souhaite afficher le contenu
 		 * @param Boolean	$pOpen [optional]		Définit si le debugger est ouvert par défault
 		 * @return void
@@ -208,7 +231,7 @@ namespace core\tools\debugger
 
 
 		/**
-		 * Méthode de définition du temps nécessaire &agrave; l'excecution de l'application
+		 * Méthode de définition du temps nécessaire à l'excecution de l'application
 		 * @param String $pStartTime		Microtime de début
 		 * @param String $pEndTime          Microtime de fin
 		 * @return void
@@ -227,13 +250,17 @@ namespace core\tools\debugger
 		private function setMemoryUsage($pStartMem, $pEndMem)
 		{
 			$mem = $pEndMem - $pStartMem;
-			$units = array("o", "ko", "Mo", "Go");
-			$k = 0;
-			while($units[$k++] && $mem>1024)
-				$mem /= 1024;
-			$mem = round($mem*100)/100;
-			$this->memUsage = $mem." ".$units[--$k];
+			$this->memUsage = $this->formatMemory($mem);
 		}
+
+        private function formatMemory($pValue){
+            $units = array("o", "ko", "Mo", "Go");
+            $k = 0;
+            while($units[$k++] && $pValue>1024)
+                $pValue /= 1024;
+            $pValue = round($pValue*100)/100;
+            return $pValue." ".$units[--$k];
+        }
 
 		/**
 		 * Gestionnaire des erreurs de scripts Php
@@ -356,4 +383,9 @@ namespace
 	{
 		Debugger::traceR($pArray, $pOpen);
 	}
+
+    function track($pId)
+    {
+        Debugger::track($pId);
+    }
 }

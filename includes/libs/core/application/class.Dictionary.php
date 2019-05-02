@@ -60,9 +60,10 @@ namespace core\application
 		{
 			$i = self::getInstance();
 			$value = Stack::get($pId, $i->table_terms);
-			while(preg_match("/\{[a-z\.]+\}/", $value, $matches))
+            $re = "/\{([a-z\.]+)\}/";
+			while(preg_match($re, $value, $matches))
 			{
-				$value = preg_replace("/\{[a-z\.]+\}/", self::term($matches[1]), $value);
+				$value = str_replace($matches[0], self::term($matches[1]), $value);
 			}
 			if(empty($value))
 				$value = self::UNDEFINED;

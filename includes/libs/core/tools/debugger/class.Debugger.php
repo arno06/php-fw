@@ -9,7 +9,7 @@ namespace core\tools\debugger
     use core\utils\Logs;
 	use core\application\Autoload;
 	use core\application\Header;
-	use \Exception;
+    use \Exception;
 
 	/**
 	 * Class Debugger - Permet de centraliser les éventuelles "sorties" permettant de debugger l'application
@@ -118,9 +118,9 @@ namespace core\tools\debugger
                 );
             }else{
                 $tracked = $instance->tracked[$pId];
-                $message = $pId."<br/>execution time: <b>".(round(microtime(true)-$tracked["time"], 3))."sec</b><br/>memory usage: <b>".($instance->formatMemory(memory_get_usage(MEMORY_REAL_USAGE)-$tracked["memory"]))."</b>";
+                $message = $pId."<br/>execution time: <b>".(round(microtime(true)-$tracked["time"], 3))."sec</b><br/>memory usage: <b>".(self::formatMemory(memory_get_usage(MEMORY_REAL_USAGE)-$tracked["memory"]))."</b>";
                 trace($message);
-                unset($instance->tracked);
+                unset($instance->tracked[$pId]);
             }
         }
 
@@ -250,16 +250,19 @@ namespace core\tools\debugger
 		private function setMemoryUsage($pStartMem, $pEndMem)
 		{
 			$mem = $pEndMem - $pStartMem;
-			$this->memUsage = $this->formatMemory($mem);
+			$this->memUsage = self::formatMemory($mem);
 		}
 
-        private function formatMemory($pValue){
-            $units = array("o", "ko", "Mo", "Go");
-            $k = 0;
-            while($units[$k++] && $pValue>1024)
+
+        static public function formatMemory($pValue, $pPrecision = 2)
+        {
+            $units = array("octet", "ko", "Mo", "Go");
+            $i = 0;
+            while($pValue >= 1024 && $units[$i++])
+            {
                 $pValue /= 1024;
-            $pValue = round($pValue*100)/100;
-            return $pValue." ".$units[--$k];
+            }
+            return round($pValue, $pPrecision)." ".$units[$i];
         }
 
 		/**

@@ -2,6 +2,7 @@
 namespace core\tools\template
 {
 
+    use core\application\Application;
     use core\system\File;
 
     /**
@@ -92,7 +93,8 @@ namespace core\tools\template
             "implode"=>array("parameters"=>array("data"=>array(), "separator"=>"|"), "template"=>'implode({$separator}, {$data})'),
             "json_encode"=>array("parameters"=>array("data"=>array()), "template"=>'json_encode({$data})'),
             "nl2br"=>array("parameters"=>array("string"=>""), "template"=>'nl2br({$string})'),
-            "addslashes"=>array("parameters"=>array("string"=>"", "template"=>'addslashes({$string})'))
+            "addslashes"=>array("parameters"=>array("string"=>""), "template"=>'addslashes({$string})'),
+            "trace_r"=>array("parameters"=>array("value"=>array()), "template"=>'trace_r({$value})')
         );
 
 
@@ -107,6 +109,9 @@ namespace core\tools\template
             {
                 $this->context->setData($pDefaultData);
             }
+            /** @var Application $app */
+            $app = Application::getInstance();
+            $this->setup($app->getTemplatesPath(), $app->getTemplatesCachePath());
         }
 
 
@@ -136,8 +141,7 @@ namespace core\tools\template
          */
         public function setup($pTemplateDir, $pCacheDir)
         {
-            $currentDir = dirname($_SERVER['SCRIPT_FILENAME']).'/';
-            $this->templateDir = $currentDir.$pTemplateDir;
+            $this->templateDir = $pTemplateDir;
             $this->cacheDir = $pCacheDir;
             $this->context->prepare($pTemplateDir, $pCacheDir);
         }
@@ -230,7 +234,7 @@ namespace core\tools\template
             }
             catch (\Exception $e)
             {
-                trigger_error("Le fichier '".$this->templateFile."' n'existe pas.", E_USER_WARNING);
+                trigger_error("Le fichier '".$this->templateFile."' n'existe pas. ".$this->templatePath, E_USER_WARNING);
                 return;
             }
             
@@ -340,7 +344,18 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                 case "include":
                     $default = array();
                     $this->parseParameters($params, $default);
-                    return "<?php \$this->includeTpl('".$default["file"]."'); ?>";
+                    $extra = 'array(';
+                    foreach($default as $n=>$v){
+                        if($extra !== 'array('){
+                            $extra .= ',';
+                        }
+                        if(strpos($v, '$')!==0){
+                            $v = '"'.addslashes($v).'"';
+                        }
+                        $extra .= '"'.$n.'"=>'.$v;
+                    }
+                    $extra .= ')';
+                    return "<?php \$this->includeTpl('".$default["file"]."', ".$extra."); ?>";
                     break;
                 default:
                     if(isset($this->available_functions[$name]) && !empty($this->available_functions[$name]))

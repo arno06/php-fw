@@ -239,5 +239,18 @@ namespace core\data
 			else
 				return $pString;
 		}
+
+        /**
+         * @param \SimpleXMLElement $pXml
+         */
+        static public function registerNameSpaces(\SimpleXMLElement $pXml){
+            $ns = $pXml->getNamespaces(true);
+            foreach($ns as $a=>$n){
+                if(empty($a)){
+                    $a = "default";
+                }
+                $pXml->registerXPathNamespace($a, $n);
+            }
+        }
 	}
 }

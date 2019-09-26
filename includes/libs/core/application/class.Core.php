@@ -21,7 +21,7 @@ namespace core\application {
         /**
          * Version en cours du framework
          */
-        const VERSION = "3.0";
+        const VERSION = "4.0";
 
         /**
          * Erreur de configuration
@@ -40,20 +40,9 @@ namespace core\application {
         static public $path_to_application;
 
         /**
-         * Définit le chemin vers le dossier du thème pour l'application en cours
-         * @var String
-         */
-        static public $path_to_theme = "themes/main/default/front";
-
-        /**
          * @var string
          */
         static public $path_to_components = "includes/components";
-
-        /**
-         * @var string
-         */
-        static public $path_to_templates = "themes/main/default/front/views";
 
         /**
          * Contient l'url requêtée (sans l'application ni la langue)
@@ -261,8 +250,6 @@ namespace core\application {
             if (isset($parsedURL["parameters"]) && is_array($parsedURL["parameters"]) && is_array($_GET)) {
                 $_GET = array_merge($_GET, $parsedURL["parameters"]);
             }
-            self::$path_to_theme = Configuration::$server_url . $access . self::$application->getThemePath();
-            self::$path_to_templates = self::$application->getThemePath() . "/views";
         }
 
         /**
@@ -389,17 +376,6 @@ namespace core\application {
             return PHP_SAPI == "cli";
         }
 
-
-        /**
-         * Méthode de configuration de moteur de rendu
-         * @param Template $pRenderer Instance de
-         * @return void
-         */
-        static public function setupRenderer(Template &$pRenderer)
-        {
-            $pRenderer->setup(Core::$path_to_templates, Application::getInstance()->getTemplatesCachePath());
-        }
-
         /***
          * Méthode permettant d'afficher simplement un contenu sans passer par le système de templating
          * Sert notamment dans le cadre de requêtes asychrones (avec du Flash ou du JS par exemple)
@@ -486,8 +462,6 @@ namespace core\application {
             self::$module = null;
             self::$path_to_application = null;
             self::$path_to_components = null;
-            self::$path_to_theme = null;
-            self::$path_to_templates = null;
             Singleton::dispose();
             DBManager::dispose();
             exit(0);

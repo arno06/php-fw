@@ -3,6 +3,7 @@ namespace app\main\controllers\back
 {
 
     use core\application\Application;
+    use core\application\Autoload;
     use core\application\DefaultController;
 	use core\application\InterfaceController;
 	use core\application\Go;
@@ -15,7 +16,7 @@ namespace app\main\controllers\back
 	{
 		public function __construct()
 		{
-
+            Autoload::addComponent("Backoffice");
 		}
 
 		public function index()

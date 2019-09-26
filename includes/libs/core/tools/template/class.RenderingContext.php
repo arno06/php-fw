@@ -74,10 +74,11 @@ namespace core\tools\template
 
         /**
          * @param string $pName
+         * @param array $pExtra
          */
-        public function includeTpl($pName)
+        public function includeTpl($pName, $pExtra = array())
         {
-            $tpl = new Template($this->data);
+            $tpl = new Template(array_merge($this->data, $pExtra));
             $tpl->setup($this->templateDir, $this->cacheDir);
             $tpl->render($pName, true);
         }
@@ -135,6 +136,10 @@ namespace core\tools\template
          */
         public function render($pDisplay)
         {
+            if(!file_exists($this->file)){
+                trigger_error("Template file '".$this->file."' not found", E_USER_ERROR);
+                return;
+            }
             ob_start();
             include($this->file);
             $rendering = ob_get_contents();

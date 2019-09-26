@@ -40,9 +40,12 @@
     },
     "Backoffice":
     {
+		"css":[
+			"core/back/style.css"
+		],
         "javascript":
         [
-            "core/Backoffice.js"
+            "core/back/Backoffice.js"
         ]
     },
     "Debugger":

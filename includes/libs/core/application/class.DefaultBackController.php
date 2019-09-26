@@ -113,7 +113,7 @@ namespace core\application
 			$class = explode("\\", get_class($this));
 			$this->className = end($class);
             $this->formName = $this->className;
-			Autoload::addScript("Backoffice");
+            Autoload::addComponent("Backoffice");
 			$this->h1 = new BOLabelList("h1", ucfirst($this->className));
 			$this->titles = new BOLabelList("titles", ucfirst($this->className));
 			$this->actions = new BOActionList();

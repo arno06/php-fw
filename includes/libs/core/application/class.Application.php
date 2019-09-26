@@ -32,11 +32,6 @@ namespace core\application
         private $relative_path = "";
 
         /**
-         * @var string
-         */
-        private $theme = "default";
-
-        /**
          * @var bool
          */
         public $multiLanguage = false;
@@ -136,17 +131,17 @@ namespace core\application
         /**
          * @return string
          */
-        public function getThemePath()
+        public function getTemplatesCachePath()
         {
-            return "themes/".$this->name."/".$this->theme."/".$this->module->name;
+            return $this->getFilesPath()."/_cache/".$this->module->name;
         }
 
         /**
          * @return string
          */
-        public function getTemplatesCachePath()
+        public function getTemplatesPath()
         {
-            return $this->getFilesPath()."/_cache/".$this->module->name."/".$this->theme;
+            return $this->getFilesPath()."/modules/".$this->module->name."/views";
         }
 
         /**

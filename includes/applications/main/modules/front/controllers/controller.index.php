@@ -2,7 +2,6 @@
 namespace app\main\controllers\front
 {
     use core\application\DefaultController;
-    use core\tools\form\Form;
 
     class index extends DefaultController
     {
@@ -12,8 +11,7 @@ namespace app\main\controllers\front
 
         }
 
-        public function index()
-        {
+        public function index(){
 
         }
     }

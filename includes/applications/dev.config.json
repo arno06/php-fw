@@ -35,8 +35,8 @@
         {
             "handler":"core\\db\\handler\\MysqliHandler",
             "host":"localhost",
-            "user":"root",
-            "password":"",
+            "user":"php",
+            "password":"rootroot",
             "name":"fwphp"
         }
     },

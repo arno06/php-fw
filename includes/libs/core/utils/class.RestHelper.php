@@ -3,6 +3,7 @@
 namespace core\utils {
 
     use core\data\SimpleJSON;
+    use core\data\SimpleXML;
     use core\tools\debugger\Debugger;
     use core\tools\Request;
 
@@ -87,7 +88,7 @@ namespace core\utils {
                     break;
                 case self::FORMAT_XML:
                     $result = simplexml_load_string($d);
-                    XMLItem::registerNameSpaces($result);
+                    SimpleXML::registerNameSpaces($result);
                     break;
                 default:
                 case self::FORMAT_RAW:

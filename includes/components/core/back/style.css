@@ -54,7 +54,7 @@ body .button > span {
   display: inline-block;
   width: 14px;
   height: 14px;
-  background: url('../imgs/glyphicons-halflings-white.png') no-repeat;
+  background: url("imgs/glyphicons-halflings-white.png") no-repeat;
 }
 body .button.view > span {
   background-position: -48px 0;
@@ -104,7 +104,7 @@ body menu#main li.global > a > span {
   display: inline-block;
   width: 14px;
   height: 14px;
-  background: url('../imgs/glyphicons-halflings-white.png') no-repeat;
+  background: url("imgs/glyphicons-halflings-white.png") no-repeat;
 }
 body menu#main li.global.logout > a > span {
   background-position: -384px 0;

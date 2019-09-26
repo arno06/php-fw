@@ -936,8 +936,9 @@ namespace core\db
 			$union = "";
 			if(isset($this->query_union)&&!empty($this->query_union))
 			{
-				foreach($this->query_union as $q)
-					$union .= " UNION ".preg_replace("/;$/", "", $q->get());
+                /** @var QuerySelect $q */
+                foreach($this->query_union as $q)
+					$union .= " UNION ".$q->get(false);
 			}
 			$str = "SELECT " . $field . " FROM " . $table . " " . $joins . $condition . $union;
 			if ($pSemicolon) $str .= ";";

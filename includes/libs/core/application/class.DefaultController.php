@@ -102,7 +102,6 @@ namespace core\application
             $t->assign("dictionary", $terms);
             $t->assign("request_asyn", Core::$request_async);
             $t->assign("form", $this->forms);
-            Core::setupRenderer($t);
             $t->render($this->template, $pDisplay);
             return true;
 		}
@@ -118,7 +117,6 @@ namespace core\application
             foreach($authHandler::$permissions as $name=>$value)
                 $is[$name] = $authHandler::$data&&$authHandler::is($name);
 			return array(
-				"path_to_theme"=>Core::$path_to_theme,
 				"path_to_components"=>Core::$path_to_components,
 				"scripts"=>Autoload::scripts(),
 				"styles"=>Autoload::styles(),

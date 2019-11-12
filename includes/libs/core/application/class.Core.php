@@ -240,9 +240,13 @@ namespace core\application {
 
             self::setDictionary();
 
+            self::$url = $url;
+
             $parsedURL = RoutingHandler::parse($url);
 
-            self::$url = $url;
+            if(is_null($parsedURL)){
+                return;
+            }
 
             self::$controller = str_replace("-", "_", $parsedURL["controller"]);
             self::$action = str_replace("-", "_", $parsedURL["action"]);

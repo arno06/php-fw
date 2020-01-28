@@ -61,6 +61,23 @@ namespace core\application
             }
         }
 
+        /**
+         * Gère les requêtes de type OPTIONS
+         * @param array $pDomain liste des domaines autorisés
+         * @param array $pMethods liste des méthodes HTTP autorisées
+         * @param array $pHeaders liste des headers autorisés
+         */
+        static public function handleOptionsRequest($pDomain = array("*"), $pMethods = array("GET"), $pHeaders = array('Content-Type')){
+            self::allowOrigin($pDomain);
+            header('Access-Control-Allow-Methods: '.implode(", ", $pMethods));
+            header('Access-Control-Allow-Headers: '.implode(", ", $pHeaders));
+            Core::endApplication();
+        }
+
+        static public function allowOrigin($pDomain = array('*')){
+            header('Access-Control-Allow-Origin: '.implode(", ", $pDomain));
+        }
+
 		/**
 		 * Se charge d'effectuer une redirection HTTP
 		 * @param string $pURL	Url cible de la redirection

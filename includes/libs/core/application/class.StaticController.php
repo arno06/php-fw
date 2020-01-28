@@ -289,5 +289,36 @@ namespace core\application
         {
             Core::performResponse(json_encode($response), "json");
         }
+
+        /**
+         * Les routes sont à définir dans le fichier de routing de l'application ciblée
+         * ie :
+         * "some/url":
+         *  {
+         *      "parameters":{
+         *          "OPTIONS":{
+         *              "methods":["GET"],
+         *              "headers":["awaited-header"]
+         *          }
+         *      },
+         *      "OPTIONS":{
+         *          "controller":"statique",
+         *          "action":"handleOptionsRequest"
+         *      }
+         *  }
+         *  Note dans l'action du controller ciblé par la méthode HTTP appelée par un domaine distant, il est nécessaire d'appeler :
+         *      Header::allowOrigin('domain.tld');
+         */
+        public function handleOptionsRequest(){
+            if(!Core::checkRequiredGetVars("OPTIONS")){
+                Go::to404();
+            }
+            $options = $_GET["OPTIONS"];
+            $domains = $options['domains']??array("*");
+            $methods = $options['methods']??array('GET');
+            $headers = $options['headers']??array('Content-Type');
+            Header::handleOptionsRequest($domains, $methods, $headers);
+            Core::endApplication();
+        }
     }
 }

@@ -23,16 +23,14 @@ namespace core\application
             self::$pool["ETag"] = $pETag;
 
 
-            if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && isset($_SERVER['HTTP_IF_NONE_MATCH']))
+            if(isset($_SERVER['HTTP_IF_NONE_MATCH']))
             {
-                $if_modified_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
                 $if_none_match = $_SERVER['HTTP_IF_NONE_MATCH'];
-                $expires = $if_modified_since+$pDuration;
 
-                if($if_none_match == $pETag && (time() < $expires))
+                if($if_none_match == $pETag)
                 {
+                    self::$pool["Last-Modified"] = gmdate("D, d M Y H:i:s", time())." GMT";
                     self::$pool['HTTP/1.1 304 Not Modified'] = '';
-                    self::$pool["Expires"] = gmdate("D, d M Y H:i:s", $expires)." GMT";
                     self::write();
                     Core::endApplication();
                 }

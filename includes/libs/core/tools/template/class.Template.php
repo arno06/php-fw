@@ -355,7 +355,11 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                         $extra .= '"'.$n.'"=>'.$v;
                     }
                     $extra .= ')';
-                    return "<?php \$this->includeTpl('".$default["file"]."', ".$extra."); ?>";
+                    $file = $default['file'];
+                    if(strpos($file, '$this') === false){
+                        $file = "'".$file."'";
+                    }
+                    return "<?php \$this->includeTpl('".$file."', ".$extra."); ?>";
                     break;
                 default:
                     if(isset($this->available_functions[$name]) && !empty($this->available_functions[$name]))

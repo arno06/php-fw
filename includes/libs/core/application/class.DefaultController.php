@@ -100,10 +100,9 @@ namespace core\application
             $global = array('get'=>$_GET, 'post', $_POST);
             $t->assign('global', $global);
             $t->assign("dictionary", $terms);
-            $t->assign("request_asyn", Core::$request_async);
+            $t->assign("request_async", Core::$request_async);
             $t->assign("form", $this->forms);
-            $t->render($this->template, $pDisplay);
-            return true;
+            return $t->render($this->template, $pDisplay);
 		}
 
 

@@ -444,7 +444,7 @@ namespace core\application {
                 if (Core::debug()) {
                     $return = array_merge($return, Debugger::getInstance()->getGlobalVars());
                 }
-                if ((isset($_POST) && isset($_POST["render"]) && $_POST["render"] !== "false"))
+                if (Core::checkRequiredGetVars('render') && $_GET["render"] !== "false")
                     $return["html"] = $pController->render(false);
                 $response = SimpleJSON::encode($return);
                 $type = "json";

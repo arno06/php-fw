@@ -3,10 +3,6 @@
     {
         "main":
         {
-			"theme":"default",
-			"multiLanguage": false,
-			"defaultLanguage": "fr",
-			"currentLanguage": "fr",
 			"modules":{
 				"front": {
 					"useRoutingFile":true,
@@ -26,9 +22,6 @@
 		"session": "php_fw",
         "explainOnSelect": "",
         "emailContact": "me@arnaud-nicolas.fr"
-    },
-    "server": {
-        "smtp": ""
     },
     "db": {
         "default":

@@ -84,6 +84,21 @@ namespace core\application {
          */
         static public $request_async = false;
 
+        static public function runMiddlewares(){
+            ini_set('display_errors', 1);
+            ini_set('display_startup_errors', 1);
+            error_reporting(E_ALL);
+            $middlewares = [
+                "core\\middleware\\CoreMiddleware",
+                "core\\middleware\\RoutingMiddleware"
+            ];
+            for($i = 0, $max = count($middlewares); $i<$max; $i++){
+                if(call_user_func_array(array($middlewares[$i], "execute"), array(Core::$url))){
+                    Core::endApplication();
+                }
+            }
+        }
+
         /**
          * Initialisation du Core applicatif du framework
          * @return void

@@ -14,7 +14,6 @@ Autoload::$folder = __DIR__;
 spl_autoload_register(array(Autoload::getInstance(), "load"));
 
 Core::checkEnvironment();
-Core::init();
-Core::parseURL();
-Core::execute(Core::getController(), Core::getAction(), Core::getTemplate());
-Core::endApplication();
+Core::runMiddlewares();
+/*Core::init();
+Core::parseURL();*/

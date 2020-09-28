@@ -88,7 +88,11 @@ namespace core\application
 		 */
 		public function render($pDisplay = true)
 		{
-			$conf = get_class_vars('core\application\Configuration');
+            $props = get_class_vars('core\application\Configuration');
+            $conf = array();
+            foreach($props as $name=>$val){
+                $conf[$name] = Configuration::$$name;
+            }
             $terms = Dictionary::terms();
 			$globalVars = $this->getGlobalVars();
             $t = new Template();

@@ -37,7 +37,7 @@ namespace core\application
          * Tableau contenant les informations de jointures à ajout systématiquement sur les SELECT
 		 * @var array
 		 */
-		private $joins;
+		private $joins = [];
 
 		/**
 		 * @param string $pTable    Nom de la table par défaut du model

@@ -10,7 +10,7 @@ namespace core\models
      * Model de gestion des authentifications
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version 1.0
      * @package models
      */
     class ModelAuthentication extends BaseModel
@@ -24,6 +24,23 @@ namespace core\models
             parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application), Configuration::$authentication_tableId);
         }
 
+        static public function checkLoginAndHash($pLogin, $pHash){
+            if(empty($pLogin)||empty($pHash))
+                return false;
+
+            $instance = self::getInstance();
+
+            if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentication_fieldLogin, Query::EQUAL, $pLogin)))
+            {
+                if($result[Configuration::$authentication_fieldPassword] == $pHash)
+                {
+                    self::$data = $result;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         static public function isUser($pLogin, $pMdp)
         {
             if(empty($pLogin)||empty($pMdp))
@@ -33,13 +50,21 @@ namespace core\models
 
             if($result = $instance->one(Query::condition()->andWhere(Configuration::$authentication_fieldLogin, Query::EQUAL, $pLogin)))
             {
-                if($result[configuration::$authentication_fieldPassword] == $pMdp)
+                if(password_verify($pMdp, $result[configuration::$authentication_fieldPassword]))
                 {
                     self::$data = $result;
                     return true;
                 }
             }
             return false;
+        }
+
+        public function createUser($pLogin, $pPassword, $pPermissions = 1){
+            $data = array(Configuration::$authentication_fieldLogin=>$pLogin,
+                Configuration::$authentication_fieldPassword=>password_hash($pPassword, PASSWORD_BCRYPT, array("cost"=>10)),
+                Configuration::$authentication_fieldPermissions=>$pPermissions,
+            );
+            return $this->insert($data);
         }
 
         /**

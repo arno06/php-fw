@@ -419,8 +419,7 @@ namespace core\tools\form
 					{
 						case "submit":
 							unset($this->post[$name]);
-							continue;
-							break;
+							continue 2;
 						case "checkbox":
 							if(!isset($this->post[$name])||$this->post[$name]!=$data["attributes"]["value"])
 								$this->post[$name] = $data["attributes"]["valueOff"];
@@ -786,7 +785,8 @@ namespace core\tools\form
 									call_user_func_array(array($condition, $method), $parameters);
 							}
 							$model = method_exists($fm["model"], "getInstance")? $fm["model"]::getInstance() : new $fm["model"]();
-							$datas = $model->$fm["method"]($condition);
+                            $method = $fm["method"]??"all";
+                            $datas = $model->$method($condition);
 							$options = array();
 							$defaultChecked = isset($data["attributes"]["checked"]) && !isset($this->post);
 							foreach($datas as $donnees)

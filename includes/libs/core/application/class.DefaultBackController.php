@@ -2,8 +2,10 @@
 namespace core\application
 {
 	use core\application\event\Event;
-	use core\db\Query;
-	use core\tools\form\Form;
+    use core\data\SimpleJSON;
+    use core\db\Query;
+    use core\system\File;
+    use core\tools\form\Form;
 	use core\tools\PaginationHandler;
 	use core\tools\Menu;
 	use \Exception;
@@ -340,6 +342,16 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('view'));
 		}
 
+
+        public function create_form(){
+            $module = Core::$module;
+            $formFile = Core::$path_to_application."/modules/".$module."/forms/form.".$this->formName.".json";
+            $inputs = $this->model->generateInputsFromDescribe();
+            File::delete($formFile);
+            File::create($formFile);
+            File::append($formFile, SimpleJSON::encode($inputs));
+            Core::performResponse('Form file created');
+        }
 
 		/**
 		 * @param string $pField

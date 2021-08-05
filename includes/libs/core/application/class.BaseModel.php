@@ -5,15 +5,16 @@ namespace core\application
 	use core\db\DBManager;
 	use core\db\QuerySelect;
 	use core\db\QueryCondition;
+    use core\models\InterfaceBackModel;
 
-	/**
+    /**
 	 * Class devant servir de model de base pour l'ensemble des models de l'application
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version .5
 	 * @package application
 	 */
-	class BaseModel
+	class BaseModel implements InterfaceBackModel
 	{
 		/**
 		 * Nom du champs servant de clé primaire

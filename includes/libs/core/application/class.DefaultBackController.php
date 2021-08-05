@@ -4,6 +4,7 @@ namespace core\application
 	use core\application\event\Event;
     use core\data\SimpleJSON;
     use core\db\Query;
+    use core\models\InterfaceBackModel;
     use core\system\File;
     use core\tools\form\Form;
 	use core\tools\PaginationHandler;
@@ -47,7 +48,7 @@ namespace core\application
 
 		/**
 		 * Instance du model que le controller pourra manipuler
-		 * @var BaseModel
+		 * @var InterfaceBackModel
 		 */
 		protected $model;
 

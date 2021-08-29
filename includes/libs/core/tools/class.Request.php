@@ -48,7 +48,7 @@ namespace core\tools
 			$this->setOption(CURLOPT_HEADER, 0);
 		}
 
-        public function initResource() {
+        protected function initResource() {
             $this->curlResource = curl_init();
         }
 

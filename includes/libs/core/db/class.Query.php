@@ -1199,7 +1199,7 @@ namespace core\db
         public function get()
         {
             $condition = $this->getCondition()->get();
-            return "DELETE FROM ".$this->table.$condition.";";
+            return "DELETE FROM `".$this->table."`".$condition.";";
         }
     }
 
@@ -1225,7 +1225,7 @@ namespace core\db
          */
         public function get()
         {
-            return "DROP TABLE '".$this->table."';";
+            return "DROP TABLE `".$this->table."';";
         }
     }
 
@@ -1268,6 +1268,8 @@ namespace core\db
          */
         private $change_fields = "";
 
+        private $removed_fields = [];
+
         /**
          * @param $pName
          * @param $pType
@@ -1307,7 +1309,12 @@ namespace core\db
                 throw new Exception("Impossible de faire appel à la commande SQL CHANGE sur plusieurs champs simultamément");
             if(!empty($this->add_fields))
                 throw new Exception("Impossible de faire appel à la commande SQL CHANGE lorsque la commande ADD est définie");
-            $this->change_fields[] = "`".$pName."` ".$this->setupField($pName, $pType, $pSize, $pDefaultValue, $pNull, $pAI, $pIndex, $pComments);
+            $this->change_fields = "`".$pName."` ".$this->setupField($pName, $pType, $pSize, $pDefaultValue, $pNull, $pAI, $pIndex, $pComments);
+            return $this;
+        }
+
+        public function removeField($pName){
+            $this->removed_fields[] = "DROP COLUMN ".$pName;
             return $this;
         }
 
@@ -1322,7 +1329,11 @@ namespace core\db
             $change = "";
             if(!empty($this->change_fields))
                 $change = " CHANGE ".$this->change_fields;
-            return "ALTER TABLE `".$this->table."`".$add.$change.";";
+            $remove = "";
+            if(!empty($this->removed_fields)){
+                $remove = " ".implode(', ', $this->removed_fields);
+            }
+            return "ALTER TABLE `".$this->table."`".$add.$change.$remove.";";
         }
     }
 
@@ -1389,7 +1400,7 @@ namespace core\db
             $field_prop = array("`".$pName."`");
             if(preg_match('/(varchar)$/i', $pType) &&(empty($pSize) || !$pSize))
                 throw new Exception("Le type 'varchar' requiert la définition d'une taille de champ.");
-            if(preg_match("/(int|varchar)$/i", $pType))
+            if(preg_match("/(int|varchar)$/i", $pType) && !preg_match('/\([0-9]+\)/', $pType))
             {
                 if(!$pSize)
                     $pSize = 11;

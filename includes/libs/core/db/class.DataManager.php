@@ -2,8 +2,6 @@
 
 namespace core\db{
 
-    use core\application\BaseModel;
-
     /**
      * Class DataManager
      * @package core\db
@@ -58,8 +56,7 @@ namespace core\db{
             foreach($this->tables as $source){
                 $schema[] = $source->toArray();
                 $cond = Query::condition();
-                $field_info = explode(".", $source->getSelectField());
-                $field = array_pop($field_info);
+                list($tableField, $field) = explode(".", $source->getSelectField());
                 if(empty($this->foreign_values[$source->getSelectField()])){
                     trigger_error('Empty foreign values for table '.$source->getTable(), E_USER_WARNING);
                     continue;
@@ -70,6 +67,9 @@ namespace core\db{
                 $tables[$source->getTable()] = $data;
 
                 foreach($data as $datum){
+                    if(!isset($datum[$source->getId()])){
+                        continue;
+                    }
                     $this->addForeignValue($source->getTable().'.'.$source->getId(), $datum[$source->getId()]);
                 }
 
@@ -98,8 +98,10 @@ namespace core\db{
         public function import($pData, $pDomain = null, $pHandler = "default"){
 
             $schema = $pData['schema'];
+            $data = $pData['tables'];
             $dependencies = [];
             $ordered = [];
+            $ids = array();
 
             foreach($schema as &$infos){
                 $neededTables = [];
@@ -108,9 +110,23 @@ namespace core\db{
                 if($select_field[0]!= $table){
                     $neededTables[] = $select_field[0];
                 }
-                foreach($infos['foreign_keys'] as $fk){
+                foreach($infos['foreign_keys'] as $ref_field=>$fk){
                     $f = explode(".", $fk);
-                    if($f[0] == $table || in_array($f[0], $neededTables)){
+                    if($f[0] == $table){
+
+                        usort($data[$table], function($pA, $pB) use ($ref_field){
+                            if(is_null($pA[$ref_field])){
+                                return -1;
+                            }
+                            if(is_null($pB[$ref_field])){
+                                return 1;
+                            }
+                            return $pA[$ref_field] - $pB[$ref_field];
+                        });
+
+                        continue;
+                    }
+                    if(in_array($f[0], $neededTables)){
                         continue;
                     }
                     $neededTables[] = $f[0];
@@ -134,10 +150,10 @@ namespace core\db{
                 }
             }
 
-            $data = $pData['tables'];
-            $ids = array();
-
             foreach($ordered as $tableName){
+                if(!isset($dependencies[$tableName])){
+                    continue;
+                }
                 $info = $dependencies[$tableName];
                 $id = $info["id"];
                 $select_id = $info["select_field"];
@@ -149,9 +165,7 @@ namespace core\db{
 
                 $insert = $data[$name];
 
-                if(preg_match('/^'.$name.'\.(.+)$/', $select_id, $matches)){
-                    $select_id = $matches[1];
-                }else{
+                if(!preg_match('/^'.$name.'\.(.+)$/', $select_id, $matches)){
                     if(!isset($info["foreign_keys"])){
                         $info["foreign_keys"] = array();
                     }
@@ -170,10 +184,10 @@ namespace core\db{
                         }
                     }
                     $old_id = false;
-                    if($id === $select_id){
+                    if(isset($item[$id])){
                         $old_id = $item[$id];
+                        unset($item[$id]);
                     }
-                    unset($item[$id]);
 
                     if(isset($info["foreign_keys"])){
                         $keys = $info["foreign_keys"];
@@ -191,10 +205,16 @@ namespace core\db{
                     }
 
                     if(Query::insert($item)->into($name)->execute($pHandler)){
-                        if($old_id !== false){
+                        if($old_id){
                             $ids[$name.".".$id][$old_id] = DBManager::get($pHandler)->getInsertId();
                         }
                     }else{
+                        foreach($ids as $name=>$values){
+                            list($table, $id) = explode(".", $name);
+                            foreach($values as $old=>$new){
+                                Query::delete()->from($table)->where($id, Query::EQUAL, $new)->execute($pHandler);
+                            }
+                        }
                         trigger_error('Une erreur est apparue lors d\'une insertion pour la table '.$name, E_USER_ERROR);
                     }
                 }
@@ -203,7 +223,7 @@ namespace core\db{
 
             if(!is_null($pDomain) && isset($data["main_uploads"])){
                 foreach($data["main_uploads"] as $datum){
-                    $file = "https://".$pDomain."/".$datum["path_upload"];
+                    $file = $pDomain."/".$datum["path_upload"];
                     file_put_contents($datum["path_upload"], file_get_contents($file));
                 }
             }

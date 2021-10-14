@@ -103,7 +103,7 @@ namespace core\db
          * @param  String $pQuery
          * @param  String $pHandler
          * @param  bool   $pRaw
-         * @return array|resource
+         * @return array|resource|null|false
          */
         static public function execute($pQuery, $pHandler = "default", $pRaw = false)
         {
@@ -286,10 +286,8 @@ namespace core\db
                 {
                     case "sqlite":
                         return "'".\SQLite3::escapeString($pValue)."'";
-                        break;
                     default:
                         return "'".addslashes($pValue)."'";
-                        break;
                 }
             }
             else
@@ -1120,7 +1118,7 @@ namespace core\db
         /**
          * Méthode de définition des champs de la table en fonction des clés du tableau de valeurs envoyées
          * @param array $pTuple
-         * @return QueryInsert
+         * @return void
          */
         private function setFields($pTuple)
         {
@@ -1133,7 +1131,7 @@ namespace core\db
         /**
          * Méthode de définition et d'échappement des valeurs à insérer
          * @param array $pTuples
-         * @return QueryInsert
+         * @return void
          */
         private function setValues($pTuples)
         {
@@ -1268,6 +1266,9 @@ namespace core\db
          */
         private $change_fields = "";
 
+        /**
+         * @var array
+         */
         private $removed_fields = [];
 
         /**
@@ -1313,6 +1314,10 @@ namespace core\db
             return $this;
         }
 
+        /**
+         * @param $pName
+         * @return $this
+         */
         public function removeField($pName){
             $this->removed_fields[] = "DROP COLUMN ".$pName;
             return $this;

@@ -202,3 +202,11 @@
   padding: 5px;
   float: right;
 }
+
+#debug .debug_content .debug_vars ul.opcache{list-style: none;padding-left:0;}
+#debug .debug_content .debug_vars ul.opcache ul{list-style: none;padding-left:25px;}
+#debug .debug_content .debug_vars ul.opcache li{}
+#debug .debug_content .debug_vars ul.opcache li.opcache-dir>span{cursor: pointer;}
+#debug .debug_content .debug_vars ul.opcache li.opcache-file{cursor:default;}
+#debug .debug_content .debug_vars ul.opcache li.opcache-file span.invalidate{transition:all .4s;cursor:pointer;opacity:0;pointer-events:none;font-size:.8em;padding:3px 6px;margin-left:10px;background: #af0707;color:#fff;border-radius:3px;}
+#debug .debug_content .debug_vars ul.opcache li.opcache-file:hover span.invalidate{opacity:1;pointer-events: all;}

@@ -9,6 +9,7 @@ namespace core\tools\debugger
     use core\utils\Logs;
 	use core\application\Autoload;
 	use core\application\Header;
+    use core\utils\OPCacheHelper;
     use \Exception;
 
 	/**
@@ -215,6 +216,7 @@ namespace core\tools\debugger
 			$this->count["post"] = count($_POST);
 			$this->count["cookie"] = count($_COOKIE);
 			$this->count["session"] = count($_SESSION);
+            $this->count['opcache'] = OPCacheHelper::getInstance()->countScripts();
 			return array(
 				"console"=>$this->consoles,
 				"timeToGenerate"=>(round($this->timeToGenerate,3))." sec",
@@ -222,7 +224,8 @@ namespace core\tools\debugger
 				"vars"=>array("get"=>print_r($_GET, true),
 					"post"=>print_r($_POST, true),
 					"cookie"=>print_r($_COOKIE, true),
-					"session"=>print_r($_SESSION, true)
+					"session"=>print_r($_SESSION, true),
+                    "opcache"=>OPCacheHelper::getInstance()->prettyPrint()
 				),
 				"count"=>$this->count,
 				"open"=>self::$open

@@ -22,7 +22,7 @@ namespace core\utils{
             $this->enabled = $status['opcache_enabled']==1;
 
             foreach($status['scripts'] as $path=>$file){
-                if(strpos($path, Autoload::$folder)===false){
+                if(strpos($path, Autoload::$folder)===false || !$file['timestamp']){
                     continue;
                 }
                 $this->scripts[] = $file;
@@ -109,7 +109,7 @@ namespace core\utils{
                     $return .= '<li class="opcache-dir"><span>📁 '.$script['name'].'</span>';
                     $return .= '<ul>'.$this->prepareData($script['children']).'</ul></li>';
                 }else{
-                    $return .= '<li class="opcache-file"><span>📄 '.$script['name'].'</span><span class="invalidate">Invalider</span></li>';
+                    $return .= '<li class="opcache-file"><span>📄 '.$script['name'].'</span><span class="invalidate" data-script="'.$script['fullPath'].'">Invalider</span></li>';
                 }
             }
             return $return;

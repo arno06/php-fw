@@ -10,6 +10,7 @@ namespace core\application
     use core\db\Query;
     use core\tools\form\Upload;
     use core\tools\form\Captcha;
+    use core\utils\OPCacheHelper;
     use \Exception;
 
     /**
@@ -319,6 +320,14 @@ namespace core\application
             $headers = $options['headers']??array('Content-Type');
             Header::handleOptionsRequest($domains, $methods, $headers);
             Core::endApplication();
+        }
+
+        public function opcache_invalidate(){
+            if(!Core::debug() || !Core::checkRequiredGetVars('script')){
+                Go::to404();
+            }
+            $result = OPCacheHelper::getInstance()->invalidate($_GET['script']);
+            Core::performResponse($result?'true':'false');
         }
     }
 }

@@ -380,7 +380,7 @@ namespace core\application
 		public function disable($pActionName)
 		{
 			if(isset($this->actions[$pActionName]))
-                $this->actions[$pActionName]['enabled'] = false;
+                unset($this->actions[$pActionName]);
 		}
 
 		public function isEnabled($pActionName)

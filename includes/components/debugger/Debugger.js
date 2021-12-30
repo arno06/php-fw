@@ -51,6 +51,10 @@ var Debugger =
 	{
 		switch(e.keyCode)
 		{
+			case 192:
+				e.preventDefault();
+				Debugger.fullscreen();
+				break;
 			case 113:
 				e.preventDefault();
                 if(e.shiftKey)

@@ -101,7 +101,7 @@ namespace core\application
 			{
                 $t->assign($n, $v);
 			}
-            $global = array('get'=>$_GET, 'post', $_POST);
+            $global = array('get'=>$_GET, 'post'=>$_POST);
             $t->assign('global', $global);
             $t->assign("dictionary", $terms);
             $t->assign("request_async", Core::$request_async);

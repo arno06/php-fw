@@ -23,12 +23,38 @@ var Debugger =
 		document.querySelector("#debug .debug_toggle").addEventListener("click", Debugger.toggle);
         document.querySelector("#debug .debug_fullscreen").addEventListener("click", Debugger.fullscreen);
 		document.querySelector("#debug .debug_close").addEventListener("click", Debugger.close);
+		document.querySelectorAll("#debug .opcache .invalidate").forEach(function(pEl){
+			pEl.addEventListener('click', Debugger.invalidateHandler);
+		});
 		window.addEventListener("keydown", Debugger.keyDownHandler);
+	},
+	invalidateHandler:function(e){
+		let url = document.querySelector('base').getAttribute("href")+'statique/opcache-invalidate/';
+		url += '?script='+encodeURIComponent(e.currentTarget.getAttribute("data-script"));
+		let target = e.currentTarget;
+		fetch(url).then((pResponse)=>pResponse.text()).then(function(pResult){
+			console.log(pResult);
+			if(pResult!=='true'){
+				console.error('Debugger.js - OPCache invalidate error');
+				return;
+			}
+			let parent = target.parentNode.parentNode;
+			parent.removeChild(target.parentNode);
+			while(!parent.querySelectorAll('.opcache-file').length){
+				let p = parent.parentNode;
+				parent = p.parentNode;
+				parent.removeChild(p);
+			}
+		});
 	},
 	keyDownHandler:function(e)
 	{
 		switch(e.keyCode)
 		{
+			case 192:
+				e.preventDefault();
+				Debugger.fullscreen();
+				break;
 			case 113:
 				e.preventDefault();
                 if(e.shiftKey)

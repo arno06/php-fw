@@ -240,7 +240,7 @@ namespace core\tools\form
 			if($pExtension == "*")
 				$pExtension = ".".$pExtension;
 			$extract = array();
-			if(preg_match("/^.*\.(".$pExtension.")/i",$this->pathFile,$extract))
+			if(preg_match("/^.*\.(".$pExtension.")$/i",$this->pathFile,$extract))
 				return $extract[1];
 			else
 				return false;

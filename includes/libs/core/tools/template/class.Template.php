@@ -321,9 +321,11 @@ namespace core\tools\template
 
                         $array_var = 'data_'.$this->step;
                         $var = '$'.$array_var.'='.$default["from"].';';
+                        $item = preg_replace("/(\"|')/", '', $default['item']);
+                        $key = preg_replace("/(\"|')/", '', $default['key']);
 
                         return '<?php '.$var.' if($'.$array_var.'&&is_array($'.$array_var.')&&!empty($'.$array_var.')):
-foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->assign("'.$default['item'].'", $'.$default['item'].'); $this->assign("'.$default['key'].'", $'.$default['key'].'); ?>';
+foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'.$item.'); $this->assign("'.$key.'", $'.$key.'); ?>';
                     }
                     else
                     {
@@ -346,18 +348,19 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                     $this->parseParameters($params, $default);
                     $extra = 'array(';
                     foreach($default as $n=>$v){
+                        if($n === "file"){
+                            $file = $v;
+                            continue;
+                        }
                         if($extra !== 'array('){
                             $extra .= ',';
-                        }
-                        if(strpos($v, '$')!==0){
-                            $v = '"'.addslashes($v).'"';
                         }
                         $extra .= '"'.$n.'"=>'.$v;
                     }
                     $extra .= ')';
-                    $file = $default['file'];
-                    if(strpos($file, '$this') === false){
-                        $file = "'".$file."'";
+                    if(!$file){
+                        trigger_error('Paramètre "file" manquant lors de l\'appel à la fonction "include"', E_USER_WARNING);
+                        return '';
                     }
                     return "<?php \$this->includeTpl(".$file.", ".$extra."); ?>";
                     break;
@@ -369,8 +372,6 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
                         $tpl = $this->available_functions[$name]['template'];
                         foreach($default as $n=>$v)
                         {
-                            if(strpos($v, '$this->get') === false)
-                                $v = '"'.addslashes($v).'"';
                             $tpl = str_replace('{$'.$n.'}', $v, $tpl);
                         }
                         return "<?php echo ".$tpl."; ?>";
@@ -435,13 +436,13 @@ foreach($'.$array_var.' as $'.$default['key'].'=>$'.$default['item'].'): $this->
          */
         private function parseParameters($pString, &$pParams)
         {
-            $p = explode(" ", $pString);
-            foreach($p as $pv)
-            {
-                $v = explode("=", $pv);
-                $value = trim($v[1]);
-                $value = trim($value, '"');
-                $pParams[trim($v[0])] = $value;
+            $re = "/(([a-z0-9A-Z\_]+)=)/";
+            preg_match_all($re, $pString, $matches);
+            for($i = 0, $max = count($matches[0]); $i<$max; $i++){
+                $m = $matches[0][$i];
+                $s = strpos($pString, $m) + strlen($m);
+                $e = $i<($max-1)?strpos($pString, $matches[0][$i+1]):strlen($pString);
+                $pParams[trim($matches[2][$i])] = trim(substr($pString, $s, $e-$s));
             }
         }
 

@@ -764,7 +764,7 @@ namespace core\tools\form
 						}
 						break;
 					case self::TAG_DATEPICKER:
-						Autoload::addComponent("Pikaday");
+						Autoload::addComponent("WebCPicker");
 						$this->hasDatePicker = true;
 						break;
 					case self::TAG_COLORPICKER:
@@ -902,6 +902,7 @@ namespace core\tools\form
 		{
 			$noForm = false;
 			$noMandatory = false;
+            $inputs = false;
 			$output = $idForm = $classes = $url = "";
             $controller = Core::$controller;
             $action = Core::$action;
@@ -955,6 +956,9 @@ namespace core\tools\form
 			}
 			foreach($this->data as $n=>$d)
 			{
+                if($inputs !== false && !in_array($n, $inputs)){
+                    continue;
+                }
 				$require = "";
 				if($d["require"]===true)
 					$require = "*";

@@ -189,8 +189,8 @@ namespace core\tools\form
             foreach($attributes as $name=>$value)
                 $component .= $name."='".$value."' ";
             $component .= "/>";
-            $component .= "<label for='".$attributes["id"]."' class='datepicker-icon'></label>";
-            $extra = self::script("var picker = new Pikaday({ field: document.getElementById('".$attributes["id"]."') });",'',true);
+            $component .= "<label for='".$attributes["id"]."'></label>";
+            $extra = "";
             $input = self::getLabel($pData["label"].$pRequire, $pId);
             $input .= self::getComponent($component.$extra);
             return $input;

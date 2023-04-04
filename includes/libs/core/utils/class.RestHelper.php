@@ -21,6 +21,10 @@ namespace core\utils {
 
         static private $runtime_cache = array();
 
+        static public $use_cache = true;
+
+        static public $debug_track = true;
+
         /**
          * @param string $pUrl
          * @param string $pMethod
@@ -36,11 +40,13 @@ namespace core\utils {
                 $pUrl .= '?'.http_build_query($pParams);
             }
 
-            if(isset(self::$runtime_cache[md5($pUrl)]) && !empty(self::$runtime_cache[md5($pUrl)]) && $pMethod == self::HTTP_GET)
+            if(self::$use_cache && (isset(self::$runtime_cache[md5($pUrl)]) && !empty(self::$runtime_cache[md5($pUrl)]) && $pMethod == self::HTTP_GET))
                 return self::$runtime_cache[md5($pUrl)];
 
             $id = "RestHelper::request : <a target='_blank' href='".$pUrl."'>".$pUrl."</a>";
-            Debugger::track($id);
+            if(self::$debug_track){
+                Debugger::track($id);
+            }
             $r = new Request($pUrl);
             $r->setOption(CURLOPT_ENCODING, 'gzip');
             $r->setOption(CURLOPT_TIMEOUT, 10);
@@ -95,8 +101,12 @@ namespace core\utils {
                     $result = $d;
                     break;
             }
-            Debugger::track($id);
-            self::$runtime_cache[md5($pUrl)] = $result;
+            if(self::$debug_track){
+                Debugger::track($id);
+            }
+            if(self::$use_cache){
+                self::$runtime_cache[md5($pUrl)] = $result;
+            }
             return $result;
         }
     }

@@ -7,7 +7,7 @@ namespace core\system
 	 * Surcouche aux fonctions Php permettant de gérer les fichiers
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .3
+	 * @version .4
 	 * @package system
 	 */
 	abstract class File
@@ -63,6 +63,23 @@ namespace core\system
                 throw new Exception("Le fichier '".$file."' n'existe pas.");
             }
 		}
+
+        /**
+         * @param $pFileName
+         * @param $pCallBack
+         * @return void
+         * @throws Exception
+         */
+        static public function readLines($pFileName, $pCallBack){
+            if(!($resource = self::open($pFileName))){
+                throw new Exception("Le fichier '".$pFileName."' n'existe pas.");
+            }
+            $idx = 0;
+            while(!feof($resource)){
+                $pCallBack(fgets($resource), $idx++);
+            }
+            fclose($resource);
+        }
 
 		/**
 		 * Méthode d'écriture &agrave; la suite d'un fichier existant

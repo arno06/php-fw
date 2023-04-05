@@ -260,6 +260,7 @@ namespace core\db{
                         if($value != $colTo[$key]){
                             switch($key){
                                 case "Type":
+                                    trace("For ".$key." newVal=".$value." oldVal=".$colTo[$key]);
                                     $upgrades[] = Query::alter($tableName)->changeField($colName, $value, "", $col['Default'], $col['Null']=="YES")->get();
                                     break;
                                 default:

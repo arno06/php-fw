@@ -6,6 +6,7 @@ namespace core\tools\debugger
 	use core\application\Core;
 	use core\application\Configuration;
     use core\tools\template\RenderingContext;
+    use core\utils\CLI;
     use core\utils\Logs;
 	use core\application\Autoload;
 	use core\application\Header;
@@ -112,6 +113,8 @@ namespace core\tools\debugger
         static public function track($pId){
             /** @var Debugger $instance */
             $instance = self::getInstance();
+            if(!$instance->activated)
+                return;
             if(!isset($instance->tracked[$pId])){
                 $instance->tracked[$pId] = array(
                     "time"=>microtime(true),
@@ -134,6 +137,10 @@ namespace core\tools\debugger
 		 */
 		static public function trace($pString, $pOpen = false)
 		{
+            /** @var Debugger $instance */
+            $instance = self::getInstance();
+            if(!$instance->activated)
+                return;
 			if(!self::$open&&$pOpen===true)
 				self::$open = true;
 			if(is_bool($pString))
@@ -192,10 +199,8 @@ namespace core\tools\debugger
 		{
             if(!$this->activated)
                 return null;
-            $dir_to_theme = "http://".Configuration::$server_domain."/".(isset(Configuration::$server_folder)?Configuration::$server_folder."/":"")."includes/libs/core/tools/debugger";
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
             $ctx->assign('is_error', $pError);
-            $ctx->assign('dir_to_theme', $dir_to_theme);
             $ctx->assign('dir_to_components', Core::$path_to_components);
             $ctx->assign('server_url', Configuration::$server_url);
 			$globalVars = $this->getGlobalVars();
@@ -283,13 +288,6 @@ namespace core\tools\debugger
 			$stopApplication = false;
 			switch($pErrorLevel)
 			{
-				case E_ERROR:
-				case E_CORE_ERROR:
-				case E_COMPILE_ERROR:
-				case E_USER_ERROR:
-					$stopApplication = true;
-					$type = "error";
-					break;
 				case E_WARNING:
 				case E_CORE_WARNING:
 				case E_COMPILE_WARNING:
@@ -300,8 +298,12 @@ namespace core\tools\debugger
 				case E_USER_NOTICE:
 					$type = "notice";
 					break;
-				default:
+                case E_ERROR:
+                case E_CORE_ERROR:
+                case E_COMPILE_ERROR:
+                case E_USER_ERROR:
 				case self::E_USER_EXCEPTION:
+                default:
 					$stopApplication = true;
 					$type = "error";
 					break;
@@ -317,10 +319,18 @@ namespace core\tools\debugger
 				{
 					Logs::write($pErrorMessage." ".$pErrorFile." ".$pErrorLine." ".$pErrorContext, $pErrorLevel);
 				}
-				Header::contentType("text/html", Configuration::$global_encoding);
-				self::$open = true;
-				self::getInstance()->render(true, true);
-                Core::endApplication();
+                $exitCode = 0;
+                if(!CLI::isCurrentContext()){
+                    Header::contentType("text/html", Configuration::$global_encoding);
+                    self::$open = true;
+                    self::getInstance()->render(true, true);
+                }else{
+                    $exitCode = 1;
+                    CLI::newLine()->out("\r\n")
+                        ->setTextColor(CLI::RED)->out("Error (".$pErrorLevel.")")
+                        ->resetTextColor()->out(" - ".$pErrorFile.":".$pErrorLine." - ".$pErrorMessage)->endOfLine();
+                }
+                Core::endApplication($exitCode);
 			}
 		}
 
@@ -340,7 +350,7 @@ namespace core\tools\debugger
 		 */
 		static public function prepare()
 		{
-            if(Core::isCli()||Core::isBot()){
+            if(CLI::isCurrentContext()||Core::isBot()){
                 self::getInstance()->deactivate();
                 return;
             }

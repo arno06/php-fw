@@ -5,7 +5,7 @@ namespace core\application {
     use core\tools\debugger\Debugger;
     use core\db\DBManager;
     use core\application\routing\RoutingHandler;
-    use core\tools\template\Template;
+    use core\utils\CLI;
     use \Exception;
 
 
@@ -122,7 +122,7 @@ namespace core\application {
             }
             foreach ($setup as $env => $domains) {
                 foreach ($domains as $domain) {
-                    if((isset($_SERVER["SERVER_NAME"])&&$_SERVER["SERVER_NAME"] === $domain)|| (Core::isCli() && $domain == PHP_SAPI)){
+                    if((isset($_SERVER["SERVER_NAME"])&&$_SERVER["SERVER_NAME"] === $domain)|| (CLI::isCurrentContext() && $domain == PHP_SAPI)){
                         self::$config_file = "/includes/applications/" . $env . ".config.json";
                         break 2;
                     }
@@ -372,14 +372,6 @@ namespace core\application {
             return false;
         }
 
-        /**
-         * @tatic
-         * @return bool
-         */
-        static public function isCli(){
-            return PHP_SAPI == "cli";
-        }
-
         /***
          * Méthode permettant d'afficher simplement un contenu sans passer par le système de templating
          * Sert notamment dans le cadre de requêtes asychrones (avec du Flash ou du JS par exemple)
@@ -455,9 +447,10 @@ namespace core\application {
 
         /**
          * Méthode appelée afin de clore l'application
+         * @param int $pExitCode
          * @return void
          */
-        static public function endApplication()
+        static public function endApplication($pExitCode = 0)
         {
             self::$instance_controller = null;
             self::$action = null;
@@ -468,7 +461,7 @@ namespace core\application {
             self::$path_to_components = null;
             Singleton::dispose();
             DBManager::dispose();
-            exit(0);
+            exit($pExitCode);
         }
     }
 }

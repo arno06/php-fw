@@ -36,7 +36,7 @@ namespace core\tools\debugger
 
 		/**
 		 * Temps nécessaire à l'excecution de l'ensemble de l'application
-		 * @var Number
+		 * @var number
 		 */
 		private $timeToGenerate;
 
@@ -110,6 +110,10 @@ namespace core\tools\debugger
 		}
 
 
+        /**
+         * @param string $pId
+         * @return void
+         */
         static public function track($pId){
             /** @var Debugger $instance */
             $instance = self::getInstance();
@@ -131,8 +135,8 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode d'ajout d'une sortie à la variable dédiée à cet effet
-		 * @param String $pString					Chaine de caractère à afficher
-		 * @param Boolean $pOpen [optional]			Définit si le debugger est ouvert par défault
+		 * @param string $pString					Chaine de caractère à afficher
+		 * @param bool $pOpen [optional]			Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
 		static public function trace($pString, $pOpen = false)
@@ -240,8 +244,8 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode de définition du temps nécessaire à l'excecution de l'application
-		 * @param String $pStartTime		Microtime de début
-		 * @param String $pEndTime          Microtime de fin
+		 * @param string $pStartTime		Microtime de début
+		 * @param string $pEndTime          Microtime de fin
 		 * @return void
 		 */
 		private function setTimeToGenerate($pStartTime, $pEndTime)
@@ -277,13 +281,13 @@ namespace core\tools\debugger
 		 * Gestionnaire des erreurs de scripts Php
 		 * Peut stopper l'application en cas d'erreur bloquante
 		 * @param Number $pErrorLevel						Niveau d'erreur
-		 * @param String $pErrorMessage						Message renvoyé
-		 * @param String $pErrorFile						Adresse du fichier qui a déclenché l'erreur
+		 * @param string $pErrorMessage						Message renvoyé
+		 * @param string $pErrorFile						Adresse du fichier qui a déclenché l'erreur
 		 * @param Number $pErrorLine						Ligne où se trouve l'erreur
-		 * @param String $pErrorContext						Contexte
+		 * @param string $pErrorContext						Contexte - Déprécié en PHP 8
 		 * @return void
 		 */
-		static public function errorHandler($pErrorLevel, $pErrorMessage, $pErrorFile, $pErrorLine, $pErrorContext)
+		static public function errorHandler($pErrorLevel, $pErrorMessage, $pErrorFile, $pErrorLine, $pErrorContext = null)
 		{
 			$stopApplication = false;
 			switch($pErrorLevel)

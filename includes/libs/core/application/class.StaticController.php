@@ -1,6 +1,8 @@
 <?php
 namespace core\application
 {
+
+    use core\tools\debugger\Debugger;
     use core\tools\Dependencies;
     use core\tools\form\Form;
     use core\models\ModelUpload;
@@ -62,7 +64,7 @@ namespace core\application
             $ext = $extract[1];
             $folder_cache = "includes/applications/".Core::$application."/_cache/imgs/";
             $file_cache = $folder_cache."resize_".$_GET["id"]."_".$_GET["w"]."_".$_GET["h"].".".$ext;
-            if($app != "main")
+            if(Application::getInstance()->__toString() != Application::DEFAULT_APPLICATION)
                 Configuration::$server_url .= "../";
             if(file_exists($file_cache))
                 Header::location(Configuration::$server_url.$file_cache);
@@ -189,6 +191,19 @@ namespace core\application
             $this->response($response);
         }
 
+        static private function convertConfSize($pSize){
+            if(!preg_match('/^([0-9]+)([OKMGT])/', $pSize, $matches)){
+                return false;
+            }
+            $units = ["K", "M", "G", "T"];
+            $size = $matches[1];
+            $unit = $matches[2];
+            for($i = 0, $max = array_search($unit, $units); $i<=$max; $i++){
+                $size *= 1024;
+            }
+            return $size;
+        }
+
         /**
          * ATTENTION AU NAME DE L'INPUT
          * ==> FORM[INPUTNAME] <==
@@ -201,6 +216,18 @@ namespace core\application
         {
             $datas = null;
             $response = array("error"=>"");
+
+            $upload_size = self::convertConfSize(ini_get("upload_max_filesize"));
+            $post_size = self::convertConfSize(ini_get("post_max_size"));
+
+            $content_size = $_SERVER['CONTENT_LENGTH'];
+
+            if($content_size > $upload_size || $content_size > $post_size){
+                $min_size = min($upload_size, $post_size);
+                $response["error"] = 'Le fichier transmis est trop volumineux ('.Debugger::formatMemory($content_size).'). Poids maximum autorisé : '.Debugger::formatMemory($min_size);
+                $this->response($response);
+            }
+
             if(!isset($_POST["form_name"])||empty($_POST["form_name"]))
             {
                 $response["error"] = '$_POST["form_name"] require';
@@ -213,76 +240,83 @@ namespace core\application
             }
 
             $file = $_FILES[$_POST["input_name"]];
-            if(!isset($file)||empty($file))
+            if(!isset($file)||empty($file)){
                 $response["error"] = "Aucun fichier n'a été transmis";
-            if(empty($response["error"]))
-            {
-                $app = $_POST["application"];
-                $path_to_form = "includes/applications/".$app."/modules/";
-                if(isset($_POST["module"])&&!empty($_POST['module']))
-                    $path_to_form .= $_POST["module"]."/";
-                else
-                    $path_to_form .= "front/";
-                $form_name = $_POST["form_name"];
-                $path_to_form .= "forms/form.".$form_name.".json";
-                if (!file_exists($path_to_form))
-                    $path_to_form = preg_replace("/_[0-9]+\.json$/", ".json", $path_to_form);
-                try
-                {
-                    $datas = SimpleJSON::import($path_to_form);
-                }
-                catch (Exception $e)
-                {
-                    $response["error"] = "Formulaire introuvable ".$path_to_form;
-                    $this->response($response);
-                }
-
-                if(!is_array($datas[$_POST["input_name"]]))
-                {
-                    $response["error"] = "Champs cibl&eacute; introuvable";
-                    $this->response($response);
-                }
-
-                $input = $datas[$_POST["input_name"]];
-
-                if($input["tag"]!=Form::TAG_UPLOAD && ($input["tag"]!="input"&&$input["attributes"]["type"]!="file"))
-                {
-                    $response["error"] = "Le champ ciblé n'est pas un input type 'file'";
-                    $this->response($response);
-                }
-
-                $fileName = "";
-                if(isset($input["fileName"]))
-                    $fileName = "file".(rand(0,999999));
-                $folderName = Form::PATH_TO_UPLOAD_FOLDER;
-                if(isset($input["folder"]))
-                    $folderName .= $input["folder"];
-
-                $upload = new Upload($file, $folderName, $fileName);
-                if(isset($input["resize"])&&is_array($input["resize"]))
-                    $upload->resizeImage($input["resize"][0],$input["resize"][1]);
-                if(!$upload->isMimeType($input["fileType"]))
-                {
-                    $response["error"] = "Type de fichier non-autorisé (".$input["fileType"].")";
-                    $this->response($response);
-                }
-                try
-                {
-                    $upload->send();
-                }
-                catch(Exception $e)
-                {
-                    $response["error"] = "Upload impossible";
-                    $this->response($response);
-                }
-                if(isset($input["fileName"])&&!empty($input["fileName"]))
-                {
-                    $fileName = preg_replace("/(\{id\})/", $upload->id_upload, $input["fileName"]);
-                    $upload->renameFile($fileName);
-                }
-                $response["path_upload"] = Application::getInstance()->getPathPart().$upload->pathFile;
-                $response["id_upload"] = $upload->id_upload;
+                $this->response($response);
             }
+            $app = $_POST["application"];
+            $path_to_form = "includes/applications/".$app."/modules/";
+            if(isset($_POST["module"])&&!empty($_POST['module']))
+                $path_to_form .= $_POST["module"]."/";
+            else
+                $path_to_form .= "front/";
+            $form_name = $_POST["form_name"];
+            $path_to_form .= "forms/form.".$form_name.".json";
+            if (!file_exists($path_to_form))
+                $path_to_form = preg_replace("/_[0-9]+\.json$/", ".json", $path_to_form);
+            try
+            {
+                $datas = SimpleJSON::import($path_to_form);
+            }
+            catch (Exception $e)
+            {
+                $response["error"] = "Formulaire introuvable ".$path_to_form;
+                $this->response($response);
+            }
+
+            if(!is_array($datas[$_POST["input_name"]]))
+            {
+                $response["error"] = "Champs cibl&eacute; introuvable";
+                $this->response($response);
+            }
+
+            $input = $datas[$_POST["input_name"]];
+
+            if($input["tag"]!=Form::TAG_UPLOAD && ($input["tag"]!="input"&&$input["attributes"]["type"]!="file"))
+            {
+                $response["error"] = "Le champ ciblé n'est pas un input type 'file'";
+                $this->response($response);
+            }
+
+            if(isset($input['fileSize'])){
+                $acceptedFileSize = self::convertConfSize($input['fileSize']);
+                if($acceptedFileSize<$content_size){
+                    $response["error"] = 'Le fichier transmis est trop volumineux ('.Debugger::formatMemory($content_size).'). Poids maximum accepté : '.Debugger::formatMemory($acceptedFileSize);
+                    $this->response($response);
+                }
+            }
+
+            $fileName = "";
+            if(isset($input["fileName"]))
+                $fileName = "file".(rand(0,999999));
+            $folderName = Form::PATH_TO_UPLOAD_FOLDER;
+            if(isset($input["folder"]))
+                $folderName .= $input["folder"];
+
+            $upload = new Upload($file, $folderName, $fileName);
+            if(isset($input["resize"])&&is_array($input["resize"]))
+                $upload->resizeImage($input["resize"][0],$input["resize"][1]);
+            if(!$upload->isMimeType($input["fileType"]))
+            {
+                $response["error"] = "Type de fichier non-autorisé (".$input["fileType"].")";
+                $this->response($response);
+            }
+            try
+            {
+                $upload->send();
+            }
+            catch(Exception $e)
+            {
+                $response["error"] = "Upload impossible ".$e->getMessage();
+                $this->response($response);
+            }
+            if(isset($input["fileName"])&&!empty($input["fileName"]))
+            {
+                $fileName = preg_replace("/(\{id})/", $upload->id_upload, $input["fileName"]);
+                $upload->renameFile($fileName);
+            }
+            $response["path_upload"] = Application::getInstance()->getPathPart().$upload->pathFile;
+            $response["id_upload"] = $upload->id_upload;
             $this->response($response);
         }
 

@@ -23,11 +23,30 @@
             setupContext(input);
             input.dataset.progress = 0;
             input.addEventListener("change", fileChangedHandler, false);
+            let dropZone = input.parentNode;
+            dropZone.addEventListener('drop', dropHandler);
+            dropZone.addEventListener('dragover', dragHandler);
+            dropZone.addEventListener('dragleave', dragLeaveHandler);
         });
         document.querySelectorAll('a.file+a.delete').forEach(function(a)
         {
             a.addEventListener('click', deleteCurrentFileHandler, false);
         });
+    }
+
+    function dragLeaveHandler(e){
+        e.currentTarget.classList.remove('droppable');
+    }
+
+    function dropHandler(e){
+        e.preventDefault();
+        e.currentTarget.classList.remove('droppable');
+        uploadFile(e.currentTarget.querySelector('input[type="file"]'), e.dataTransfer.files[0]);
+    }
+
+    function dragHandler(e){
+        e.preventDefault();
+        e.currentTarget.classList.add('droppable');
     }
 
     function setupContext(pInput)

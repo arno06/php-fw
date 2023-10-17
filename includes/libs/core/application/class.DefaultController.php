@@ -157,25 +157,25 @@ namespace core\application
 
 		/**
 		 * Méthode d'ajout d'une variable de contenu envoyé &agrave; la vue
-		 * @param String $pSmartyVar				Nom d'acc&egrave;s &agrave; la variable
+		 * @param String $pTemplateVar				Nom d'acc&egrave;s &agrave; la variable
 		 * @param mixed $pContent					Valeur de la variable acc&egrave;s tout type (String, Object, array, int...)
 		 * @return void
 		 */
-		protected function addContent($pSmartyVar, $pContent)
+		protected function addContent($pTemplateVar, $pContent)
 		{
-			$this->content[$pSmartyVar]=$pContent;
+			$this->content[$pTemplateVar]=$pContent;
 		}
 
 		/**
 		 * Méthode de récupération du contenu d'une variable
-		 * @param String $pSmartyVar
+		 * @param String $pTemplateVar
 		 * @return mixed
 		 */
-		protected function getContent($pSmartyVar)
+		protected function getContent($pTemplateVar)
 		{
-			if(!isset($this->content[$pSmartyVar]))
+			if(!isset($this->content[$pTemplateVar]))
 				return "";
-			return $this->content[$pSmartyVar];
+			return $this->content[$pTemplateVar];
 		}
 
 

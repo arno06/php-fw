@@ -4,8 +4,8 @@ namespace core\db\handler
 
     use core\db\InterfaceDatabaseHandler;
     use core\tools\debugger\Debugger;
-	use \mysqli_result;
-	use \mysqli;
+	use mysqli_result;
+	use mysqli;
 
 	/**
 	 * Couche d'abstraction à la base de données (type mysql improved)
@@ -17,7 +17,7 @@ namespace core\db\handler
 	class MysqliHandler implements InterfaceDatabaseHandler
 	{
         /**
-         * @var array
+         * @var string[]
          */
         static private $specials = array(
             "NOW()",
@@ -136,8 +136,8 @@ namespace core\db\handler
 		 * Méthode permettant de centraliser les commandes à effectuer avant l'excécution d'une requête
 		 * @param String $pQuery				Requête à excécuter
          * @param bool   $pRaw
-		 * @return mysqli_result
-		 */
+		 * @return array|bool|mysqli_result
+         */
 		public function execute($pQuery, $pRaw = false)
 		{
 			Debugger::query($pQuery, "db", $this->bdd);
@@ -152,7 +152,7 @@ namespace core\db\handler
             $return = array();
             while($data = $result->fetch_assoc())
             {
-                array_push($return, $data);
+                $return[] = $data;
             }
             $result->free();
             return $return;

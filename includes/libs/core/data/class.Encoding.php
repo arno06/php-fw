@@ -106,7 +106,7 @@ namespace core\data
 		static public function fromUTF8($pValue)
 		{
 			if(is_string($pValue))
-				return utf8_decode($pValue);
+                return mb_convert_encoding($pValue, 'ISO-8859-1');
 			if (is_object($pValue))
 			{
 				$values = get_object_vars($pValue);

@@ -1,10 +1,6 @@
 <?php
 namespace core\utils
 {
-	use \ArrayAccess;
-	use \Iterator;
-	use \Countable;
-
 	/**
 	 * @author NICOLAS Arnaud <arno06@gmail.com>
 	 * @version 2.0

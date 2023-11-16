@@ -118,7 +118,7 @@ namespace core\tools\template
         public function get($pName, $pModifiers = array())
         {
             $value = Stack::get($pName, $this->data);
-            if(!empty($pModifiers))
+            if($value&&!empty($pModifiers))
             {
                 foreach($pModifiers as $m)
                 {

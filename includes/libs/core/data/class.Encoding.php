@@ -20,6 +20,9 @@ namespace core\data
 		 */
 		static public function toNumericEntities($pValue)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			$convmap = array(0x80, 0xff, 0, 0xff);
 			if (is_object($pValue))
 				return $pValue;
@@ -39,6 +42,9 @@ namespace core\data
 		 */
 		static public function fromNumericEntities($pValue)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			$convmap = array(0x80, 0xff, 0, 0xff);
 			if(!is_array($pValue))
 			{
@@ -65,10 +71,13 @@ namespace core\data
 		 * @param mixed $pValue
 		 * @param int $pQuote
 		 * @param bool $pCharset
-		 * @return string
+		 * @return array|string
 		 */
 		static public function toHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			if(!$pCharset)
 				$pCharset = Configuration::$global_encoding;
 			if(!is_array($pValue))
@@ -84,10 +93,13 @@ namespace core\data
 		 * @param mixed $pValue
 		 * @param int $pQuote
 		 * @param bool $pCharset
-		 * @return string
+		 * @return mixed
 		 */
 		static public function fromHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			if(!$pCharset)
 				$pCharset = Configuration::$global_encoding;
 			if(!is_array($pValue))
@@ -105,6 +117,9 @@ namespace core\data
 		 */
 		static public function fromUTF8($pValue)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			if(is_string($pValue))
                 return mb_convert_encoding($pValue, 'ISO-8859-1');
 			if (is_object($pValue))
@@ -128,8 +143,11 @@ namespace core\data
 		 */
 		static public function toUTF8($pValue)
 		{
+            if(!$pValue){
+                return $pValue;
+            }
 			if(is_string($pValue))
-				return utf8_encode($pValue);
+				return mb_convert_encoding($pValue, 'UTF-8');
 			if (is_object($pValue))
 			{
 				$values = get_object_vars($pValue);

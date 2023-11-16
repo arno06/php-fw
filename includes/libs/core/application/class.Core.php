@@ -197,7 +197,7 @@ namespace core\application {
         static public function parseURL($pUrl = null)
         {
             Configuration::$server_domain = $_SERVER["SERVER_NAME"];
-            $protocol = "http" . ((isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443') ? 's' : '') . "://";
+            $protocol = "http" . (self::isHttps() ? 's' : '') . "://";
             Configuration::$server_folder = preg_replace('/\/(index).php$/', "", $_SERVER["SCRIPT_NAME"]);
             Configuration::$server_folder = preg_replace('/^\//', "", Configuration::$server_folder);
             Configuration::$server_url = $protocol . Configuration::$server_domain . "/";
@@ -444,6 +444,13 @@ namespace core\application {
             }
         }
 
+        /**
+         * @return bool
+         */
+        static public function isHttps(){
+            return (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443')
+                || isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] == '443';
+        }
 
         /**
          * Méthode appelée afin de clore l'application

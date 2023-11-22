@@ -280,6 +280,9 @@ namespace core\db
         {
             if (!$escape)
                 return $pValue;
+            if(!$pValue){
+                return "''";
+            }
             elseif(!in_array(strtoupper($pValue), self::$specials))
             {
                 switch(self::$mode)

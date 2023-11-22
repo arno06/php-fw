@@ -325,7 +325,7 @@ namespace core\application\routing
 			$parameters = array();
 			if(empty($pUrl))
 				return $parameters;
-			$p = self::shift($pUrl, utf8_encode(self::REGEXP_PARAMETERS));
+			$p = self::shift($pUrl, mb_convert_encoding(self::REGEXP_PARAMETERS, 'UTF-8'));
 			$params = explode("/",$p);
 			$max = count($params);
 			for($i=0;$i<$max;$i++)

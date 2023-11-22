@@ -65,13 +65,13 @@ namespace core\application {
          * Définit le nom du controller
          * @var String
          */
-        static public $controller;
+        static public $controller = "";
 
         /**
          * Définit le nom de l'action
          * @var String
          */
-        static public $action;
+        static public $action = "";
 
         /**
          * Fait référence &agrave; l'instance du controller en cours

@@ -15,7 +15,7 @@ namespace core\db
 		 * Méthode d'execution d'une Requêtes SQL
 		 * @param String $pQuery				Requêtes SQL brute
          * @param bool   $pRaw                  Détermine si le gestionnaire doit renvoyer un tableau ou le résultat brute
-		 * @return array|resource
+		 * @return bool|array|resource
 		 */
 		public function execute($pQuery, $pRaw = false);
 

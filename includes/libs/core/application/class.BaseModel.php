@@ -150,7 +150,7 @@ namespace core\application
 			$r = $this->one($pCondition, $pField);
 			if(preg_match("/as\s([a-z0-9]+)/", $pField, $matches))
 				$pField = $matches[1];
-			return $r[$pField];
+			return $r[$pField]??null;
 		}
 
 		/**

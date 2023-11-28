@@ -91,7 +91,7 @@ namespace core\db\handler
 		 */
 		protected function connect()
 		{
-			if(!$this->sqlite = new SQLite3($this->host, SQLITE3_OPEN_READWRITE, null))
+			if(!$this->sqlite = new SQLite3($this->host, SQLITE3_OPEN_READWRITE))
 				trigger_error("Connexion au serveur de gestion de base de données impossible", E_USER_ERROR);
 		}
 

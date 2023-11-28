@@ -65,6 +65,13 @@ namespace core\application
 		 */
 		public function load($pClassName)
 		{
+
+            if(array_key_exists($pClassName, $this->exeptions))
+            {
+                require_once(self::$folder.$this->exeptions[$pClassName]);
+                return true;
+            }
+
 			$path = '';
 			$packages = explode('\\', $pClassName);
 
@@ -97,12 +104,6 @@ namespace core\application
 			if(!empty($path) && file_exists($path))
 			{
 				require_once($path);
-				return true;
-			}
-
-			if(array_key_exists($pClassName, $this->exeptions))
-			{
-				require_once(self::$folder.$this->exeptions[$pClassName]);
 				return true;
 			}
 

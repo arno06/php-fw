@@ -36,32 +36,8 @@
         "handler":"core\\db\\handler\\MysqliHandler",
         "host":"localhost",
         "user":"root",
-        "password":"W00Tw00t",
+        "password":"",
         "name":"php_fw"
-      },
-      "mobile":
-      {
-        "handler":"core\\db\\handler\\SQLiteHandler",
-        "host":"files/vidalmobile.db",
-        "user":"",
-        "password":"",
-        "name":""
-      },
-      "mobile2":
-      {
-        "handler":"core\\db\\handler\\SQLiteHandler",
-        "host":"files/vidalmobile2.db",
-        "user":"",
-        "password":"",
-        "name":""
-      },
-      "mobile3":
-      {
-        "handler":"core\\db\\handler\\SQLiteHandler",
-        "host":"files/vidalmobile3.db",
-        "user":"",
-        "password":"",
-        "name":""
       }
     },
     "authentication":

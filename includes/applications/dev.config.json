@@ -31,14 +31,38 @@
         "smtp": ""
     },
     "db": {
-        "default":
-        {
-            "handler":"core\\db\\handler\\MysqliHandler",
-            "host":"localhost",
-            "user":"php",
-            "password":"rootroot",
-            "name":"fwphp"
-        }
+      "default":
+      {
+        "handler":"core\\db\\handler\\MysqliHandler",
+        "host":"localhost",
+        "user":"root",
+        "password":"W00Tw00t",
+        "name":"php_fw"
+      },
+      "mobile":
+      {
+        "handler":"core\\db\\handler\\SQLiteHandler",
+        "host":"files/vidalmobile.db",
+        "user":"",
+        "password":"",
+        "name":""
+      },
+      "mobile2":
+      {
+        "handler":"core\\db\\handler\\SQLiteHandler",
+        "host":"files/vidalmobile2.db",
+        "user":"",
+        "password":"",
+        "name":""
+      },
+      "mobile3":
+      {
+        "handler":"core\\db\\handler\\SQLiteHandler",
+        "host":"files/vidalmobile3.db",
+        "user":"",
+        "password":"",
+        "name":""
+      }
     },
     "authentication":
     {
@@ -49,5 +73,7 @@
         "fieldPermissions": "permissions_user",
         "useGroup": ""
     },
-	"extra": {}
+	"extra": {
+
+    }
 }

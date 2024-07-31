@@ -32,7 +32,7 @@ namespace core\application
          * Identifiant du gestionnaire de la base de données à utiliser pour exécuter les requêtes du model
 		 * @var String
 		 */
-		protected $handler = "default";
+		protected $handler;
 
 		/**
          * Tableau contenant les informations de jointures à ajout systématiquement sur les SELECT
@@ -48,6 +48,7 @@ namespace core\application
 		{
 			$this->table = $pTable;
 			$this->id = $pId;
+            $this->handler = Application::getInstance()->dbHandler;
 		}
 
 		/**
@@ -136,7 +137,7 @@ namespace core\application
 		 **/
 		public function delete($pCondition)
 		{
-			return Query::delete()->from($this->table)->setCondition($pCondition)->execute();
+			return Query::delete()->from($this->table)->setCondition($pCondition)->execute($this->handler);
 		}
 
 		/**

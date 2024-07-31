@@ -49,6 +49,11 @@ namespace core\application
         /**
          * @var string
          */
+        public $dbHandler = "default";
+
+        /**
+         * @var string
+         */
         public $authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
 
         /**
@@ -57,7 +62,7 @@ namespace core\application
         public function __construct(PrivateClass $pInstance)
         {
             if(!$pInstance instanceOf PrivateClass)
-                trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la m�thode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
+                trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
         }
 
         /**
@@ -74,7 +79,7 @@ namespace core\application
             }
             if(!Configuration::$applications[$this->name])
             {
-                trigger_error("L'application ".$this->name." n'a pas �t� d�finie dans le fichier de configuration.", E_USER_ERROR);
+                trigger_error("L'application ".$this->name." n'a pas été définie dans le fichier de configuration.", E_USER_ERROR);
             }
 
             $data = Configuration::$applications[$this->name];

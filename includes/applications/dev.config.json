@@ -3,7 +3,6 @@
     {
         "main":
         {
-			"theme":"default",
 			"multiLanguage": false,
 			"defaultLanguage": "fr",
 			"currentLanguage": "fr",

@@ -3,7 +3,6 @@
     {
         "main":
         {
-			"theme":"default",
 			"multiLanguage": false,
 			"defaultLanguage": "fr",
 			"currentLanguage": "fr",
@@ -31,14 +30,14 @@
         "smtp": ""
     },
     "db": {
-        "default":
-        {
-            "handler":"core\\db\\handler\\MysqliHandler",
-            "host":"localhost",
-            "user":"php",
-            "password":"rootroot",
-            "name":"fwphp"
-        }
+      "default":
+      {
+        "handler":"core\\db\\handler\\MysqliHandler",
+        "host":"localhost",
+        "user":"root",
+        "password":"",
+        "name":"php_fw"
+      }
     },
     "authentication":
     {
@@ -49,5 +48,7 @@
         "fieldPermissions": "permissions_user",
         "useGroup": ""
     },
-	"extra": {}
+	"extra": {
+
+    }
 }

@@ -1,11 +1,10 @@
 <?php
-
 namespace core\utils
 {
 
     use core\application\Core;
 
-    class CLI
+    abstract class CLI
     {
 
         const RED = '0;31';
@@ -14,6 +13,14 @@ namespace core\utils
         const BLUE = '0;34';
         const WHITE = '1;37';
         const RESET = '39';
+
+        static public function delay($pSeconds){
+            for($i = $pSeconds; $i>0; $i--){
+                self::resetLine()->out("Starting in ".(CLIUtils::formatTime($i)));
+                sleep(1);
+            }
+            self::resetLine();
+        }
 
         static public function progressBar(){
             return new CLIProgressBar();
@@ -81,6 +88,30 @@ namespace core\utils
             }
             $out .= "]";
             CLI::resetLine()->out($pMessageBefore)->out(" ".$out." ")->out($pMessageAfter);
+        }
+    }
+
+    abstract class CLIUtils{
+        static public function formatTime($pSec){
+            $remaining = $pSec;
+            $precision = "";
+            $unit = "s";
+            $units = [
+                ["remaining"=>60, "unit"=>"min"],
+                ["remaining"=>60, "unit"=>"h"],
+                ["remaining"=>24, "unit"=>"j"]
+            ];
+            foreach($units as $u){
+                if($remaining > $u["remaining"]){
+                    $val = $remaining;
+                    $remaining = floor($remaining / ($u["remaining"]));
+                    $precision = $val - ($remaining * $u["remaining"]);
+                    $unit = $u["unit"];
+                }else{
+                    break;
+                }
+            }
+            return $remaining.$unit.$precision;
         }
     }
 }

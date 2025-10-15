@@ -90,6 +90,16 @@ namespace core\tools
 
             $this->configuration = isset($this->manifest["config"])?$this->manifest["config"]:array();
             unset($this->manifest["config"]);
+
+            /**
+             * Cache
+             */
+            $cacheDuration = Stack::get("cache.duration", $this->configuration);
+            if(!empty($cacheDuration))
+            {
+                $eTag = md5($_GET["need"]);
+                Header::handleCache($eTag, $cacheDuration);
+            }
         }
 
         /**
@@ -212,16 +222,6 @@ namespace core\tools
          */
         private function output($pContent)
         {
-            /**
-             * Cache
-             */
-            $cacheDuration = Stack::get("cache.duration", $this->configuration);
-            if(!empty($cacheDuration))
-            {
-                $eTag = md5($pContent);
-                Header::handleCache($eTag, $cacheDuration);
-            }
-
             Header::contentLength(strlen($pContent));
             echo $pContent;
             Core::endApplication();

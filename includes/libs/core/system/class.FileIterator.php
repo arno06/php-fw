@@ -2,6 +2,7 @@
 namespace core\system
 {
     use \Iterator;
+    use ReturnTypeWillChange;
 
     /**
      * Class FileIterator
@@ -28,7 +29,7 @@ namespace core\system
          * @link http://php.net/manual/en/iterator.current.php
          * @return mixed Can return any type.
          */
-        public function current()
+        public function current():mixed
         {
             return $this->line;
         }
@@ -39,7 +40,7 @@ namespace core\system
          * @link http://php.net/manual/en/iterator.next.php
          * @return void Any returned value is ignored.
          */
-        public function next()
+        public function next():void
         {
             $this->line = fgets($this->resource);
             $this->iteration++;
@@ -51,7 +52,7 @@ namespace core\system
          * @link http://php.net/manual/en/iterator.key.php
          * @return mixed scalar on success, or null on failure.
          */
-        public function key()
+        public function key():mixed
         {
             return $this->iteration;
         }
@@ -63,7 +64,7 @@ namespace core\system
          * @return boolean The return value will be casted to boolean and then evaluated.
          * Returns true on success or false on failure.
          */
-        public function valid()
+        public function valid():bool
         {
             return $this->line !== false;
         }
@@ -74,7 +75,7 @@ namespace core\system
          * @link http://php.net/manual/en/iterator.rewind.php
          * @return void Any returned value is ignored.
          */
-        public function rewind()
+        public function rewind():void
         {
             $this->iteration = -1;
             $this->resource = fopen($this->file, 'r');

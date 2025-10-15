@@ -255,8 +255,7 @@ namespace core\tools\template
 
             $blocks = "[a-z0-9\_]+";
 
-            $re_block = "/(\\".$to."(".$blocks.")|\\".$to."\/(".$blocks."))([^\\".$tc."]*)\\".$tc."/i";
-
+            $re_block = "/((?<!\\".$to.")\\".$to."(".$blocks.")|(?<!\\".$to.")\\".$to."\/(".$blocks."))([^\\".$tc."]*)\\".$tc."/i";
             $re_vars = "/\\$([a-z0-9\_\.\|]+)/i";
 
             $content = preg_replace_callback($re_vars, function($pMatches)

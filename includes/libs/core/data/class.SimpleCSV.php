@@ -107,7 +107,7 @@ namespace core\data
 				$new = array();
 				for($j = 0; $j<$maxFields; $j++)
 				{
-					$v = $temp[$j];
+					$v = $temp[$j]??"";
 					$v = preg_replace("/^\"/", "", $v);
 					$v = preg_replace("/\"$/", "", $v);
 					$new[$fields[$j]] = $v;

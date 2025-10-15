@@ -136,7 +136,24 @@ namespace core\application
          */
         static public function extra($pId)
         {
+            $env = getenv(str_replace(".", "_", strtoupper($pId)));
+            if($env !== false){
+                return $env;
+            }
             return Stack::get($pId, self::$_extra);
+        }
+
+        static public function fromEnvVars(){
+            $ref = new \ReflectionClass(Configuration::class);
+            $props = $ref->getStaticProperties();
+            foreach($props as $name=>$val){
+                $env = getenv(strtoupper($name));
+                if(!str_contains($name, 'global_') || $env === false){
+                    continue;
+                }
+                $env = in_array($env, ["true", "false"])?$env==="true":$env;
+                self::$$name = $env;
+            }
         }
 	}
 }

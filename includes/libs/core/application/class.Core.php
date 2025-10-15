@@ -173,6 +173,8 @@ namespace core\application {
             if (isset($configurationData['extra']) && !empty($configurationData['extra'])) {
                 Configuration::setExtra($configurationData['extra']);
             }
+
+            Configuration::fromEnvVars();
         }
 
         /**

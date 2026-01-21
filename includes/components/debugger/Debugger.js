@@ -102,7 +102,7 @@ var Debugger =
 	__controlVarsClickHandler:function(e)
 	{
 		e.preventDefault();
-		var t = e.target.nodeName.toLowerCase()!="div" ? e.target.parentNode : e.target;
+		var t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
 		document.querySelectorAll("#debug .debug_buttons div.vars").forEach(function(div)
 		{
 			if(!div.classList.contains("disabled"))
@@ -111,16 +111,19 @@ var Debugger =
 		t.classList.remove("disabled");
 		document.querySelectorAll(".debug_vars pre").forEach(function(pre)
 		{
-			if(pre.getAttribute("rel") == t.getAttribute("rel"))
-				pre.style.display = "block";
-			else
-				pre.style.display = "none";
+			if(pre.getAttribute("rel") === t.getAttribute("rel")){
+                pre.style.display = "block";
+                document.dispatchEvent(new Event('DEBUGGER_DISPLAY_'+pre.getAttribute("rel").toUpperCase()));
+            }
+			else{
+                pre.style.display = "none";
+            }
 		});
 	},
 	__controlConsoleClickHandler:function(e)
 	{
 		e.preventDefault();
-		var t = e.target.nodeName.toLowerCase()!="div" ? e.target.parentNode : e.target;
+		var t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
 		if (!t.toggle_alone) {
 			t.toggle_alone = false;
 		}
@@ -143,6 +146,65 @@ var Debugger =
 			t.classList.toggle("disabled");
 		}
 		Debugger.updateConsole();
-	}};
+	}
+};
+
+
+const FlameGraph = (()=>{
+
+    function render(pData, pParent, pTotalDuration = null, pEndAt = null){
+        let container = document.createElement("div");
+        container.classList.add("fg-row");
+        pParent.appendChild(container);
+
+        let maxWidth = container.offsetWidth;
+
+        if(!pTotalDuration){
+            pTotalDuration = pData[pData.length-1].endTime - pData[0].startTime;
+        }
+
+        for(let i of pData){
+            let elapse = 0;
+            if(pEndAt !== null){
+                elapse = i.startTime - pEndAt;
+            }
+            let duration = i.endTime - i.startTime;
+            let percent = duration / pTotalDuration;
+            let drop = document.createElement("div");
+            drop.style.width = (percent * maxWidth)+"px";
+            if(elapse){
+                drop.style.marginLeft = ((elapse/pTotalDuration) * maxWidth) + "px";
+            }
+            let labelDuration = Math.round(duration*1000)/1000;
+            drop.innerHTML = "<span>"+i.id + " "+labelDuration+"s</span>";
+            drop.setAttribute("title", i.id.stripTags()+"\nExecution time: "+labelDuration+"s");
+
+            container.appendChild(drop);
+            if(i.children && i.children.length){
+                render(i.children, drop, duration, i.startTime);
+            }
+            pEndAt = i.endTime;
+        }
+    }
+
+
+    function display(pData, pParentSelector){
+        let parent = document.querySelector(pParentSelector);
+        if(!parent){
+            return;
+        }
+        parent.innerHTML = "";
+        render(pData, parent);
+    }
+
+    String.prototype.stripTags = function(){
+        let el = document.createElement("div");
+        el.innerHTML = this;
+        return el.innerText;
+    };
+
+    return {display};
+})();
+
 NodeList.prototype.forEach = Array.prototype.forEach;
 window.addEventListener("load", Debugger.__init);

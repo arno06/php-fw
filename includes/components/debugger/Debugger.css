@@ -210,3 +210,9 @@
 #debug .debug_content .debug_vars ul.opcache li.opcache-file{cursor:default;}
 #debug .debug_content .debug_vars ul.opcache li.opcache-file span.invalidate{transition:all .4s;cursor:pointer;opacity:0;pointer-events:none;font-size:.8em;padding:3px 6px;margin-left:10px;background: #af0707;color:#fff;border-radius:3px;}
 #debug .debug_content .debug_vars ul.opcache li.opcache-file:hover span.invalidate{opacity:1;pointer-events: all;}
+
+.fg-row{display:flex; align-items: start;font-size:10px;font-family: Arial, sans-serif;}
+.fg-row>div{overflow:hidden;}
+.fg-row>div>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;display:block;padding:5px;background:#8b7d81;color:#fff;border:solid 1px #fff;box-sizing:border-box;opacity:0.6;transition:all .3s;cursor:default;}
+.fg-row>div>span:hover{opacity:1;}
+.fg-row>div>span>*{pointer-events: none;}

@@ -3,7 +3,7 @@
  * @author Arnaud NICOLAS <arno06@gmail.com>
  * @version 1.0
  */
-(function(pDict){
+const Uploader = (function(pDict){
     "use strict";
 
     var dict = pDict||{
@@ -120,7 +120,7 @@
 
         xhr.onreadystatechange=function()
         {
-            if(xhr.readyState==4)
+            if(xhr.readyState===4)
             {
                 switch(xhr.status)
                 {
@@ -129,7 +129,7 @@
                         var ct = xhr.getResponseHeader("Content-Type");
                         if(ct.indexOf("json")>-1)
                             eval("xhr.responseJSON = "+xhr.responseText+";");
-                        if(xhr.responseJSON.error && xhr.responseJSON.error != "")
+                        if(xhr.responseJSON.error && xhr.responseJSON.error !== "")
                         {
                             resetUploadInput(pInput);
                             alert(xhr.responseJSON.error);
@@ -155,7 +155,7 @@
     function updateProgress(pInput, pValue)
     {
         var value = pValue||"";
-        if(value != "")
+        if(value !== "")
         {
             value = Math.round(value);
             M4Tween.killTweensOf(pInput.dataset);
@@ -218,5 +218,11 @@
     }
 
     NodeList.prototype.forEach = Array.prototype.forEach;
-    window.addEventListener('load', init, false);
+    window.addEventListener('DOMContentLoaded', init, false);
+
+    return {
+        init:init,
+        resetUploadInput:resetUploadInput,
+        uploadCompleted:uploadCompleted
+    };
 })();

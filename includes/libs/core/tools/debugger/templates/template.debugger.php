@@ -39,6 +39,11 @@ endif;
 				<div rel="query" class="messages">
 					<span>&nbsp;</span>Requ&ecirc;tes SQL <span class="count">(<?php echo $this->get('count.query'); ?>)</span>
 				</div>
+                <?php if($this->get('count.tracks')): ?>
+                <div rel="tracks" class="vars disabled">
+                    tracks <span class="count">(<?php echo $this->get('count.tracks'); ?>)</span>
+                </div>
+                <?php endif; ?>
                 <div rel="opcache" class="vars disabled">
                     opcache <span class="count">(<?php echo $this->get('count.opcache'); ?>)</span>
                 </div>
@@ -67,6 +72,9 @@ endif;
 					<pre rel="session" style="display:none;"><?php echo $this->get('vars.session'); ?></pre>
 					<pre rel="cookie" style="display:none;"><?php echo $this->get('vars.cookie'); ?></pre>
 					<pre rel="opcache" style="display:none;"><?php echo $this->get('vars.opcache'); ?></pre>
+                    <?php if ($this->get("vars.tracks")): ?>
+                    <pre rel="tracks" style="display:none;"><?php echo $this->get('vars.tracks'); ?></pre>
+                    <?php endif; ?>
 				</div>
 			</div>
 		</div>

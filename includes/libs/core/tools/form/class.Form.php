@@ -922,20 +922,19 @@ namespace core\tools\form
             }
             $pParams = $n;
 
-            if(empty($url))
-            {
-                $url = Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage);
-            }
-            else
-            {
-                if(!empty($pParams))
-                {
-                    $url .= "?".http_build_query($pParams);
-                }
-            }
-
 			if(!$noForm)
 			{
+                if(empty($url))
+                {
+                    $url = Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage);
+                }
+                else
+                {
+                    if(!empty($pParams))
+                    {
+                        $url .= "?".http_build_query($pParams);
+                    }
+                }
 				$output .= '<form action="'.$url.'" method="post"';
 				if($this->hasUpload)
 					$output .= ' enctype="multipart/form-data"';

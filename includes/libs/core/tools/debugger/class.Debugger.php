@@ -5,6 +5,7 @@ namespace core\tools\debugger
 	use core\application\Singleton;
 	use core\application\Core;
 	use core\application\Configuration;
+    use core\data\SimpleJSON;
     use core\tools\template\RenderingContext;
     use core\utils\CLI;
     use core\utils\Logs;
@@ -66,6 +67,13 @@ namespace core\tools\debugger
          */
         private $tracked = array();
 
+        /**
+         * @var FGTrack
+         */
+        private $startedTrack = null;
+
+        private $totalTracks = 0;
+
 		/**
 		 * @var array
 		 */
@@ -119,16 +127,26 @@ namespace core\tools\debugger
             $instance = self::getInstance();
             if(!$instance->activated)
                 return;
-            if(!isset($instance->tracked[$pId])){
-                $instance->tracked[$pId] = array(
-                    "time"=>microtime(true),
-                    "memory"=>memory_get_usage(MEMORY_REAL_USAGE)
-                );
+
+            if(is_null($instance->startedTrack)){
+                $instance->startedTrack = new FGTrack($pId);
             }else{
-                $tracked = $instance->tracked[$pId];
-                $message = $pId."<br/>execution time: <b>".(round(microtime(true)-$tracked["time"], 3))."sec</b><br/>memory usage: <b>".(self::formatMemory(memory_get_usage(MEMORY_REAL_USAGE)-$tracked["memory"]))."</b>";
-                trace($message);
-                unset($instance->tracked[$pId]);
+                if($instance->startedTrack->id == $pId){
+                    $instance->totalTracks++;
+                    $instance->startedTrack->end();
+                    trace($instance->startedTrack->__toString());
+                    if($instance->startedTrack->parent === null){
+                        $instance->tracked[] = $instance->startedTrack;
+                    }
+                    $parent = $instance->startedTrack->parent;
+                    $instance->startedTrack->parent = null;
+                    $instance->startedTrack = $parent;
+                }else{
+                    $newInstance = new FGTrack($pId);
+                    $instance->startedTrack->children[] = $newInstance;
+                    $newInstance->parent = $instance->startedTrack;
+                    $instance->startedTrack = $newInstance;
+                }
             }
         }
 
@@ -226,16 +244,21 @@ namespace core\tools\debugger
 			$this->count["cookie"] = count($_COOKIE);
 			$this->count["session"] = count($_SESSION);
             $this->count['opcache'] = OPCacheHelper::getInstance()->countScripts();
+            $vars = array("get"=>print_r($_GET, true),
+                "post"=>print_r($_POST, true),
+                "cookie"=>print_r($_COOKIE, true),
+                "session"=>print_r($_SESSION, true),
+                "opcache"=>OPCacheHelper::getInstance()->prettyPrint()
+            );
+            if($this->totalTracks > 0){
+                $this->count["tracks"] = $this->totalTracks;
+                $vars["tracks"] = "<div class='debug_flamegraph'></div><script>let flamegraphData = ".SimpleJSON::encode($this->tracked).";document.addEventListener('DEBUGGER_DISPLAY_TRACKS', ()=>{console.log('debugger_display');FlameGraph.display(flamegraphData, '.debug_flamegraph')});</script>";
+            }
 			return array(
 				"console"=>$this->consoles,
 				"timeToGenerate"=>(round($this->timeToGenerate,3))." sec",
 				"memUsage"=>$this->memUsage,
-				"vars"=>array("get"=>print_r($_GET, true),
-					"post"=>print_r($_POST, true),
-					"cookie"=>print_r($_COOKIE, true),
-					"session"=>print_r($_SESSION, true),
-                    "opcache"=>OPCacheHelper::getInstance()->prettyPrint()
-				),
+                "vars"=>$vars,
 				"count"=>$this->count,
 				"open"=>self::$open
 			);
@@ -388,6 +411,31 @@ namespace core\tools\debugger
 			return "[Objet Debugger]";
 		}
 	}
+
+    class FGTrack{
+        public $id;
+        public $parent = null;
+        public $children = [];
+        public $startTime = null;
+        public $endTime = null;
+        public $startMemory = null;
+        public $endMemory = null;
+
+        public function __construct($pId){
+            $this->id = $pId;
+            $this->startTime = microtime(true);
+            $this->startMemory = memory_get_usage(true);
+        }
+
+        public function end(){
+            $this->endTime = microtime(true);
+            $this->endMemory = memory_get_usage(true);
+        }
+
+        public function __toString(){
+            return $this->id."<br/>execution time: <b>".(round($this->endTime - $this->startTime, 3))."sec</b><br/>memory usage: <b>".(Debugger::formatMemory($this->endMemory-$this->startMemory))."</b>";
+        }
+    }
 }
 
 namespace

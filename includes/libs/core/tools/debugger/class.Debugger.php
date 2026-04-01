@@ -114,7 +114,17 @@ namespace core\tools\debugger
 			$i->count[$pClass]++;
 			$pClass .= " ".self::$state;
 			self::$state = self::$state == "odd"?"even":"odd";
-            $i->consoles .= "<tr class='".$pClass."'><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
+            $context = "";
+            if(!is_null($i->startedTrack)){
+                $hashes = [];
+                $element = $i->startedTrack;
+                while($element){
+                    $hashes[] = $element->hash;
+                    $element = $element->parent;
+                }
+                $context = ' data-context="'.implode("|", $hashes).'"';
+            };
+            $i->consoles .= "<tr class='".$pClass."'".$context."><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
 		}
 
 
@@ -252,7 +262,7 @@ namespace core\tools\debugger
             );
             if($this->totalTracks > 0){
                 $this->count["tracks"] = $this->totalTracks;
-                $vars["tracks"] = "<div class='debug_flamegraph'></div><script>let flamegraphData = ".SimpleJSON::encode($this->tracked).";document.addEventListener('DEBUGGER_DISPLAY_TRACKS', ()=>{console.log('debugger_display');FlameGraph.display(flamegraphData, '.debug_flamegraph')});</script>";
+                $vars["tracks"] = "<div class='debug_flamegraph'></div><script>let flamegraphData = ".SimpleJSON::encode($this->tracked).";document.addEventListener('DEBUGGER_DISPLAY_TRACKS', ()=>{FlameGraph.display(flamegraphData, '.debug_flamegraph')});</script>";
             }
 			return array(
 				"console"=>$this->consoles,
@@ -412,8 +422,10 @@ namespace core\tools\debugger
 		}
 	}
 
+
     class FGTrack{
         public $id;
+        public $hash;
         public $parent = null;
         public $children = [];
         public $startTime = null;
@@ -423,6 +435,7 @@ namespace core\tools\debugger
 
         public function __construct($pId){
             $this->id = $pId;
+            $this->hash = md5($this->id);
             $this->startTime = microtime(true);
             $this->startMemory = memory_get_usage(true);
         }

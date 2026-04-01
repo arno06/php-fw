@@ -176,8 +176,12 @@ const FlameGraph = (()=>{
                 drop.style.marginLeft = ((elapse/pTotalDuration) * maxWidth) + "px";
             }
             let labelDuration = Math.round(duration*1000)/1000;
-            drop.innerHTML = "<span>"+i.id + " "+labelDuration+"s</span>";
+            drop.innerHTML = "<span data-context='"+i.hash+"'>"+i.id + " "+labelDuration+"s</span>";
             drop.setAttribute("title", i.id.stripTags()+"\nExecution time: "+labelDuration+"s");
+            let span = drop.querySelector('span');
+            span.addEventListener('mouseover', handleOverSpan);
+            span.addEventListener('mouseout', handleOutSpan);
+            span.addEventListener('click', handleClickSpan);
 
             container.appendChild(drop);
             if(i.children && i.children.length){
@@ -187,6 +191,40 @@ const FlameGraph = (()=>{
         }
     }
 
+
+    function handleOverSpan(e){
+        let context = e.currentTarget.getAttribute("data-context");
+        document.querySelectorAll('#debug table.console tr').forEach((pEl)=>{
+            pEl.style.opacity = 0.3;
+        });
+        document.querySelectorAll('#debug table.console tr[data-context*="'+context+'"]').forEach((pEl)=>{
+            pEl.style.opacity = 1;
+        });
+    }
+
+    function handleOutSpan(e){
+        document.querySelectorAll('#debug table.console tr').forEach((pEl)=>{
+            pEl.style.opacity = 1;
+        });
+        let selected = document.querySelector("#debug .debug_flamegraph span.span_selected");
+        if(selected){
+            handleOverSpan({currentTarget:selected});
+        }
+    }
+
+    function handleClickSpan(e){
+        let selected = document.querySelector("#debug .debug_flamegraph span.span_selected");
+        if(selected && selected !== e.currentTarget){
+            selected.classList.remove("span_selected");
+            selected.addEventListener("mouseout", handleOutSpan);
+        }
+        if(e.currentTarget.classList.contains("span_selected")){
+            e.currentTarget.addEventListener("mouseout", handleOutSpan);
+        }else{
+            e.currentTarget.removeEventListener("mouseout", handleOutSpan);
+        }
+        e.currentTarget.classList.toggle("span_selected");
+    }
 
     function display(pData, pParentSelector){
         let parent = document.querySelector(pParentSelector);

@@ -353,7 +353,6 @@ namespace core\application
             $methods = $options['methods']??array('GET');
             $headers = $options['headers']??array('Content-Type');
             Header::handleOptionsRequest($domains, $methods, $headers);
-            Core::endApplication();
         }
 
         public function opcache_invalidate(){

@@ -258,7 +258,6 @@ namespace core\application
 		/**
 		 * Méthode de modification d'une entrée
 		 * Récup&egrave;re les données via le model et les injecte dans le formulaire
-		 * @return boolean
 		 */
 		public function edit()
 		{

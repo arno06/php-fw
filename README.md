@@ -61,6 +61,15 @@ Dans le dossier racine du serveur Apache
 ### Lancement du projet
 Accéder directement à [http://localhost/php-fw/](http://localhost/php-fw/)
 
+
+### Configuration PhpStorm
+Un ensemble de [metadata avancées pour PhpStorm](https://www.jetbrains.com/help/phpstorm/ide-advanced-metadata.html) sont disponibles au sein du dossier `.phpstorm.meta.php` pour préciser l'autocomplétion ou le comportement de certaines méthodes.
+
+En complément, si `node` est disponible sur la machine de développement, il est possible des _watchers_ afin d'enrichir ce fichier de `meta` en fonction de la configuration du projet en cours :
+
+ * `.phpstorm.meta.php/watcher.manifest.js` : qui devra écouter les modifications du fichier `includes/components/manifest.json` afin de permettre l'autocomplétion des composants disponibles lors de l'appel à la méthode : `core\application\Autoload::addComponent("");`
+ * `.phpstorm.meta.php/watcher.config.js` : qui devra écouter les modifications des fichiers `includes/applications/*.config.json` afin de permettre l'autocomplétion sur les clés disponibles lors de l'appel à la méthode : `core\application\Configuration::extra("")`
+
 ## Routing
 Pour identifier le controller et l'action exécutée, on part de l'URL.
 * On regarde la première composante de l'url (chaîne de caractères entre les `/` après le domaine), si cette composante correspond à une application existante, c'est cette application qu'il faut suivre, sinon il faut suivre l'application `main` (par défaut)

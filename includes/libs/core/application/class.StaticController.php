@@ -76,48 +76,6 @@ namespace core\application
         /**
          * @return void
          */
-        public function captcha()
-        {
-            if(!Core::checkRequiredGetVars("form", "input"))
-                Go::to404();
-            $form = $_GET["form"];
-            $input = $_GET["input"];
-            $form = new Form($form);
-            $captcha = $form->getInput($input);
-            if(empty($captcha) || $captcha["tag"] != Form::TAG_CAPTCHA)
-                Go::to404();
-
-            $attributes = $captcha["attributes"];
-            $available_attributes = array("backgroundColor", "fontSizeRange", "width", "height", "rotation", "transparent", "valueMax");
-            $available_collections = array(
-                "fontColors"=>"addFontColor",
-                "fontFace"=>"addFontFace"
-            );
-
-            if(!isset($attributes["length"]) || empty($attributes["length"])|| $attributes["length"]==0)
-                $attributes["length"] = 5;
-            if(!isset($attributes["type"]) || empty($attributes["type"]))
-                $attributes["type"] = "random";
-
-            $c = new Captcha($attributes["length"], $input, $attributes["type"]);
-
-            foreach($available_collections as $name=>$method){
-                if(!isset($attributes[$name]) || !is_array($attributes[$name]))
-                    continue;
-                array_map(array($c, $method), $attributes[$name]);
-            }
-            for($i = 0, $max = count($available_attributes); $i<$max; $i++)
-            {
-                if(isset($attributes[$available_attributes[$i]])&&!empty($attributes[$available_attributes[$i]]))
-                    $c->{$available_attributes[$i]} = $attributes[$available_attributes[$i]];
-            }
-            $c->render();
-            Core::endApplication();
-        }
-
-        /**
-         * @return void
-         */
         public function autocomplete()
         {
             $datas = null;

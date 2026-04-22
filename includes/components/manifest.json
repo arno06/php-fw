@@ -7,6 +7,12 @@
 			"duration":120
 		}
 	},
+  "Captcha":
+  {
+    "javascript":[
+      "../libs/core/tools/captcha/component/Captcha.js"
+    ]
+  },
 	"Request":
 	{
 		"javascript":[

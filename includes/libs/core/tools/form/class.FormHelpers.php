@@ -272,9 +272,8 @@ namespace core\tools\form
 
         static private function captcha($pName, $pId, $pData, $pRequire = "")
         {
-            $l = "' onclick='return reloadCaptcha(this);";
-            $r = self::getLabel("<span class='captcha'><img src='statique/captcha/form:".$pData["form_name"]."/input:".$pData["field_name"]."/' alt=''/><br/><span class='reload_captcha'>".Dictionary::term("global.forms.infosCaptcha").$pRequire."</span></span>", $pId);
-            $r .= self::getComponent("<p class='input'><input type='text' name='".$pName."' id='".$pId."'/><br/><span class='details_captcha'>".sprintf(Dictionary::term("global.forms.reloadCaptcha"),$l)."</span></p>");
+            $r = self::getLabel("", $pId);
+            $r .= self::getComponent('<webc-captcha id="'.$pId.'" name="'.$pName.'"></webc-captcha>');
             return $r;
         }
 

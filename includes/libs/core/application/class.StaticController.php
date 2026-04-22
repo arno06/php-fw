@@ -362,5 +362,26 @@ namespace core\application
             $result = OPCacheHelper::getInstance()->invalidate($_GET['script']);
             Core::performResponse($result?'true':'false');
         }
+
+        public function webc_captcha(){
+
+            $headers = getallheaders();
+
+            if(!isset($headers['x-token']) || !isset($headers['x-http-with']) || !isset($headers['x-http-from'])){
+                Go::to404();
+            }
+
+            if($headers['x-http-from'] !== 'webc-catpcha' || $headers['x-http-with'] !== 'fetch'){
+                Go::to404();
+            }
+
+            $captcha = new \core\tools\captcha\Captcha($headers['x-token']);
+
+            if(isset($_POST["value"])){
+                $captcha->submit($_POST["value"]);
+            }
+
+            Core::performResponse(SimpleJSON::encode($captcha->get()), "json");
+        }
     }
 }

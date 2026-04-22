@@ -260,9 +260,7 @@ namespace core\tools\form
 					"fileType"=>"txt|rtf|pdf|doc|docx|xls|xlsx|csv|ppt|pptx"
 				),
 				self::TAG_CAPTCHA=>array(
-					"attributes"=>array(
-                        "length"=>5
-                    )
+					"attributes"=>array()
 				),
 				self::TAG_SELECT=>array(
 					"parameters"=>array()
@@ -389,27 +387,22 @@ namespace core\tools\form
 			{
 				if($data["tag"] == Form::TAG_CAPTCHA)
 				{
-                    $attr = $data["attributes"];
 					$data["label"] = "Captcha";
-					$c = new Captcha($attr["length"], $name);
 					if(!isset($this->post[$name]) || empty($this->post[$name]))
 					{
 						unset($this->post[$name]);
 						$this->inputsRequire[] = $name;
 						$this->isValid = false;
+                        continue;
 					}
-					else if($c->getValue() != $this->post[$name])
+                    $c = new \core\tools\captcha\Captcha($this->post[$name]);
+					if(!$c->verified)
 					{
-						unset($this->post[$name]);
 						$this->inputsIncorrect[]= $name;
 						$this->isValid = false;
 					}
-					else
-					{
-						unset($this->post[$name]);
-						$c->unsetSessionVar();
-					}
-					continue;
+                    unset($this->post[$name]);
+                    continue;
 				}
 				if(is_array($data["inputModifiers"]))
 					$this->applyModifiers($data["inputModifiers"], $name);
@@ -737,6 +730,9 @@ namespace core\tools\form
 			{
 				switch($data["tag"])
 				{
+                    case self::TAG_CAPTCHA:
+                        Autoload::addComponent("Captcha");
+                        break;
 					case self::TAG_RICHEDITOR:
 						trace("you must handle richeditor");
 						break;

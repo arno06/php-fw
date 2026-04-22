@@ -120,6 +120,17 @@ namespace core\system
             Core::endApplication();
         }
 
+        /**
+         * @return string
+         */
+        public function toDataUrl(){
+            ob_start();
+            $this->draw();
+            $rawdata = ob_get_contents();
+            ob_end_clean();
+            return 'data:image/'.$this->type.';base64,'.base64_encode($rawdata);
+        }
+
 
         /**
          * @param $pFile
@@ -388,6 +399,11 @@ namespace core\system
         /**
          * @type string
          */
+        const COMMAND_ROTATE         = "command_rotate";
+
+        /**
+         * @type string
+         */
         const COMMAND_CREATEIMAGE         = "command_createimage";
 
         /**
@@ -452,6 +468,15 @@ namespace core\system
             if(!$pHeight)
                 $pHeight = $srcSize[1];
             $this->command[] = array("type"=>self::COMMAND_DRAWIMAGE, "src"=>$pSrc, "srcWidth"=>$srcSize[0], "srcHeight"=>$srcSize[1], "width"=>$pWidth, "height"=>$pHeight, "x"=>$pX, "y"=>$pY);
+        }
+
+        /**
+         * @param $pAngle
+         * @return void
+         */
+        public function rotate($pAngle){
+            $this->command[] = array("type"=>self::COMMAND_ROTATE, "angle"=>$pAngle);
+
         }
 
         /**
@@ -580,7 +605,7 @@ namespace core\system
          * @param resource  $pResource
          * @return void
          */
-        protected function drawCommands($pResource)
+        protected function drawCommands(&$pResource)
         {
             $tmp = array("x"=>"0", "y"=>"0");
             $path = array();
@@ -595,8 +620,12 @@ namespace core\system
                 $cmd = $this->command[$i];
                 if(!isset($cmd["type"]))
                     continue;
-                for($k = 0;$k<$mProps;$k++)
+                for($k = 0;$k<$mProps;$k++){
+                    if(!isset($props[$k]) || !isset($cmd[$props[$k]])){
+                        continue;
+                    }
                     $cmd[$props[$k]] = $cmd[$props[$k]] * $this->oversampling;
+                }
                 switch($cmd["type"])
                 {
                     case self::COMMAND_DRAWIMAGE:
@@ -674,6 +703,11 @@ namespace core\system
                         $drawingPolygon = true;
                         $path = array();
                         break;
+                    case self::COMMAND_ROTATE:
+                        $pResource = imagerotate($pResource, $cmd["angle"], imageColorAllocateAlpha($pResource, 0, 0, 0, 127));
+                        imagealphablending($pResource, false);
+                        imagesavealpha($pResource, true);
+                        break;
                     case self::COMMAND_ENDFILL:
                         if(count($path)<3||!$drawingPolygon)
                         {
@@ -683,7 +717,7 @@ namespace core\system
                             continue;
                         }
                         if($fill_color>-1)
-                            imagefilledpolygon($pResource, $path, count($path)/2, $fill_color);
+                            imagefilledpolygon($pResource, $path, $fill_color);
                         if($line_color>-1)
                             imagepolygon($pResource, $path, count($path)/2, $line_color);
                         $drawingPolygon = false;
@@ -714,7 +748,7 @@ namespace core\system
                         break;
                     case self::COMMAND_DRAWTEXT:
                         $c = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
-                        imagettftext($pResource, $cmd["size"], $cmd["rotation"], $cmd["x"], $cmd["y"], $c, $cmd["font"], $cmd["text"]);
+                        imagettftext($pResource, $cmd["size"], $cmd["rotation"], round($cmd["x"]), round($cmd["y"]), $c, $cmd["font"], $cmd["text"]);
                         break;
                     case self::COMMAND_DRAWRECT:
                         if($fill_color>-1)

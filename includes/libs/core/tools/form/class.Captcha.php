@@ -6,6 +6,8 @@ namespace core\tools\form
 
 	/**
 	 * Class Captcha
+     * @deprecated
+     * @see \core\tools\captcha\Captcha
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version .1

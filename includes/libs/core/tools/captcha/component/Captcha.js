@@ -21,33 +21,20 @@ class WebCCaptcha extends HTMLElement
     .webc-captcha-error{background: left center/18px no-repeat var(--svg-error);color:#c52828;font-weight: bold;padding-left:30px;}
     .webc-captcha-options{display:flex;padding:0.5em;gap:0.5em;}
     .webc-captcha-options>img{cursor:pointer;padding:2px;}
-    .webc-captcha-options>img:hover{outline:solid 1px #b4f4ff;}
+    .webc-captcha-options>img:hover,
+    .webc-captcha-options>img.webc-captcha-s:focus,
+    .webc-captcha-options>img:focus{outline:solid 2px #74cedd;}
+    .webc-captcha-options>img.webc-captcha-s{}
 </style>
 <div class="webc-captcha-container">
     <div class="webc-captcha-loader" data-label="loading"></div>
 </div>
 `;
-
-
-    static DICTIONARY = {
-        'fr-FR':{
-            loading:'Vérification en cours...',
-            status_verified:'Vérification terminée.',
-            too_many_attempts:'Vous avez soumis trop de mauvaises réponses.<br/>Veuillez attendre %x',
-            wrong_answer:'La solution soumise est incorrecte'
-        },
-        'en-UK':{
-            loading:'Verification in progress...',
-            status_verified:'Verification complete.',
-            too_many_attempts:'You have submitted too many incorrect answers.<br/>Please wait %x',
-            wrong_answer:'The submitted solution is incorrect'
-        },
-        'es-SP':{
-            loading:'Verificación en curso...',
-            status_verified:'Verificación completada',
-            too_many_attempts:'Has introducido demasiadas respuestas incorrectas.<br/>Por favor, espera %x',
-            wrong_answer:'La solución enviada es incorrecta'
-        }
+    static DEFAULT_DICTIONARY = {
+        "loading": "Vérification en cours...",
+        "status_verified": "Vérification terminée.",
+        "too_many_attempts": "Vous avez soumis trop de mauvaises réponses.<br/>Veuillez attendre %x",
+        "wrong_answer": "La solution soumise est incorrecte"
     };
 
     static EVENT_THRESHOLD = 70;//ms
@@ -56,7 +43,6 @@ class WebCCaptcha extends HTMLElement
         super();
         this.verified = false;
         this.token = null;
-        this.defaultLanguage = 'fr-FR';
         this.backendUrl = 'statique/webc-captcha/';
         this.microtime = null;
         this.optionTarget = null;
@@ -114,20 +100,19 @@ class WebCCaptcha extends HTMLElement
         }
         if(pJson.too_many_attempts){
             let waiting = pJson.waiting_time;
-            let units = "sec";
-            if(waiting>=60){
-                let sec = waiting%60;
-                waiting = Math.floor(waiting / 60);
-                units = "min";
-                units += sec+"sec";
+            let units = ["sec", "min", "h"];
+            let unit = units[0];
+            for(let i = 1; i<units.length; i++){
+                if(waiting >= 60){
+                    let sub = waiting%60;
+                    waiting = Math.floor(waiting/60);
+                    unit = units[i];
+                    if(sub>0){
+                        unit += sub+units[i-1];
+                    }
+                }
             }
-            if(waiting >= 60){
-                let min = waiting%60;
-                waiting = Math.floor(waiting / 60);
-                units = "h";
-                units += min+"min";
-            }
-            let message = this.#getLabel("too_many_attempts").replace('%x', waiting+units);
+            let message = this.#getLabel("too_many_attempts").replace('%x', waiting+unit);
             container.innerHTML = `
             <div class='webc-captcha-error'>${message}</div>
 `;
@@ -157,7 +142,7 @@ class WebCCaptcha extends HTMLElement
         if((Date.now()) - this.microtime < WebCCaptcha.EVENT_THRESHOLD){
             return;
         }
-        this.#submitSolution(e.currentTarget.getAttribute("data-value"));
+        this.#submitSolution(e.currentTarget);
     }
 
     #itemMouseOverHandler(e){
@@ -172,15 +157,17 @@ class WebCCaptcha extends HTMLElement
         if((Date.now()) - this.microtime < WebCCaptcha.EVENT_THRESHOLD){
             return;
         }
-        this.#submitSolution(e.currentTarget.getAttribute("data-value"));
+        this.#submitSolution(e.currentTarget);
     }
 
-    #submitSolution(pValue){
+    #submitSolution(pSelectedElement){
+        pSelectedElement.parentNode.querySelector('.webc-captcha-s')?.classList.remove("webc-captcha-s");
+        pSelectedElement.classList.add("webc-captcha-s");
         let container = this.shadow.querySelector('.webc-captcha-container');
         container.querySelector('.webc-captcha-error')?.remove();
         container.insertAdjacentHTML('afterbegin', '<div class="webc-captcha-loader-overlay" data-label="loading"></div>');
         this.#i18n();
-        this.#makeRequest('POST', {value:pValue}).then((pJson)=>{
+        this.#makeRequest('POST', {value:pSelectedElement.getAttribute("data-value")}).then((pJson)=>{
             container.querySelector('.webc-captcha-loader-overlay').remove();
             this.#genericResponse(pJson);
         });
@@ -222,7 +209,7 @@ class WebCCaptcha extends HTMLElement
     }
 
     #getLabel(pId){
-        let val = WebCCaptcha.DICTIONARY[this.defaultLanguage]||WebCCaptcha.DICTIONARY['fr-FR'];
+        let val = DICTIONARY?.captcha||DEFAULT_DICTIONARY;
         let parts = pId.split(".");
         for(let i = 0, max = parts.length; i<max; i++){
             let id = parts[i];
@@ -235,7 +222,7 @@ class WebCCaptcha extends HTMLElement
     }
 
 
-    async #checkState(){
+    #checkState(){
         let storage = localStorage.getItem(WebCCaptcha.LS_KEY);
         let data = JSON.parse(storage?atob(storage):'{}');
         if(!data || !data.token){

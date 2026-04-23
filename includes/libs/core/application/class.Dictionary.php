@@ -54,7 +54,7 @@ namespace core\application
 		 * Méthode de récupération d'un terme se trouvant dans le fichier de langue
 		 * Le paramètre attendu correspond à la concaténation des différents identifiants de niveau d'accès
 		 * @param string $pId
-		 * @return String
+		 * @return string|array
 		 */
 		static public function term($pId)
 		{
@@ -62,6 +62,9 @@ namespace core\application
 			$value = Stack::get($pId, $i->table_terms);
             if(!$value){
                 return self::UNDEFINED;
+            }
+            if(!is_string($value)){
+                return $value;
             }
             $re = "/\{([a-z\.]+)\}/";
 			while(preg_match($re, $value, $matches))

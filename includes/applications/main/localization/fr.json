@@ -6,6 +6,19 @@
         }
     }
 }, "terms":{
+    "public": {
+      "captcha": {
+        "loading": "Vérification en cours...",
+        "status_verified": "Vérification terminée.",
+        "too_many_attempts": "Vous avez soumis trop de mauvaises réponses.<br/>Veuillez attendre %x",
+        "wrong_answer": "La solution soumise est incorrecte"
+      }
+    },
+    "captcha": {
+      "icons": {
+        "question": "Quelle icône est <u>la moins</u> représentée :"
+      }
+    },
     "global":{
         "forms":{
             "inputRequire":"Champ obligatoire",

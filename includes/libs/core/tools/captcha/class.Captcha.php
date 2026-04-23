@@ -137,6 +137,7 @@ namespace core\tools\captcha
             ];
 
             if($this->challenge["attempts_cc"] >= self::MAX_ATTEMPT){
+                $this->challenge["creation_date_cc"] = date("Y-m-d H:i:s");
                 $free = strtotime($this->challenge["creation_date_cc"]) + self::MAX_ATTEMPT_LIFTIME;
                 $this->result = [
                     "too_many_attempts"=>true,

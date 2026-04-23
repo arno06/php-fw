@@ -4,6 +4,7 @@ namespace core\tools
 
     use core\application\Application;
     use core\application\Core;
+    use core\application\Dictionary;
     use core\application\Header;
     use core\system\File;
     use core\data\SimpleJSON;
@@ -120,6 +121,14 @@ namespace core\tools
             $this->calculateNeeds($need, $needs);
 
             $needs = array_unique($needs);
+
+            if($this->type == self::TYPE_JS){
+                $dict = SimpleJSON::encode(Dictionary::term("public"));
+                $this->output = <<<DIC
+const DICTIONARY = $dict;
+DIC;
+
+            }
 
             /**
              * Get lib contents

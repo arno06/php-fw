@@ -2,6 +2,7 @@
 namespace core\tools\captcha\challenges
 {
 
+    use core\application\Dictionary;
     use core\system\Folder;
     use core\system\Image;
 
@@ -83,7 +84,7 @@ namespace core\tools\captcha\challenges
 
             return [
                 "setup"=>["icons"=>$this->icons, "correct_answers"=>$this->correct_answers],
-                "question"=>"Quelle icône est <u>la moins</u> représentée :",
+                "question"=>Dictionary::term('captcha.icons.question'),
                 "response"=>$choices
             ];
         }

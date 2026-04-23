@@ -6,6 +6,7 @@ namespace core\tools\form
     use core\application\Configuration;
     use core\application\Core;
     use core\application\Dictionary;
+    use core\data\SimpleJSON;
     use core\models\ModelUpload;
 
     /**
@@ -272,8 +273,15 @@ namespace core\tools\form
 
         static private function captcha($pName, $pId, $pData, $pRequire = "")
         {
+            $infos = [
+                "form"=>$pData["form_name"],
+                "field"=>$pData["field_name"],
+                "application"=>Application::getInstance()->__toString(),
+                "module"=>Application::getInstance()->getModule()->name
+            ];
+            $attr = base64_encode(SimpleJSON::encode($infos));
             $r = self::getLabel("", $pId);
-            $r .= self::getComponent('<webc-captcha id="'.$pId.'" name="'.$pName.'"></webc-captcha>');
+            $r .= self::getComponent('<webc-captcha id="'.$pId.'" name="'.$pName.'" data-infos="'.$attr.'"></webc-captcha>');
             return $r;
         }
 

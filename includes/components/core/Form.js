@@ -4,7 +4,7 @@ var UPLOADS = {}, Uploader = {};
 Uploader.updateProgress = function (pIdDiv, pPourcent, pSpeed)
 {
     Uploader.bar(pIdDiv).style.width = pPourcent+"%";
-	if(pSpeed != "")
+	if(pSpeed !== "")
 		pSpeed = "&nbsp;("+pSpeed+"/s)";
 	Uploader.bar(pIdDiv).innerHTML = "<span>"+pPourcent+"%"+pSpeed+"</span>";
 	Uploader.bar(pIdDiv).classList.remove('fail');
@@ -119,15 +119,6 @@ function getConvertedOctet(pBytes)
 		pBytes /= 1024;
 	pBytes = Math.round(pBytes*10)/10;
 	return pBytes+" "+units[--i];
-}
-
-function reloadCaptcha(pTarget)
-{
-	var i = pTarget.parentNode.parentNode.parentNode.parentNode.getElementsByTagName("label")[0].getElementsByTagName("span")[0].getElementsByTagName("img")[0];
-	if(!src_catpha)
-		src_catpha = i.src;
-	i.setAttribute("src", src_catpha+""+Math.round(Math.random()*9999)+"/");
-	return false;
 }
 
 function AutoFillPlugin(pTarget)

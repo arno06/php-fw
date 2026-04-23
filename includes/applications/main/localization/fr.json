@@ -17,6 +17,11 @@
     "captcha": {
       "icons": {
         "question": "Quelle icône est <u>la moins</u> représentée :"
+      },
+      "code": {
+        "calculus": "Veuillez saisir le résultat du calcul : ",
+        "random": "Veuillez saisir le code ci-après : ",
+        "check": "Vérifier"
       }
     },
     "global":{

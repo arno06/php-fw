@@ -19,12 +19,17 @@ class WebCCaptcha extends HTMLElement
     .webc-captcha-loader-overlay{padding:1em 1em 1em calc(1em + 30px);position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items: center;box-sizing: border-box;background-size:18px;background-position:left 1em center;backdrop-filter: blur(5px);}
     .webc-captcha-verified{background: no-repeat var(--svg-checkmark);color:#43a047;font-weight: bold;padding-left:30px;}
     .webc-captcha-error{background: left center/18px no-repeat var(--svg-error);color:#c52828;font-weight: bold;padding-left:30px;}
+    .webc-captcha-question{display:flex;align-items:center;}
     .webc-captcha-options{display:flex;padding:0.5em;gap:0.5em;}
     .webc-captcha-options>img{cursor:pointer;padding:2px;}
     .webc-captcha-options>img:hover,
     .webc-captcha-options>img.webc-captcha-s:focus,
     .webc-captcha-options>img:focus{outline:solid 2px #74cedd;}
     .webc-captcha-options>img.webc-captcha-s{}
+    .webc-captcha-code{display:flex;gap:0.5em;align-items: center;}
+    .webc-captcha-code input[type="text"]{max-width:150px;border-radius:3px;outline:none;box-sizing: border-box;border:solid 1px #666;padding:4px;}
+    .webc-captcha-code input[type="button"]{transition:all .3s;box-sizing: border-box;padding:5px 7px;background:#74cedd;color:#fff;border-radius:3px;border:none;}
+    .webc-captcha-code input[type="button"]:hover{background:#62b0bd;cursor:pointer;}
 </style>
 <div class="webc-captcha-container">
     <div class="webc-captcha-loader" data-label="loading"></div>
@@ -84,6 +89,13 @@ class WebCCaptcha extends HTMLElement
                     pItem.addEventListener('mouseover', this.#itemMouseOverHandler.bind(this));
                     pItem.addEventListener('click', this.#itemClickHandler.bind(this));
                 });
+                if(container.querySelector('.webc-captcha-button')){
+                    container.querySelector('.webc-captcha-button').addEventListener('click', ()=>{
+                        let input = container.querySelector('.webc-captcha-input');
+                        input.setAttribute("data-value", input.value);
+                        this.#submitSolution(input);
+                    });
+                }
             }
             this.#genericResponse(pJson);
         });
@@ -139,6 +151,7 @@ class WebCCaptcha extends HTMLElement
         if(this.optionTarget !== e.currentTarget){
             return;
         }
+        console.log((Date.now()) - this.microtime);
         if((Date.now()) - this.microtime < WebCCaptcha.EVENT_THRESHOLD){
             return;
         }
@@ -186,7 +199,8 @@ class WebCCaptcha extends HTMLElement
             headers:{
                 'x-http-from':'webc-catpcha',
                 'x-http-with':'fetch',
-                'x-token':this.token !== null ? this.token:""
+                'x-token':this.token !== null ? this.token:"",
+                'x-infos':this.getAttribute("data-infos")
             }
         };
         if(pParams && pMethod !== "GET"){

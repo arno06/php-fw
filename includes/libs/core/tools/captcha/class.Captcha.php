@@ -13,35 +13,31 @@ namespace core\tools\captcha
 
         const TABLE = 'captcha_challenges';
 
-        private $token;
+        private string $token;
 
-        private $types = null;
+        private string $type;
 
-        private $cleanToken = false;
+        private bool $cleanToken = false;
 
-        /**
-         * @var array
-         */
-        private $result = null;
+        private array $result;
 
-        /**
-         * @var array
-         */
-        private $challenge = null;
+        private array|null $challenge;
 
-        private $instance = null;
+        private InterfaceChallenge $instance;
 
-        public $verified = false;
+        public bool $verified = false;
 
-        public function __construct($pToken = null, $pTypes = ["icons"])
+        public array $config;
+
+        public function __construct($pToken = null, $pType = "icons", $pConfig = [])
         {
             $this->token = $pToken;
-            $this->types = $pTypes;
-
+            $this->type = $pType;
+            $this->config = $pConfig;
             $this->init();
         }
 
-        private function init(){
+        private function init():void{
             $setup = null;
             $this->challenge = null;
             if(!empty($this->token)){
@@ -92,7 +88,7 @@ namespace core\tools\captcha
 
                 $this->challenge = [
                     "token_cc"=>$this->token,
-                    "challenge_cc"=>$this->types[0],
+                    "challenge_cc"=>$this->type,
                     "creation_date_cc"=>"NOW()"
                 ];
                 Query::insert($this->challenge)->into(self::TABLE)->execute();
@@ -103,7 +99,7 @@ namespace core\tools\captcha
 
             $className = 'core\tools\captcha\challenges\\'.ucFirst($challengeClass).'Challenge';
 
-            $this->instance = new $className($setup);
+            $this->instance = new $className($setup, $this->config);
 
             $this->result = $this->instance->get();
 
@@ -111,7 +107,7 @@ namespace core\tools\captcha
             $this->saveChallenge();
         }
 
-        public function submit($pValue){
+        public function submit($pValue):bool{
             if(!$this->challenge){
                 return false;
             }
@@ -122,7 +118,7 @@ namespace core\tools\captcha
                 $this->challenge["attempts_cc"] = 0;
             }
             $this->challenge["attempts_cc"]++;
-            if($this->instance && $this->instance->submit($pValue)){
+            if($this->instance->submit($pValue)){
                 $this->verified = true;
                 $this->result = [
                     "verified"=>true
@@ -149,14 +145,14 @@ namespace core\tools\captcha
             return false;
         }
 
-        public function get(){
+        public function get():array{
             unset($this->result["setup"]);
             $this->result["token"] = $this->token;
             return $this->result;
         }
 
 
-        private function clearToken(){
+        private function clearToken():void{
             if(!$this->cleanToken){
                 return;
             }
@@ -164,7 +160,7 @@ namespace core\tools\captcha
             $this->token = null;
         }
 
-        private function saveChallenge(){
+        private function saveChallenge():void{
             Query::update(self::TABLE)->values($this->challenge)->where("token_cc", Query::EQUAL, $this->token)->execute();
         }
     }

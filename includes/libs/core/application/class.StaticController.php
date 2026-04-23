@@ -333,7 +333,30 @@ namespace core\application
                 Go::to404();
             }
 
-            $captcha = new \core\tools\captcha\Captcha($headers['x-token']);
+            $infos = SimpleJSON::decode(base64_decode($headers["x-infos"]));
+
+            $path_to_form = "includes/applications/".$infos["application"]."/modules/".$infos["module"]."/forms/form.".$infos["form"].".json";
+            try
+            {
+                $datas = SimpleJSON::import($path_to_form);
+            }
+            catch (Exception $e)
+            {
+                Go::to404();
+            }
+            if(!is_array($datas[$infos["field"]]))
+            {
+                Go::to404();
+            }
+
+            $input = $datas[$infos["field"]];
+
+            if($input["tag"]!=Form::TAG_CAPTCHA)
+            {
+                Go::to404();
+            }
+
+            $captcha = new \core\tools\captcha\Captcha($headers['x-token'], $input["type"]??"icons", $input["config"]??[]);
 
             if(isset($_POST["value"])){
                 $captcha->submit($_POST["value"]);

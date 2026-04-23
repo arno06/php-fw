@@ -5,48 +5,36 @@ namespace core\tools\captcha\challenges
     use core\application\Dictionary;
     use core\system\Folder;
     use core\system\Image;
+    use core\tools\captcha\Challenge;
+    use core\tools\captcha\InterfaceChallenge;
 
-    class IconsChallenge
+    class IconsChallenge extends Challenge implements InterfaceChallenge
     {
-        const ICONS_PATH = 'includes/libs/core/tools/captcha/assets/icons/';
+        protected string $icons_path = 'includes/libs/core/tools/captcha/assets/icons/';
+        protected int $icon_size = 32;
 
-        private $icon_size = 32;
+        protected array $icons = [];
+        protected array $correct_answers = [];
 
-        private $different_icons_occurences = null;
-        private $total_icons = null;
-        private $least_icon_occurences = null;
+        protected function generateSetup():void{
+            $different_icons_occurences = rand(2,3);
 
-        private $icons = [];
-        private $correct_answers = [];
+            $total_icons = rand($different_icons_occurences * 2, $different_icons_occurences * 2 + 1);
 
-        public function __construct($pSetup = null){
-            if(!$pSetup){
-                $this->generateSetup();
-            }else{
-                $this->icons = $pSetup["icons"];
-                $this->correct_answers = $pSetup["correct_answers"];
-            }
-        }
+            $least_icon_occurences = round(($total_icons/$different_icons_occurences)-1);
 
-        private function generateSetup(){
-            $this->different_icons_occurences = rand(2,3);
-
-            $this->total_icons = rand($this->different_icons_occurences * 2, $this->different_icons_occurences * 2 + 1);
-
-            $this->least_icon_occurences = round(($this->total_icons/$this->different_icons_occurences)-1);
-
-            $icons = Folder::read(self::ICONS_PATH);
+            $icons = Folder::read($this->icons_path);
             $icons = array_keys($icons);
             shuffle($icons);
 
-            $icons = array_splice($icons, 0, $this->different_icons_occurences);
+            $icons = array_splice($icons, 0, $different_icons_occurences);
 
             $least_icon = array_shift($icons);
 
             $this->icons = [];
-            $this->appendIcon($this->icons, $least_icon, $this->least_icon_occurences);
+            $this->appendIcon($this->icons, $least_icon, $least_icon_occurences);
 
-            $total = $this->total_icons - $this->least_icon_occurences;
+            $total = $total_icons - $least_icon_occurences;
 
             while(!empty($icons)){
                 $ct = floor($total / count($icons));
@@ -63,19 +51,23 @@ namespace core\tools\captcha\challenges
 
         }
 
-        private function appendIcon(&$pIcons, $pIcon, $pCount){
+        private function appendIcon(array &$pIcons, string $pIcon, int $pCount):void{
             for($i = 0; $i<$pCount; $i++){
                 $pIcons[] = $pIcon;
             }
         }
 
-        public function get(){
+        public function get():array{
+
+            if(!file_exists($this->icons_path.$this->icons[0])){
+                $this->generateSetup();
+            }
 
             $choices = "<div class='webc-captcha-options'>";
 
             foreach($this->icons as $i=>$icon){
                 $img = new Image($this->icon_size, $this->icon_size, Image::PNG);
-                $img->drawImage(self::ICONS_PATH.$icon, $this->icon_size, $this->icon_size);
+                $img->drawImage($this->icons_path.$icon, $this->icon_size, $this->icon_size);
                 $img->rotate(rand(0,3) * 90);
                 $choices .= "<img src='".$img->toDataUrl()."' alt='Image ".$i."'>";
             }
@@ -89,7 +81,7 @@ namespace core\tools\captcha\challenges
             ];
         }
 
-        public function submit($pValue){
+        public function submit($pValue):bool{
             if(!$this->correct_answers){
                 return false;
             }

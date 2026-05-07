@@ -31,7 +31,7 @@ Yet another PHP Framework
 
 Pré-requis :
 * Apache
-* PHP 7.2
+* PHP 8.*
 * MySQL
 
 ### Windows
@@ -260,24 +260,24 @@ La méthode `addForm` déclare l'instance de la classe Form pour permettre son a
 #### Captcha
 
 ```  
-	{
-		"label":"Captcha",
-		"tag":"captcha",
-		"require":true|false,
-		"attributes":{
-			"backgroundColor":"#ffffff",
-			"fontSizeMax":13,
-			"fontSizeMin":13,
-			"width":100,
-			"height":30,
-			"rotation":15,
-			"fontColors":["#444444","#ff0000","#000000"],
-			"transparent":true,
-			"length":7,
-			"type":"random|calculus",
-			"valueMax":99
-		}
-	}
+    {
+        "label": "Captcha",
+        "tag": "captcha",
+        "type": "code|icons",
+        "config": {
+          "backgroundColor":"#ffffff",
+          "fontSizeMax":13,
+          "fontSizeMin":13,
+          "width":100,
+          "height":30,
+          "rotation":15,
+          "fontColors":["#444444","#ff0000","#00ff00"],
+          "transparent":true,
+          "length":7,
+          "type":"calculus|random",
+          "valueMax":99
+        }
+    }
 ```  
 
 ## Composants
@@ -342,7 +342,6 @@ track($pId);
 
 ## Todo (nice to have)
 
-* [ ] Integrate a light Dictionary class with the Dependencies's loaded scripts
 * [ ] RoutingHandler : method to get a route depending upon controller/action/method/parameters
 * [ ] Integrate services managing
 * [ ] Develop an Autocomplete component

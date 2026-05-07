@@ -3,6 +3,8 @@ namespace core\system
 {
 
     use core\application\Core;
+    use GdImage;
+    use JetBrains\PhpStorm\NoReturn;
 
     /**
      * Class Image
@@ -14,43 +16,31 @@ namespace core\system
      */
     class Image extends TracingCommands
     {
-        /**
-         * @type string
-         */
         const JPG = "jpg";
 
-        /**
-         * @type string
-         */
         const JPEG = "jpeg";
 
-        /**
-         * @type string
-         */
         const PNG = "png";
 
-        /**
-         * @type string
-         */
         const GIF = "gif";
 
         /**
          * Largeur de l'image
          * @var int
          */
-        public $width;
+        public int $width;
 
         /**
          * Hauteur de l'image
          * @var int
          */
-        public $height;
+        public int $height;
 
         /**
          * Type d'image souhaitée
          * @var string
          */
-        public $type;
+        public string $type;
 
 
         /**
@@ -60,7 +50,7 @@ namespace core\system
          * @param string $pType
          * @param int  $pOverSampling
          */
-        public function __construct($pWidth, $pHeight, $pType = self::JPG, $pOverSampling = 1)
+        public function __construct(int $pWidth, int $pHeight, string $pType = self::JPG, int $pOverSampling = 1)
         {
             parent::__construct();
             if($pOverSampling<1)
@@ -72,26 +62,9 @@ namespace core\system
         }
 
 
-        /**
-         * @return void
-         */
-        private function draw()
+        private function draw():void
         {
-            $resource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
-            if($this->type == self::PNG)
-                $this->preparePNG($resource, $this->width*$this->oversampling, $this->height*$this->oversampling);
-
-            $this->drawCommands($resource);
-
-            if($this->oversampling>1)
-            {
-                $overSampled = imagecreatetruecolor($this->width, $this->height);
-                if($this->type == self::PNG)
-                    self::preparePNG($overSampled, $this->width, $this->height);
-                imagecopyresampled($overSampled,$resource,0,0,0,0,$this->width, $this->height,$this->width*$this->oversampling, $this->height*$this->oversampling);
-                imagedestroy($resource);
-                $resource = &$overSampled;
-            }
+            $resource = $this->prepareFile();
 
             switch($this->type)
             {
@@ -110,20 +83,40 @@ namespace core\system
         }
 
 
+        private function prepareFile():GdImage
+        {
+            $resource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
+            if($this->type == self::PNG)
+                $this->preparePNG($resource, $this->width*$this->oversampling, $this->height*$this->oversampling);
+
+            $this->drawCommands($resource);
+
+            if($this->oversampling>1)
+            {
+                $overSampled = imagecreatetruecolor($this->width, $this->height);
+                if($this->type == self::PNG)
+                    self::preparePNG($overSampled, $this->width, $this->height);
+                imagecopyresampled($overSampled,$resource,0,0,0,0,$this->width, $this->height,$this->width*$this->oversampling, $this->height*$this->oversampling);
+                imagedestroy($resource);
+                $resource = &$overSampled;
+            }
+            return $resource;
+        }
+
         /**
          * @return void
          */
-        public function render()
+        #[NoReturn]
+        public function render():void
         {
             header('Content-Type: image/'.$this->type);
             $this->draw();
             Core::endApplication();
         }
 
-        /**
-         * @return string
-         */
-        public function toDataUrl(){
+
+        public function toDataUrl():string
+        {
             ob_start();
             $this->draw();
             $rawdata = ob_get_contents();
@@ -132,11 +125,7 @@ namespace core\system
         }
 
 
-        /**
-         * @param $pFile
-         * @return void
-         */
-        public function save($pFile)
+        public function save(string $pFile):void
         {
             ob_start();
             $this->draw();
@@ -148,14 +137,7 @@ namespace core\system
         }
 
 
-        /**
-         * @static
-         * @param resource $pResource
-         * @param int $pWidth
-         * @param int $pHeight
-         * @return void
-         */
-        static private function preparePNG(&$pResource, $pWidth, $pHeight)
+        static private function preparePNG(mixed $pResource, int $pWidth, int $pHeight):void
         {
             imagesavealpha($pResource, true);
             imagealphablending($pResource, false);
@@ -165,30 +147,9 @@ namespace core\system
         }
 
 
-        /**
-         * @param $pFinalImage
-         * @param $pMaxWidth
-         * @param $pMaxHeight
-         * @return bool
-         */
-        public function createCache($pFinalImage, $pMaxWidth, $pMaxHeight)
+        public function createCache(string $pFinalImage, int $pMaxWidth, int $pMaxHeight):bool
         {
-            $ressource = imagecreatetruecolor($this->width*$this->oversampling, $this->height*$this->oversampling);
-            if($this->type == self::PNG)
-                $this->preparePNG($ressource, $this->width*$this->oversampling, $this->height*$this->oversampling);
-
-            $this->drawCommands($ressource);
-
-            if($this->oversampling>1)
-            {
-                $overSampled = imagecreatetruecolor($this->width, $this->height);
-                if($this->type == self::PNG)
-                    self::preparePNG($overSampled, $this->width, $this->height);
-                imagecopyresampled($overSampled,$ressource,0,0,0,0,$this->width, $this->height,$this->width*$this->oversampling, $this->height*$this->oversampling);
-                imagedestroy($ressource);
-                $ressource = &$overSampled;
-            }
-
+            $ressource = $this->prepareFile();
             $TailleRedim = self::getProportionResize($this->width, $this->height, $pMaxWidth, $pMaxHeight);
             $ImageTampon = imagecreatetruecolor($TailleRedim["width"], $TailleRedim["height"]);
             imagecopyresampled($ImageTampon,$ressource,0,0,0,0,$TailleRedim["width"], $TailleRedim["height"],$this->width, $this->height);
@@ -208,23 +169,21 @@ namespace core\system
                     break;
                 default:
                     return false;
-                    break;
             }
             imagedestroy($ressource);
             chmod($pFinalImage, 0666);
             return true;
         }
 
-
         /**
          * Méthode static de creation d'une copie d'une image avec redimensionnement
-         * @param String $pSourceImage				Fichier source
-         * @param String $pFinalImage				Fichier que l'on souhaite créer
-         * @param float $pMaxWidth					Largeur du nouveau fichier
-         * @param float $pMaxHeight				Hauteur du nouveau fichier
-         * @return Boolean
+         * @param string $pSourceImage				Fichier source
+         * @param string $pFinalImage				Fichier que l'on souhaite créer
+         * @param int $pMaxWidth					Largeur du nouveau fichier
+         * @param int $pMaxHeight				Hauteur du nouveau fichier
+         * @return bool
          */
-        static public function createCopy($pSourceImage, $pFinalImage, $pMaxWidth, $pMaxHeight) {
+        static public function createCopy(string $pSourceImage, string $pFinalImage, int $pMaxWidth, int $pMaxHeight):bool {
             if (!file_exists($pSourceImage))
                 return false;
             if (file_exists($pFinalImage))
@@ -257,7 +216,6 @@ namespace core\system
                     break;
                 default:
                     return false;
-                    break;
             }
             imagedestroy($ImageTampon);
             imagedestroy($ImageTampon2);
@@ -265,15 +223,15 @@ namespace core\system
             return true;
         }
 
-
         /**
          * Méthode de redimensionnement d'une image existante
-         * @param String $pSourceImage				Chemin de l'image &agrave; redimensionner
-         * @param float $pMaxWidth						Largeur maximale souhaitée
-         * @param float $pMaxHeight					Hauteur maximale souhaitée
-         * @return Boolean
+         * @param string $pSourceImage				Chemin de l'image &agrave; redimensionner
+         * @param int $pMaxWidth						Largeur maximale souhaitée
+         * @param int $pMaxHeight					Hauteur maximale souhaitée
+         * @return bool
          */
-        static public function resize($pSourceImage, $pMaxWidth, $pMaxHeight) {
+        static public function resize(string $pSourceImage, int $pMaxWidth, int $pMaxHeight):bool
+        {
             $size = self::getSize($pSourceImage);
             $currentWidth = $size[0];
             $currentHeight = $size[1];
@@ -283,16 +241,16 @@ namespace core\system
             return self::createCopy($pSourceImage, $pSourceImage, $TailleRedim["width"], $TailleRedim["height"]);
         }
 
-
         /**
          * Méthode de calcul de dimension apr&egrave;s redimensionnement en concervant les proportions
-         * @param Number $pWidth			Largeur actuelle
-         * @param Number $pHeight			Hauteur actuelle
-         * @param float $pMaxWidth			Largeur max
-         * @param float $pMaxHeight		Hauteur max
+         * @param int $pWidth Largeur actuelle
+         * @param int $pHeight Hauteur actuelle
+         * @param int $pMaxWidth Largeur max
+         * @param int $pMaxHeight Hauteur max
          * @return array
          */
-        static public function getProportionResize($pWidth, $pHeight, $pMaxWidth, $pMaxHeight) {
+        static public function getProportionResize(int $pWidth, int $pHeight, int $pMaxWidth, int $pMaxHeight):array
+        {
             $TestW = round($pMaxHeight / $pHeight * $pWidth);
             $TestH = round($pMaxWidth / $pWidth * $pHeight);
             if ($TestW > $pMaxWidth) {
@@ -308,29 +266,30 @@ namespace core\system
             return array("width"=>$width, "height"=>$height);
         }
 
-
         /**
          * Récup&egrave;re la hauteur et la largeur d'un fichier
-         * @param String $pSourceImage				Fichier source dont on souhaite récupérer la taille
+         * @param string $pSourceImage Fichier source dont on souhaite récupérer la taille
          * @return array
          */
-        static public function getSize($pSourceImage) {
+        static public function getSize(string $pSourceImage):array
+        {
             return getimagesize($pSourceImage);
         }
 
-
         /**
          * Méthode permettant de vérifier si le fichier est bien une image (jpg, gif ou png)
-         * @param String $pSourceImage				Fichier source
-         * @return String
+         * @param string $pSourceImage Fichier source
+         * @return string
          */
-        static public function isImage($pSourceImage) {
+        static public function isImage(string $pSourceImage):string
+        {
             $extract = array();
             if (preg_match('/^.*\.('.self::JPEG.'|'.self::JPG.'|'.self::GIF.'|'.self::PNG.')$/i', $pSourceImage, $extract))
                 return strtolower($extract[1]);
             return "";
         }
     }
+
     /**
      * Class TracingCommands
      *
@@ -340,91 +299,41 @@ namespace core\system
      */
     class TracingCommands
     {
-
-        /**
-         * @type string
-         */
         const COMMAND_MOVETO            = "command_moveto";
 
-        /**
-         * @type string
-         */
         const COMMAND_LINETO            = "command_lineto";
 
-        /**
-         * @type string
-         */
         const COMMAND_SETLINESTYLE      = "command_setlinestyle";
 
-        /**
-         * @type string
-         */
         const COMMAND_BEGINFILL         = "command_beginfill";
 
-        /**
-         * @type string
-         */
         const COMMAND_ENDFILL           = "command_endfill";
 
-        /**
-         * @type string
-         */
         const COMMAND_DRAWCIRCLE        = "command_drawcircle";
 
-        /**
-         * @type string
-         */
         const COMMAND_DRAWELLIPSE       = "command_drawellipse";
 
-        /**
-         * @type string
-         */
         const COMMAND_DRAWTEXT          = "command_drawtext";
 
-        /**
-         * @type string
-         */
         const COMMAND_DRAWRECT          = "command_drawrect";
 
-        /**
-         * @type string
-         */
         const COMMAND_SETPIXEL          = "command_setpixel";
 
-        /**
-         * @type string
-         */
         const COMMAND_DRAWIMAGE         = "command_drawimage";
 
-        /**
-         * @type string
-         */
         const COMMAND_ROTATE         = "command_rotate";
 
-        /**
-         * @type string
-         */
         const COMMAND_CREATEIMAGE         = "command_createimage";
 
-        /**
-         * @var array
-         */
-        private $command;
+        private array $command;
 
-        /**
-         * @var int
-         */
-        protected $oversampling = 1;
+        protected int $oversampling = 1;
 
 
-        /**
-         * Constructor
-         */
         public function __construct()
         {
             $this->command = array();
         }
-
 
         /**
          * Méthode de définition du style de ligne souhaité
@@ -434,33 +343,25 @@ namespace core\system
          * @param int $pSize
          * @return void
          */
-        public function setLineStyle($pR = 0, $pG = 0, $pB = 0, $pSize = 1)
+        public function setLineStyle(int $pR = 0, int $pG = 0, int $pB = 0, int $pSize = 1):void
         {
             $this->command[] = array("type"=>self::COMMAND_SETLINESTYLE,"r"=>$pR, "g"=>$pG, "b"=>$pB, "size"=>$pSize);
         }
 
-
         /**
          * Méthode de définition de la couleur de remplissage
-         * @param number  $pR
-         * @param number  $pG
-         * @param number  $pB
+         * @param int  $pR
+         * @param int  $pG
+         * @param int  $pB
          * @return void
          */
-        public function beginFill($pR, $pG, $pB)
+        public function beginFill(int $pR, int $pG, int $pB):void
         {
             $this->command[] = array("type"=>self::COMMAND_BEGINFILL, "r"=>$pR, "g"=>$pG, "b"=>$pB);
         }
 
 
-        /**
-         * @param $pSrc
-         * @param null $pWidth
-         * @param null $pHeight
-         * @param int $pX
-         * @param int $pY
-         */
-        public function drawImage($pSrc, $pWidth = null, $pHeight = null, $pX = 0, $pY = 0)
+        public function drawImage(string $pSrc, int $pWidth = null, int $pHeight = null, int $pX = 0, int $pY = 0):void
         {
             $srcSize = Image::getSize($pSrc);
             if(!$pWidth)
@@ -470,22 +371,15 @@ namespace core\system
             $this->command[] = array("type"=>self::COMMAND_DRAWIMAGE, "src"=>$pSrc, "srcWidth"=>$srcSize[0], "srcHeight"=>$srcSize[1], "width"=>$pWidth, "height"=>$pHeight, "x"=>$pX, "y"=>$pY);
         }
 
-        /**
-         * @param $pAngle
-         * @return void
-         */
-        public function rotate($pAngle){
+
+        public function rotate(int $pAngle):void
+        {
             $this->command[] = array("type"=>self::COMMAND_ROTATE, "angle"=>$pAngle);
 
         }
 
-        /**
-         * @param $pSrc
-         * @param $pWidth
-         * @param $pHeight
-         * @param $pPadding
-         */
-        public function createImage($pSrc, $pWidth, $pHeight, $pPadding)
+
+        public function createImage(string $pSrc, int $pWidth, int $pHeight, int $pPadding):void
         {
             $this->command[] = array("type"=>self::COMMAND_CREATEIMAGE, "src"=>$pSrc, "width"=>$pWidth, "height"=>$pHeight, "padding"=>$pPadding);
         }
@@ -495,33 +389,22 @@ namespace core\system
          * Méthode permettant de mettre fin au remplissage
          * @return void
          */
-        public function endFill()
+        public function endFill():void
         {
             $this->command[] = array("type"=>self::COMMAND_ENDFILL);
         }
 
 
-        /**
-         * @param int  $pX
-         * @param int  $pY
-         * @return void
-         */
-        public function moveTo($pX, $pY)
+        public function moveTo(int $pX, int $pY):void
         {
             $this->command[] = array("type"=>self::COMMAND_MOVETO, "x"=>$pX, "y"=>$pY);
         }
 
 
-        /**
-         * @param int  $pX
-         * @param int  $pY
-         * @return void
-         */
-        public function lineTo($pX, $pY)
+        public function lineTo(int $pX, int $pY):void
         {
             $this->command[] = array("type"=>self::COMMAND_LINETO,"x"=>$pX, "y"=>$pY);
         }
-
 
         /**
          * Méthode de dessin d'un texte sur l'image
@@ -536,11 +419,10 @@ namespace core\system
          * @param int $pRotation
          * @return void
          */
-        public function drawText($pString, $pSize, $pFont, $pX=0, $pY=0, $pR=0, $pG=0, $pB=0, $pRotation = 0)
+        public function drawText(string $pString, int $pSize, string $pFont, int $pX=0, int $pY=0, int $pR=0, int $pG=0, int $pB=0, int $pRotation = 0):void
         {
             $this->command[] = array("type"=>self::COMMAND_DRAWTEXT, "text"=>$pString, "size"=>$pSize, "font"=>$pFont, "x"=>$pX, "y"=>$pY, "r"=>$pR, "g"=>$pG, "b"=>$pB, "rotation"=>$pRotation);
         }
-
 
         /**
          * Méthode de dessin d'un cercle
@@ -549,11 +431,10 @@ namespace core\system
          * @param int $pRadius
          * @return void
          */
-        public function drawCircle($pX, $pY, $pRadius)
+        public function drawCircle(int $pX, int $pY, int $pRadius):void
         {
             $this->command[] = array("type"=>self::COMMAND_DRAWCIRCLE, "x"=>$pX, "y"=>$pY, "width"=>$pRadius*2, "height"=>$pRadius*2);
         }
-
 
         /**
          * Méthode de dessin d'une ellipse
@@ -563,11 +444,10 @@ namespace core\system
          * @param int $pHeight
          * @return void
          */
-        public function drawEllipse($pX, $pY, $pWidth, $pHeight)
+        public function drawEllipse(int $pX, int $pY, int $pWidth, int $pHeight):void
         {
             $this->command[] = array("type"=>self::COMMAND_DRAWELLIPSE, "x"=>$pX, "y"=>$pY, "width"=>$pWidth, "height"=>$pHeight);
         }
-
 
         /**
          * Méthode de dessin d'un rectangle
@@ -577,7 +457,7 @@ namespace core\system
          * @param int $pHeight
          * @return void
          */
-        public function drawRectangle($pX, $pY, $pWidth, $pHeight)
+        public function drawRectangle(int $pX, int $pY, int $pWidth, int $pHeight):void
         {
             $this->moveTo($pX, $pY);
             $this->lineTo($pX+$pWidth, $pY);
@@ -587,25 +467,13 @@ namespace core\system
         }
 
 
-        /**
-         * @param int $pX
-         * @param int $pY
-         * @param int $pR
-         * @param int $pG
-         * @param int $pB
-         * @return void
-         */
-        public function setPixel($pX, $pY, $pR = 0, $pG = 0, $pB = 0)
+        public function setPixel(int $pX, int $pY, int $pR = 0, int $pG = 0, int $pB = 0):void
         {
             $this->command[] = array("type"=>self::COMMAND_SETPIXEL, "x"=>$pX, "y"=>$pY, "r"=>$pR, "g"=>$pG, "b"=>$pB);
         }
 
 
-        /**
-         * @param resource  $pResource
-         * @return void
-         */
-        protected function drawCommands(&$pResource)
+        protected function drawCommands(mixed &$pResource):void
         {
             $tmp = array("x"=>"0", "y"=>"0");
             $path = array();
@@ -629,43 +497,11 @@ namespace core\system
                 switch($cmd["type"])
                 {
                     case self::COMMAND_DRAWIMAGE:
-                        $type = Image::isImage($cmd["src"]);
-                        if(empty($type))
-                            trigger_error("L'image à copier ne correspond pas à un type compatible", E_USER_ERROR);
-                        $res = null;
-                        switch($type)
-                        {
-                            case Image::PNG:
-                                $res = imagecreatefrompng($cmd["src"]);
-                                break;
-                            case Image::JPEG:
-                            case Image::JPG:
-                                $res = imagecreatefromjpeg($cmd["src"]);
-                                break;
-                            case Image::GIF:
-                                $res = imagecreatefromgif($cmd["src"]);
-                                break;
-                        }
+                        $res = $this->prepareImage($cmd["src"]);
                         imagecopyresampled($pResource, $res, $cmd["x"], $cmd["y"], 0, 0, $cmd["width"], $cmd["height"], $cmd["srcWidth"], $cmd["srcHeight"]);
                         break;
                     case self::COMMAND_CREATEIMAGE:
-                        $type = Image::isImage($cmd["src"]);
-                        if(empty($type))
-                            trigger_error("L'image à copier ne correspond pas à un type compatible", E_USER_ERROR);
-                        $res = null;
-                        switch($type)
-                        {
-                            case Image::PNG:
-                                $res = imagecreatefrompng($cmd["src"]);
-                                break;
-                            case Image::JPEG:
-                            case Image::JPG:
-                                $res = imagecreatefromjpeg($cmd["src"]);
-                                break;
-                            case Image::GIF:
-                                $res = imagecreatefromgif($cmd["src"]);
-                                break;
-                        }
+                        $res = $this->prepareImage($cmd["src"]);
 
                         for($x = 0 ; $x < 50 ; $x++)
                         {
@@ -714,7 +550,7 @@ namespace core\system
                             $drawingPolygon = false;
                             $fill_color = -1;
                             $path = array();
-                            continue;
+                            continue 2;
                         }
                         if($fill_color>-1)
                             imagefilledpolygon($pResource, $path, $fill_color);
@@ -760,11 +596,21 @@ namespace core\system
                         $c = imagecolorallocate($pResource, $cmd["r"], $cmd["g"], $cmd["b"]);
                         imagesetpixel($pResource, $cmd["x"], $cmd["y"], $c);
                         break;
-                    default:
-                        continue;
-                        break;
                 }
             }
+        }
+
+
+        private function prepareImage(string $pSrc): false|GdImage
+        {
+            $type = Image::isImage($pSrc);
+            if(empty($type))
+                trigger_error("L'image à copier ne correspond pas à un type compatible", E_USER_ERROR);
+            return match($type){
+                Image::PNG=>imagecreatefrompng($pSrc),
+                Image::JPEG,Image::JPG=>imagecreatefromjpeg($pSrc),
+                Image::GIF=>imagecreatefromgif($pSrc)
+            };
         }
     }
 }

@@ -4,6 +4,10 @@ namespace core\tools\docs
     use core\data\Encoding;
     use core\system\Folder;
     use core\tools\template\Template;
+    use ReflectionClass;
+    use ReflectionException;
+    use ReflectionMethod;
+    use ReflectionProperty;
 
     /**
      * Class Documentor
@@ -15,22 +19,18 @@ namespace core\tools\docs
      */
     class Documentor
     {
+        private array $packages = array();
+
         /**
-         * @var array
+         * @param string $pClassName
+         * @return array[]
+         * @throws ReflectionException
          */
-        private $packages = array();
-
-        public function __construct()
+        public function parseClass(string $pClassName):array
         {
-
-        }
-
-        public function parseClass($pClassName)
-        {
-            $reflec = new \ReflectionClass($pClassName);
-            $classInfo = array('details'=>$this->parseDocComment($reflec->getDocComment()),
-                                'methods'=>array());
-            $allMethods = $reflec->getMethods(\ReflectionMethod::IS_PUBLIC|\ReflectionMethod::IS_PROTECTED);
+            $reflec = new ReflectionClass($pClassName);
+            $classInfo = array('details'=>$this->parseDocComment($reflec->getDocComment()));
+            $allMethods = $reflec->getMethods(ReflectionMethod::IS_PUBLIC|ReflectionMethod::IS_PROTECTED);
             $methods = array();
             for($i = 0, $max = count($allMethods); $i<$max;$i++)
             {
@@ -40,7 +40,7 @@ namespace core\tools\docs
             $this->sortName($methods);
             $classInfo['methods'] = $methods;
 
-            $allProps = $reflec->getProperties(\ReflectionProperty::IS_PUBLIC|\ReflectionProperty::IS_PROTECTED);
+            $allProps = $reflec->getProperties(ReflectionProperty::IS_PUBLIC|ReflectionProperty::IS_PROTECTED);
             $props = array();
             for($i = 0, $max = count($allProps); $i<$max;$i++)
             {
@@ -55,7 +55,14 @@ namespace core\tools\docs
             return $classInfo;
         }
 
-        public function parsePackage($pPath, $pPackage, $pOrigin = true)
+        /**
+         * @param string $pPath
+         * @param string $pPackage
+         * @param bool $pOrigin
+         * @return void
+         * @throws ReflectionException
+         */
+        public function parsePackage(string $pPath, string $pPackage, bool $pOrigin = true):void
         {
             $classes = array();
             $excluded_ext = '/(template\.|\.(tpl|tpl\.php|ttf)$)/';
@@ -94,7 +101,8 @@ namespace core\tools\docs
 
         }
 
-        public function output($pFolder)
+
+        public function output(string $pFolder):void
         {
             Folder::deleteRecursive($pFolder);
             Folder::create($pFolder);
@@ -142,11 +150,12 @@ namespace core\tools\docs
             file_put_contents($pFolder.'/index.html', Encoding::BOM().$template ->render("template.index.tpl", false));
         }
 
-        private function sortName(&$pArray)
+
+        private function sortName(array &$pArray):void
         {
             if(!function_exists('core\\tools\\docs\\documentor_cmp_fn'))
             {
-                function documentor_cmp_fn($a, $b)
+                function documentor_cmp_fn($a, $b):string
                 {
                     return strcmp(strtolower($a['name']), strtolower($b['name']));
                 }
@@ -154,7 +163,8 @@ namespace core\tools\docs
             usort($pArray, 'core\\tools\\docs\\documentor_cmp_fn');
         }
 
-        public function parseDocComment($pComments)
+
+        public function parseDocComment(string $pComments):array
         {
 
             $description = array();
@@ -163,7 +173,7 @@ namespace core\tools\docs
                 $description = $matches[1];
             }
             $parameters = array();
-            if(preg_match_all('/@param\s*([a-z\|]+)\s*\$([a-z\_]+)\s*([^\*]*)\n/i', $pComments, $matches))
+            if(preg_match_all('/@param\s*([a-z|]+)\s*\$([a-z_]+)\s*([^*]*)\n/i', $pComments, $matches))
             {
                 foreach($matches[0] as $i=>$m)
                 {
@@ -177,7 +187,7 @@ namespace core\tools\docs
 
 
             $author = false;
-            if(preg_match('/@author\s*([a-z\|\s]+)\s*\<([^\>]+)\>/i', $pComments, $matches))
+            if(preg_match('/@author\s*([a-z|\s]+)\s*<([^>]+)>/i', $pComments, $matches))
             {
                 $author = array(
                     "name"=>$matches[1],
@@ -201,7 +211,7 @@ namespace core\tools\docs
             }
 
             $annexe = array();
-            if(preg_match('/@annexe\s*([a-z\_]+)\s*([^@].+)\n/i', $pComments, $matches))
+            if(preg_match('/@annexe\s*([a-z_]+)\s*([^@].+)\n/i', $pComments, $matches))
             {
                 $annexe = array(
                     'name'=>$matches[1],
@@ -222,9 +232,10 @@ namespace core\tools\docs
             );
         }
 
-        private function extractDocVar($pVarName, $pComments)
+
+        private function extractDocVar(string $pVarName, string $pComments):string|bool
         {
-            if(preg_match('/@'.$pVarName.'\s*([0-9a-z\_]+)\s*/i', $pComments, $matches))
+            if(preg_match('/@'.$pVarName.'\s*([0-9a-z_]+)\s*/i', $pComments, $matches))
             {
                 return $matches[1];
             }

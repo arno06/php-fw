@@ -3,8 +3,10 @@ namespace core\tools
 {
 
     use core\application\Core;
+    use core\application\routing\RoutingHandler;
     use core\data\SimpleJSON;
     use core\application\Go;
+    use Exception;
 
     /**
      * Class Menu
@@ -14,16 +16,19 @@ namespace core\tools
      */
     class Menu
     {
-        private $items;
+        private array $items;
+
 
         public function __construct($pFile)
         {
             if(!file_exists($pFile))
                 return;
-            $this->items = SimpleJSON::import($pFile);
-            if(!$this->items)
-            {
-                trigger_error('[Object Menu] No Items loaded', E_USER_NOTICE);
+            try{
+                $this->items = SimpleJSON::import($pFile);
+            }
+            catch(Exception $e){
+                trigger_error('[Object Menu] No Items loaded '.$e->getMessage());
+                $this->items = [];
             }
             foreach($this->items as &$item)
             {
@@ -35,14 +40,15 @@ namespace core\tools
                     $item['action'] = '';
                 $item['current'] = (Core::$controller == $item['controller']
                     && Core::$action == $item['action']);
-                $item['url'] = Core::rewriteURL($item['controller'], $item['action'], $item['parameters']);
+                $item['url'] = RoutingHandler::rewrite($item['controller'], $item['action'], $item['parameters']);
             }
         }
 
-        public function redirectToDefaultItem()
+
+        public function redirectToDefaultItem():void
         {
             $item = null;
-            if(is_array($this->items) && !empty($this->items))
+            if(!empty($this->items))
                 $item = $this->items[0];
             foreach($this->items as $i)
             {
@@ -58,7 +64,8 @@ namespace core\tools
             Go::to($item['controller'], $item['action'], $item['parameters']);
         }
 
-        public function retrieveItems()
+
+        public function retrieveItems():array
         {
             return $this->items;
         }

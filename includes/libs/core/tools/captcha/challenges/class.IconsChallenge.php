@@ -7,16 +7,21 @@ namespace core\tools\captcha\challenges
     use core\system\Image;
     use core\tools\captcha\Challenge;
     use core\tools\captcha\InterfaceChallenge;
+    use Exception;
 
     class IconsChallenge extends Challenge implements InterfaceChallenge
     {
         protected string $icons_path = 'includes/libs/core/tools/captcha/assets/icons/';
+
         protected int $icon_size = 32;
 
         protected array $icons = [];
+
         protected array $correct_answers = [];
 
-        protected function generateSetup():void{
+
+        protected function generateSetup():void
+        {
             $different_icons_occurences = rand(2,3);
 
             $total_icons = rand($different_icons_occurences * 2, $different_icons_occurences * 2 + 1);
@@ -51,13 +56,20 @@ namespace core\tools\captcha\challenges
 
         }
 
-        private function appendIcon(array &$pIcons, string $pIcon, int $pCount):void{
+
+        private function appendIcon(array &$pIcons, string $pIcon, int $pCount):void
+        {
             for($i = 0; $i<$pCount; $i++){
                 $pIcons[] = $pIcon;
             }
         }
 
-        public function get():array{
+        /**
+         * @return array
+         * @throws Exception
+         */
+        public function get():array
+        {
 
             if(!file_exists($this->icons_path.$this->icons[0])){
                 $this->generateSetup();
@@ -81,7 +93,9 @@ namespace core\tools\captcha\challenges
             ];
         }
 
-        public function submit($pValue):bool{
+
+        public function submit($pValue):bool
+        {
             if(!$this->correct_answers){
                 return false;
             }

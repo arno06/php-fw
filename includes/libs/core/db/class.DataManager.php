@@ -2,61 +2,49 @@
 
 namespace core\db{
 
+    use Exception;
+
     /**
      * Class DataManager
      * @package core\db
      */
     class DataManager{
 
-        /**
-         * @var array
-         */
-        private $tables = array();
+        private array $tables = array();
 
-        /**
-         * @var array
-         */
-        private $foreign_values = array();
+        private array $foreign_values = array();
 
-        /**
-         * @param string $pTableName
-         * @param string $pIdName
-         * @param string $pSelectField
-         * @return DataManagerSource
-         */
-        public function addSource($pTableName, $pIdName, $pSelectField = null){
+
+        public function addSource(string $pTableName, string $pIdName, string $pSelectField = null):DataManagerSource
+        {
             $ins = new DataManagerSource($pTableName, $pIdName, $pSelectField??$pTableName.".".$pIdName);
             $this->tables[] = $ins;
             return $ins;
         }
 
-        /**
-         * @param string $pRef
-         * @param mixed $pValue
-         */
-        public function addForeignValue($pRef, $pValue){
+
+        public function addForeignValue(string $pRef, string $pValue):void
+        {
             $pValue = Query::escapeValue($pValue);
             if(!isset($this->foreign_values[$pRef])){
                 $this->foreign_values[$pRef] = array();
             }
-            if(in_array($pValue, $this->foreign_values[$pRef])||is_null($pRef)){
+            if(in_array($pValue, $this->foreign_values[$pRef])){
                 return;
             }
             $this->foreign_values[$pRef][] = $pValue;
         }
 
-        /**
-         * @param string $pHandler
-         * @return array
-         */
-        public function export($pHandler = "default"){
+
+        public function export(string $pHandler = "default"):array
+        {
             $tables = array();
             $schema = array();
             /** @var DataManagerSource $source */
             foreach($this->tables as $source){
                 $schema[] = $source->toArray();
                 $cond = Query::condition();
-                list($tableField, $field) = explode(".", $source->getSelectField());
+                list(, $field) = explode(".", $source->getSelectField());
                 if(empty($this->foreign_values[$source->getSelectField()])){
                     trigger_error('Empty foreign values for table '.$source->getTable(), E_USER_WARNING);
                     continue;
@@ -90,12 +78,9 @@ namespace core\db{
 
         }
 
-        /**
-         * @param array $pData
-         * @param null $pDomain
-         * @param string $pHandler
-         */
-        public function import($pData, $pDomain = null, $pHandler = "default"){
+
+        public function import(array $pData, string $pDomain = null, string $pHandler = "default"):bool
+        {
 
             $schema = $pData['schema'];
             $data = $pData['tables'];
@@ -142,7 +127,7 @@ namespace core\db{
                     if($in){
                         array_unshift($ordered, $ta);
                     }else{
-                        array_push($ordered, $ta);
+                        $ordered[] = $ta;
                     }
                 }
                 if(!$in){
@@ -165,7 +150,7 @@ namespace core\db{
 
                 $insert = $data[$name];
 
-                if(!preg_match('/^'.$name.'\.(.+)$/', $select_id, $matches)){
+                if(!preg_match('/^'.$name.'\.(.+)$/', $select_id)){
                     if(!isset($info["foreign_keys"])){
                         $info["foreign_keys"] = array();
                     }
@@ -179,7 +164,7 @@ namespace core\db{
 
                 foreach($insert as $item){
                     foreach($item as $f=>$v){
-                        if(is_null($item[$f])||empty($v)){
+                        if(empty($v)){
                             unset($item[$f]);
                         }
                     }
@@ -192,14 +177,12 @@ namespace core\db{
                     if(isset($info["foreign_keys"])){
                         $keys = $info["foreign_keys"];
                         foreach($keys as $field=>$ref){
-                            if(!isset($item[$field]) || (empty($item[$field])||is_null($item[$field]))){
+                            if((empty($item[$field]))){
                                 unset($item[$field]);
                                 continue;
                             }
-                            if(isset($item[$field]) && isset($ids[$ref])){
-                                if(isset($ids[$ref][$item[$field]])){
-                                    $item[$field] = $ids[$ref][$item[$field]];
-                                }
+                            if(isset($ids[$ref][$item[$field]])){
+                                $item[$field] = $ids[$ref][$item[$field]];
                             }
                         }
                     }
@@ -211,7 +194,7 @@ namespace core\db{
                     }else{
                         foreach($ids as $name=>$values){
                             list($table, $id) = explode(".", $name);
-                            foreach($values as $old=>$new){
+                            foreach($values as $new){
                                 Query::delete()->from($table)->where($id, Query::EQUAL, $new)->execute($pHandler);
                             }
                         }
@@ -231,7 +214,15 @@ namespace core\db{
             return true;
         }
 
-        static public function upgradeSchema($pFromHandler, $pToHandler, $pExecute = false){
+        /**
+         * @param string $pFromHandler
+         * @param string $pToHandler
+         * @param bool $pExecute
+         * @return string
+         * @throws Exception
+         */
+        static public function upgradeSchema(string $pFromHandler, string $pToHandler, bool $pExecute = false):string
+        {
             $upgrades = [];
             $from = self::getTables($pFromHandler);
             $to = self::getTables($pToHandler);
@@ -293,7 +284,9 @@ namespace core\db{
             return implode(PHP_EOL, $upgrades);
         }
 
-        static public function getTables($pHandler){
+
+        static public function getTables(string $pHandler):array
+        {
             $tables = [];
             $raw = Query::execute('SHOW TABLES;', $pHandler);
             foreach($raw as $item){
@@ -315,88 +308,62 @@ namespace core\db{
      */
     class DataManagerSource{
 
-        /**
-         * @var string
-         */
-        private $table;
+        private string $table;
 
-        /**
-         * @var string
-         */
-        private $id;
+        private string $id;
 
-        /**
-         * @var string
-         */
-        private $select_field;
+        private string $select_field;
 
-        /**
-         * @var array
-         */
-        private $foreign_keys = array();
+        private array $foreign_keys = array();
 
-        /**
-         * DataManagerSource constructor.
-         * @param string $pTableName
-         * @param string $pId
-         * @param string $pSelectField
-         */
-        public function __construct($pTableName, $pId, $pSelectField){
+
+        public function __construct(string $pTableName, string $pId, string $pSelectField)
+        {
             $this->table = $pTableName;
             $this->id = $pId;
             $this->select_field = $pSelectField;
         }
 
-        /**
-         * @param string $pField
-         * @param string $pForeignTable
-         * @param string $pForeignField
-         * @return $this
-         */
-        public function addForeignKey($pField, $pForeignTable, $pForeignField = null){
+
+        public function addForeignKey(string $pField, string $pForeignTable, string $pForeignField = null):DataManagerSource
+        {
             $this->foreign_keys[$pField] = $pForeignTable.".".($pForeignField??$pField);
             return $this;
         }
 
-        /**
-         * @return string
-         */
-        public function getId(){
+
+        public function getId():string
+        {
             return $this->id;
         }
 
-        /**
-         * @return string
-         */
-        public function getTable(){
+
+        public function getTable():string
+        {
             return $this->table;
         }
 
-        /**
-         * @return string
-         */
-        public function getSelectField(){
+
+        public function getSelectField():string
+        {
             return $this->select_field;
         }
 
-        /**
-         * @return array
-         */
-        public function getForeignKeys(){
+
+        public function getForeignKeys():array
+        {
             return $this->foreign_keys;
         }
 
-        /**
-         * @return bool
-         */
-        public function hasForeignKeys(){
+
+        public function hasForeignKeys():bool
+        {
             return !empty($this->foreign_keys);
         }
 
-        /**
-         * @return array
-         */
-        public function toArray(){
+
+        public function toArray():array
+        {
             return array(
                 "table"=>$this->table,
                 "id"=>$this->id,

@@ -13,57 +13,22 @@ namespace core\utils
 	 */
 	class RSS
 	{
-		/**
-		 *
-		 * @var string
-		 */
-		public $title = "";
+		public string $title = "";
 
-		/**
-		 *
-		 * @var string
-		 */
-		public $description = "";
+		public string $description = "";
 
-		/**
-		 *
-		 * @var string
-		 */
-		public $rss_version = "2.0";
+		public string $rss_version = "2.0";
 
-		/**
-		 *
-		 * @var string
-		 */
-		public $link = "";
+		public string $link = "";
 
-		/**
-		 *
-		 * @var string
-		 */
-		public $link_rss = "";
+		public string $link_rss = "";
 
-		/**
-		 *
-		 * @var string[]
-		 */
-		public $namespaces = array("atom"=>"http://www.w3.org/2005/Atom");
+		public array $namespaces = array("atom"=>"http://www.w3.org/2005/Atom");
 
-		/**
-		 *
-		 * @var string
-		 */
-		private $items = array();
+		private array $items = array();
 
 
-		/**
-		 * Constructor
-		 * @param string $pTitle
-		 * @param string $pDescription
-		 * @param string $pLink
-		 * @param string $pUrlRss
-		 */
-		public function __construct($pTitle, $pDescription, $pLink, $pUrlRss)
+		public function __construct(string $pTitle, string $pDescription, string $pLink, string $pUrlRss)
 		{
 			$this->title = $pTitle;
 			$this->description = $pDescription;
@@ -73,14 +38,14 @@ namespace core\utils
 
 		/**
 		 * Méthode d'ajout d'un item au contenu du flux RSS
-		 * @param String $pTitle
-		 * @param String $pDescription
-		 * @param String $pDate
-		 * @param String $pLink
-		 * @param String $pGuid [optionnal]
+		 * @param string $pTitle
+		 * @param string $pDescription
+		 * @param string $pDate
+		 * @param string $pLink
+		 * @param string $pGuid [optionnal]
 		 * @return void
 		 */
-		public function addItem($pTitle, $pDescription, $pDate, $pLink, $pGuid = "")
+		public function addItem(string $pTitle, string $pDescription, string $pDate, string $pLink, string $pGuid = ""):void
 		{
 			$item = array();
 			$item["title"] = array("nodeValue"=>$pTitle);
@@ -97,11 +62,11 @@ namespace core\utils
 
 		/**
 		 * Méthode d'ajout d'un namespace au flux RSS
-		 * @param String $pName
-		 * @param String $pValue
+		 * @param string $pName
+		 * @param string $pValue
 		 * @return void
 		 */
-		public function addNameSpace($pName, $pValue)
+		public function addNameSpace(string $pName, string $pValue):void
 		{
 			$this->namespaces[$pName] = $pValue;
 		}
@@ -110,7 +75,7 @@ namespace core\utils
 		 * Renvoi le contenu du flux RSS sous forme d'un tableau multidimensionnel
 		 * @return array
 		 */
-		public function toArray()
+		public function toArray():array
 		{
 			$xml = array("rss"=>array("version"=>$this->rss_version));
 			foreach($this->namespaces as $name=>$value)
@@ -127,9 +92,9 @@ namespace core\utils
 
 		/**
 		 * Renvoi le contenu du flux RSS courant au format XML
-		 * @return String
+		 * @return string
 		 */
-		public function toXML()
+		public function toXML():string
 		{
 			return SimpleXML::encode($this->toArray());
 		}

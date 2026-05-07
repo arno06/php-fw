@@ -4,103 +4,78 @@ namespace core\application
 	use core\application\event\Event;
     use core\data\SimpleJSON;
     use core\db\Query;
+    use core\db\QueryCondition;
     use core\models\InterfaceBackModel;
     use core\system\File;
     use core\tools\form\Form;
 	use core\tools\PaginationHandler;
 	use core\tools\Menu;
-	use \Exception;
+	use Exception;
+    use JetBrains\PhpStorm\NoReturn;
 
-	/**
+    /**
 	 * Controller de backoffice de base
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
 	 * @version 1.0
 	 * @package core\application
 	 */
-	class DefaultBackController extends DefaultController implements InterfaceController
+	class DefaultBackController extends DefaultController
 	{
 
-		/**
-		 * @type String
-		 */
 		const EVENT_SUCCESSFUL_ADD      = "BOEvent_successful_add";
 
-		/**
-		 * @type String
-		 */
 		const EVENT_FAILED_ADD          = "BOEvent_failed_add";
 
-		/**
-		 * @type String
-		 */
 		const EVENT_SUCCESSFUL_EDIT   = "BOEVENT_SUCCESSFUL_EDIT";
 
-		/**
-		 * @type String
-		 */
 		const EVENT_FAILED_EDIT       = "BOEVENT_FAILED_EDIT";
 
-		/**
-		 * @type String
-		 */
 		const EVENT_SUCCESSUL_DELETE    = "BOEvent_successful_delete";
 
 		/**
 		 * Instance du model que le controller pourra manipuler
 		 * @var InterfaceBackModel
 		 */
-		protected $model;
+		protected InterfaceBackModel $model;
 
 		/**
 		 * Nom du formulaire à récupérer pour l'ajout et la modification
-		 * @var String
+		 * @var string
 		 */
-		protected $formName;
+		protected string $formName;
 
 		/**
 		 * Nom de la classe en cours
-		 * @var String
+		 * @var string
 		 */
-		protected $className;
+		protected string $className;
 
 		/**
 		 * Tableau des champs à afficher dans la liste des enregistrements
 		 * @var array
 		 */
-		protected $listTitle = array();
+		protected array $listTitle = array();
 
 		/**
 		 * Nombre d'entrée à afficher par page dans la liste des enregistrements
 		 * @var int
 		 */
-		protected $nbItemsByPage = 15;
+		protected int $nbItemsByPage = 15;
 
 		/**
 		 * Définit si on utilise ou non le syst&egrave;me de pagination dans la liste des enregistrements
-		 * @var Boolean
+		 * @var bool
 		 */
-		protected $usePaginationOnList = true;
+		protected bool $usePaginationOnList = true;
 
-		/**
-		 * @var BOLabelList
-		 */
-		protected $titles;
+		protected BOLabelList $titles;
 
-		/**
-		 * @var BOLabelList
-		 */
-		protected $h1;
+		protected BOLabelList $h1;
 
-		/**
-		 * @var Menu
-		 */
-		protected $menu;
+		protected Menu $menu;
 
-		/**
-		 * @var BOActionList
-		 */
-		protected $actions;
+		protected BOActionList $actions;
 
 		/**
 		 * Constructor
@@ -123,27 +98,23 @@ namespace core\application
 			$this->actions->enable('view', 'view', true);
 			$this->actions->enable('edit', 'edit', true);
 			$this->actions->enable('delete', 'delete', true);
-			$this->actions->enable('listing', 'listing', false);
-			$this->actions->enable('add', 'add', false);
+			$this->actions->enable('listing', 'listing');
+			$this->actions->enable('add', 'add');
 			$this->menu = new Menu(Core::$path_to_application.'/modules/back/menu.json');
 		}
 
-		/**
-		 * @param bool $pDisplay
-		 * @return string
-		 */
-		public function render($pDisplay = true)
+
+		public function render(bool $pDisplay = true):string
 		{
 			$this->addContent("actions", $this->actions->toArray());
 			$this->addContent('menu_items', $this->menu->retrieveItems());
 			return parent::render($pDisplay);
 		}
 
-
         /**
          * Méthode par défaut de page introuvable
          */
-        public function notFound()
+        public function notFound():void
         {
             if(get_called_class() != __CLASS__)
             {
@@ -152,26 +123,25 @@ namespace core\application
             $this->setTemplate(null, null, 'notFound.tpl');
         }
 
-
 		/**
 		 * Méthode appelé par défault en cas de non-existance d'action
 		 * Renvoie automatiquement vers l'action "lister"
 		 * @return void
 		 */
-		public function index()
+		public function index():void
 		{
 			Go::to($this->className, "listing");
 		}
 
-
-		/**
-		 * Méthode d'ajout d'une nouvel entrée
-		 * Définie le formulaire
-		 * Vérifie les données du formulaire
-		 * Déclenche l'ajout dans le model
-		 * @return void
-		 */
-		public function add()
+        /**
+         * Méthode d'ajout d'une nouvel entrée
+         * Définie le formulaire
+         * Vérifie les données du formulaire
+         * Déclenche l'ajout dans le model
+         * @return void
+         * @throws Exception
+         */
+		public function add():void
 		{
 			if(!$this->actions->isEnabled('add'))
 				Go::to404();
@@ -181,7 +151,7 @@ namespace core\application
 			{
 				$form = new Form($this->formName);
 			}
-			catch(Exception $e)
+			catch(Exception)
 			{
 				$form = new Form($this->formName, false);
 				$inputs = $this->model->generateInputsFromDescribe();
@@ -212,14 +182,13 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('add'));
 		}
 
-
 		/**
 		 * Méthode permettant de lister toutes les entrées du model
 		 * Gestion automatique du ORDER BY
-		 * @param String $pCondition		Condition souhaitée pour la requête SQL
+		 * @param QueryCondition|null $pCondition Condition souhaitée pour la requête SQL
 		 * @return void
 		 */
-		public function listing($pCondition = null)
+		public function listing(QueryCondition $pCondition = null):void
 		{
 			if(!$this->actions->isEnabled("listing"))
 				Go::to404();
@@ -235,14 +204,14 @@ namespace core\application
 			{
 				if(isset($_GET["order"])&&in_array($_GET["order"], $this->listTitle[$i]))
 				{
-					$pCondition->order($_GET["order"],(isset($_GET["by"])?$_GET["by"]:"ASC"));
+					$pCondition->order($_GET["order"],$_GET["by"]??"ASC");
 					$i = $max;
 				}
 			}
 			if($this->usePaginationOnList)
 			{
 				$nbDatas =  $this->model->count($pConditionCount);
-				$currentPage = isset($_GET["page"])?$_GET["page"]:1;
+				$currentPage = $_GET["page"]??1;
 				$pagination = new PaginationHandler($currentPage, $this->nbItemsByPage, $nbDatas);
 				$pCondition->limit($pagination->first, $pagination->number);
 				$data = $this->model->all($pCondition);
@@ -254,12 +223,13 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('listing'));
 		}
 
-
-		/**
-		 * Méthode de modification d'une entrée
-		 * Récup&egrave;re les données via le model et les injecte dans le formulaire
-		 */
-		public function edit()
+        /**
+         * Méthode de modification d'une entrée
+         * Récup&egrave;re les données via le model et les injecte dans le formulaire
+         * @return void
+         * @throws Exception
+         */
+		public function edit():void
 		{
 			if(!$this->actions->isEnabled('edit'))
 				Go::to404();
@@ -269,7 +239,7 @@ namespace core\application
 			{
 				$form = new Form($this->formName);
 			}
-			catch(Exception $e)
+			catch(Exception)
 			{
 				$form = new Form($this->formName, false);
 				$inputs = $this->model->generateInputsFromDescribe();
@@ -307,13 +277,12 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('edit'));
 		}
 
-
 		/**
 		 * Méthode de suppression d'une entrée
 		 * Renvoie systématiquement à l'action "lister"
 		 * @return void
 		 */
-		public function delete()
+		public function delete():void
 		{
 			if(!$this->actions->isEnabled('delete'))
 				Go::to404();
@@ -322,12 +291,11 @@ namespace core\application
 			Go::to($this->className);
 		}
 
-
         /**
          * Méthode de lecture seul des données d'une entrée
          * @return void
          */
-		public function view()
+		public function view():void
 		{
 			if(!$this->actions->isEnabled('view'))
 				Go::to404();
@@ -342,8 +310,9 @@ namespace core\application
 			$this->addContent("h1", $this->h1->get('view'));
 		}
 
-
-        public function create_form(){
+        #[NoReturn]
+        public function create_form():void
+        {
             $module = Core::$module;
             $formFile = Core::$path_to_application."/modules/".$module."/forms/form.".$this->formName.".json";
             $inputs = $this->model->generateInputsFromDescribe();
@@ -359,7 +328,7 @@ namespace core\application
 		 * @param bool $pOrder
 		 * @return void
 		 */
-		protected function addColumnToList($pField, $pLabel, $pOrder = true)
+		protected function addColumnToList(string $pField, string $pLabel, bool $pOrder = true):void
 		{
 			$this->listTitle[] = array("champ"=>$pField, "label"=>$pLabel, "order"=>$pOrder);
 		}
@@ -367,27 +336,30 @@ namespace core\application
 
 	Class BOActionList
 	{
-		private $actions = array();
+		private array $actions = array();
 
-		public function enable($pActionName, $pAction = null, $pApplyToEntry = false)
+		public function enable(string $pActionName, string $pAction = null, bool $pApplyToEntry = false):void
 		{
 			if(!$pAction)
 				$pAction = $pActionName;
 			$this->actions[$pActionName] = array('name'=>$pAction, 'applyToEntry'=>$pApplyToEntry, 'enabled'=>true);
 		}
 
-		public function disable($pActionName)
+
+		public function disable(string $pActionName):void
 		{
 			if(isset($this->actions[$pActionName]))
                 unset($this->actions[$pActionName]);
 		}
 
-		public function isEnabled($pActionName)
+
+		public function isEnabled(string $pActionName):bool
 		{
 			return isset($this->actions[$pActionName]);
 		}
 
-		public function toArray()
+
+		public function toArray():array
 		{
             $return = array();
             foreach($this->actions as $n=>$v)
@@ -405,31 +377,19 @@ namespace core\application
 	 */
 	class BOLabelList
 	{
-		/**
-		 * @var string
-		 */
-		private $className;
+		private string $className;
 
-		/**
-		 * @var string
-		 */
-		private $id;
+		private string $id;
 
-		/**
-		 * @param string $pId
-		 * @param string $pClass
-		 */
-		public function __construct($pId, $pClass)
+
+		public function __construct(string $pId, string $pClass)
 		{
 			$this->id = $pId;
 			$this->className = $pClass;
 		}
 
-		/**
-		 * @param string $pName
-		 * @return mixed
-		 */
-		public function get($pName)
+
+		public function get(string $pName):string
 		{
 			return sprintf(Dictionary::term('backoffice.'.$this->id.'.'.$pName), $this->className);
 		}

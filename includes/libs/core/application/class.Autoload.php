@@ -10,45 +10,21 @@ namespace core\application
 	 */
 	class Autoload extends Singleton
 	{
-		/**
-		 * @var string
-		 */
-		static public $folder = '';
+        const FOLDER_CORE = '/includes/libs/core/';
 
-		/**
-		 * @type string
-		 */
-		const FOLDER_CORE = '/includes/libs/core/';
+		static public string $folder = '';
 
-		/**
-		 * @var array
-		 */
-		private $scripts;
+		private array $scripts;
 
-		/**
-		 * @var array
-		 */
-		private $scriptDependencies;
+		private array $scriptDependencies;
 
-		/**
-		 * @var array
-		 */
-		private $styles;
+		private array $styles;
 
-		/**
-		 * @var array
-		 */
-		private $styleDependencies;
+		private array $styleDependencies;
 
-		/**
-		 * @var array
-		 */
-		private $exeptions = array();
+		private array $exeptions = array();
 
 
-		/**
-		 * constructor
-		 */
 		public function __construct()
 		{
 			$this->scripts = array();
@@ -63,7 +39,7 @@ namespace core\application
 		 * @param string $pClassName	Nom de la classe préfixé de son package
 		 * @return bool
 		 */
-		public function load($pClassName)
+		public function load(string $pClassName):bool
 		{
 
             if(array_key_exists($pClassName, $this->exeptions))
@@ -111,17 +87,12 @@ namespace core\application
 			{
 				case 'interface':
 					trigger_error('Impossible de charger l\'interface <b>'.$pClassName.'</b>.', E_USER_ERROR);
-					break;
 				case 'model':
 					trigger_error('Impossible de charger le model <b>'.$pClassName.'</b>.', E_USER_ERROR);
-					break;
 				default:
 				case 'class':
 					trigger_error('Impossible de charger la classe <b>'.$pClassName.'</b>.', E_USER_ERROR);
-					break;
 			}
-
-			return false;
 		}
 
 		/**
@@ -129,24 +100,20 @@ namespace core\application
 		 * @static
 		 * @param string $pName
 		 */
-		static public function addComponent($pName)
+		static public function addComponent(string $pName):void
 		{
 			self::addScript($pName);
 			self::addStyle($pName);
 		}
 
-		/**
-		 * @static
-		 * @param string $pScript
-		 * @return void
-		 */
-		static public function addScript($pScript)
+
+		static public function addScript(string $pScript):void
 		{
             /** @var Autoload $instance */
             $instance = self::getInstance();
 			if(preg_match('/\.js$/', $pScript))
 			{
-				$script = (strpos($pScript, 'http') === 0) ? $pScript : Core::$path_to_components . '/' . $pScript;
+				$script = (str_starts_with("http", $pScript)) ? $pScript : Core::$path_to_components . '/' . $pScript;
 				if(!in_array($script, $instance->scripts, true))
                     $instance->scripts[] = $script;
 			}
@@ -158,18 +125,13 @@ namespace core\application
 		}
 
 
-		/**
-		 * @static
-		 * @param string $pStyleSheet
-		 * @return void
-		 */
-		static public function addStyle($pStyleSheet)
+		static public function addStyle(string $pStyleSheet):void
 		{
             /** @var Autoload $instance */
             $instance = self::getInstance();
 			if(preg_match('/\.css$/', $pStyleSheet))
 			{
-				$pStyleSheet = (strpos($pStyleSheet, 'http') === 0) ? $pStyleSheet : Core::$path_to_components . '/' . $pStyleSheet;
+				$pStyleSheet = (str_starts_with("http", $pStyleSheet)) ? $pStyleSheet : Core::$path_to_components . '/' . $pStyleSheet;
 				if(!in_array($pStyleSheet, $instance->styles, true))
                     $instance->styles[] = $pStyleSheet;
 			}
@@ -181,11 +143,7 @@ namespace core\application
 		}
 
 
-		/**
-		 * @static
-		 * @return array
-		 */
-		static public function scripts()
+		static public function scripts():array
 		{
             /** @var Autoload $instance */
             $instance = self::getInstance();
@@ -195,11 +153,7 @@ namespace core\application
 		}
 
 
-		/**
-		 * @static
-		 * @return array
-		 */
-		static public function styles()
+		static public function styles():array
 		{
             /** @var Autoload $instance */
             $instance = self::getInstance();

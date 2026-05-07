@@ -5,6 +5,7 @@ namespace core\tools
     use core\application\event\EventDispatcher;
     use core\data\Encoding;
     use core\system\File;
+    use Exception;
 
     /**
      * Class SimpleCrawler
@@ -18,39 +19,23 @@ namespace core\tools
      */
     class SimpleCrawler extends EventDispatcher
     {
-        /**
-         * @var string[]
-         */
-        private $urlsDone;
+        private array $urlsDone;
 
-        /**
-         * @var string[]
-         */
-        private $urlsToCrawl;
+        private array $urlsToCrawl;
 
-        /**
-         * @var string
-         */
-        public $logFile;
+        public string $logFile;
 
-        /**
-         * @var bool
-         */
-        public $deepRunning;
+        public bool $deepRunning;
 
-        /**
-         * @param string $pBaseUrl
-         */
-        public function __construct($pBaseUrl)
+
+        public function __construct(string $pBaseUrl)
         {
             $this->deepRunning = true;
             $this->urlsToCrawl = array($pBaseUrl);
         }
 
-        /**
-         *
-         */
-        public function fetch()
+
+        public function fetch():void
         {
             $this->urlsDone = array();
             if($this->logFile)
@@ -64,13 +49,8 @@ namespace core\tools
             while($this->next()){}
         }
 
-        /**
-         * @param string $pUrl
-         * @param string $pTitle
-         * @param string $pDescription
-         * @param null $pFirst
-         */
-        private function log($pUrl, $pTitle, $pDescription, $pFirst = null)
+
+        private function log(string $pUrl, string $pTitle, string $pDescription, string $pFirst = null):void
         {
             if(!$this->logFile)
                 return;
@@ -83,10 +63,8 @@ namespace core\tools
             File::append($this->logFile, '"'.$pFirst.'";"'.$pUrl.'";"'.$pTitle.'";"'.$pDescription.'"'.PHP_EOL);
         }
 
-        /**
-         * @return bool
-         */
-        private function next()
+
+        private function next():bool
         {
             $message = "".count($this->urlsDone)." done".PHP_EOL;
             $message .= "".count($this->urlsToCrawl)." left".PHP_EOL;
@@ -97,7 +75,8 @@ namespace core\tools
             }
             $url = array_shift($this->urlsToCrawl);
 
-            if(in_array($url, $this->urlsDone)){
+            if(in_array($url, $this->urlsDone))
+            {
                 return true;
             }
 
@@ -111,7 +90,7 @@ namespace core\tools
             {
                 $d = $r->execute();
             }
-            catch (\Exception $e)
+            catch (Exception)
             {
                 $d = false;
             }
@@ -131,24 +110,24 @@ namespace core\tools
                 return true;
             }
 
-            $baseHref = $this->extract('/\<base href="([^"]+)"/', $d);
-            $title = $this->extract('/\<title\>([^<]+)/', $d);
-            $description = $this->extract('/\<meta name="description" content="([^"]+)"/', $d);
+            $baseHref = $this->extract('/<base href="([^"]+)"/', $d);
+            $title = $this->extract('/<title>([^<]+)/', $d);
+            $description = $this->extract('/<meta name="description" content="([^"]+)"/', $d);
 
-            preg_match_all('/href\="([^"]+)"/', $d, $matches);
+            preg_match_all('/href="([^"]+)"/', $d, $matches);
 
-            if(isset($matches[1]) && !empty($matches[1]))
+            if(!empty($matches[1]))
             {
                 foreach($matches[1] as $u)
                 {
-                    if(strpos($u, 'http://')===0
-                        || strpos($u, 'https://')===0
-                        || strpos($u, 'javascript:')===0
-                        || strpos($u, '#')===0
+                    if(str_starts_with($u, 'http://')
+                        || str_starts_with($u, 'https://')
+                        || str_starts_with($u, 'javascript:')
+                        || str_starts_with($u, '#')
                         || $u === "/")
                         continue;
 
-                    if(strpos($u, "/") === 0)
+                    if(str_starts_with($u, "/"))
                         $u = substr($u, 1, strlen($u));
 
                     $u = $baseHref.$u;
@@ -168,12 +147,8 @@ namespace core\tools
             return true;
         }
 
-        /**
-         * @param string $pRegExp
-         * @param string $pContent
-         * @return bool
-         */
-        private function extract($pRegExp, $pContent)
+
+        private function extract(string $pRegExp, string $pContent):bool|string
         {
             if(preg_match($pRegExp, $pContent, $matches))
             {
@@ -186,17 +161,20 @@ namespace core\tools
 
     }
 
+
     class SimpleCrawlerEvent extends Event
     {
         const OUTPUT = "evt_output";
 
-        public $message;
+        public string $message;
 
-        public function __construct($pType, $pMessage)
+
+        public function __construct(string $pType, string $pMessage)
         {
             $this->message = $pMessage;
             parent::__construct($pType);
         }
+
 
         public function __clone()
         {

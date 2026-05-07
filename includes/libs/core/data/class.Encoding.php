@@ -16,9 +16,9 @@ namespace core\data
 		 * Méthode static d'encodage récursif de valeurs dans leurs valeur numériques (é ==> &#233;)
 		 * @static
 		 * @param mixed $pValue
-		 * @return string|array
+		 * @return mixed
 		 */
-		static public function toNumericEntities($pValue)
+		static public function toNumericEntities(mixed $pValue):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -38,9 +38,9 @@ namespace core\data
 		 * Méthode static de décodage récursif des entités numériques
 		 * @static
 		 * @param  mixed $pValue
-		 * @return mixed|string
+		 * @return mixed
 		 */
-		static public function fromNumericEntities($pValue)
+		static public function fromNumericEntities(mixed $pValue):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -65,15 +65,14 @@ namespace core\data
 			return $pValue;
 		}
 
-
 		/**
 		 * Méthode static d'encodage récursif de valeurs dans leurs valeur HTML (é ==> &eacute;)
 		 * @param mixed $pValue
 		 * @param int $pQuote
 		 * @param bool $pCharset
-		 * @return array|string
+		 * @return mixed
 		 */
-		static public function toHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
+		static public function toHTMLEntities(mixed $pValue, int $pQuote = ENT_QUOTES, bool $pCharset = false):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -87,7 +86,6 @@ namespace core\data
 			return $pValue;
 		}
 
-
 		/**
 		 * Méthode static de décodage récursif d'entité HTML dans leur version ISO-8859-1
 		 * @param mixed $pValue
@@ -95,7 +93,7 @@ namespace core\data
 		 * @param bool $pCharset
 		 * @return mixed
 		 */
-		static public function fromHTMLEntities($pValue, $pQuote = ENT_QUOTES, $pCharset = false)
+		static public function fromHTMLEntities(mixed $pValue, int $pQuote = ENT_QUOTES, bool $pCharset = false):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -110,12 +108,7 @@ namespace core\data
 		}
 
 
-		/**
-		 * @static
-		 * @param array|string|object $pValue
-		 * @return array|string
-		 */
-		static public function fromUTF8($pValue)
+		static public function fromUTF8(mixed $pValue):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -136,12 +129,8 @@ namespace core\data
 			return $pValue;
 		}
 
-		/**
-		 * @static
-		 * @param array|string $pValue
-		 * @return array|string
-		 */
-		static public function toUTF8($pValue)
+
+		static public function toUTF8(mixed $pValue):mixed
 		{
             if(!$pValue){
                 return $pValue;
@@ -167,7 +156,7 @@ namespace core\data
 		 * @static
 		 * @return string
 		 */
-		static public function BOM()
+		static public function BOM():string
 		{
 			return chr(239) . chr(187) . chr(191);
 		}

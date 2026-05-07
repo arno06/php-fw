@@ -1,8 +1,10 @@
 <?php
 namespace core\system
 {
-	use \Exception;
-	/**
+	use Exception;
+    use JetBrains\PhpStorm\NoReturn;
+
+    /**
 	 * Class File
 	 * Surcouche aux fonctions Php permettant de gérer les fichiers
 	 *
@@ -17,10 +19,10 @@ namespace core\system
 		/**
 		 * Méthode de création d'un nouveau fichier sur le serveur
 		 * Renvoi le résultat du traitement - False si le fichier existe déj&agrave;
-		 * @param String $pFile					chemin du fichier
-		 * @return boolean
+		 * @param string $pFile					chemin du fichier
+		 * @return bool
 		 */
-		static public function create($pFile)
+		static public function create(string $pFile):bool
 		{
 			if(file_exists($pFile))
 				return false;
@@ -30,11 +32,11 @@ namespace core\system
 
 		/**
 		 * Méthode de récupération d'une ressource apr&egrave;s ouverture d'un fichier non binaire
-		 * @param String $pFile					Chemin du fichier
-		 * @param String $pMode					Mode d'ouverture, par défault "r" pour "read" lecture
-		 * @return resource
+		 * @param string $pFile					Chemin du fichier
+		 * @param string $pMode					Mode d'ouverture, par défault "r" pour "read" lecture
+		 * @return mixed
 		 */
-		static protected function open($pFile, $pMode = "r")
+		static protected function open(string $pFile, string $pMode = "r"):mixed
 		{
 			if(file_exists($pFile))
 				return fopen($pFile, $pMode);
@@ -46,10 +48,10 @@ namespace core\system
 		 * Méthode de récupération du contenu d'un fichier non binaire
 		 * Déclenche une Exception en cas d'échec
 		 * @param String $pPath					Chemin du fichier
-		 * @return String
+		 * @return false|string
 		 * @throws Exception
 		 */
-		static public function read($pPath)
+		static public function read(string $pPath):false|string
 		{
 			if($ressource = self::open($pPath))
 			{
@@ -65,12 +67,13 @@ namespace core\system
 		}
 
         /**
-         * @param $pFileName
-         * @param $pCallBack
+         * @param string $pFileName
+         * @param Callable $pCallBack
          * @return void
          * @throws Exception
          */
-        static public function readLines($pFileName, $pCallBack){
+        static public function readLines(string $pFileName, Callable $pCallBack):void
+        {
             if(!($resource = self::open($pFileName))){
                 throw new Exception("Le fichier '".$pFileName."' n'existe pas.");
             }
@@ -83,11 +86,11 @@ namespace core\system
 
 		/**
 		 * Méthode d'écriture &agrave; la suite d'un fichier existant
-		 * @param String $pFile					Chemin du fichier
-		 * @param String $pValue				Valeur &agrave; écrire
-		 * @return resource
+		 * @param string $pFile					Chemin du fichier
+		 * @param string $pValue				Valeur &agrave; écrire
+		 * @return bool|int
 		 */
-		static public function append($pFile, $pValue)
+		static public function append(string $pFile, string $pValue):bool|int
 		{
 			$r = self::open($pFile, "a");
 			$return = @fwrite($r, $pValue);
@@ -98,10 +101,10 @@ namespace core\system
 		/**
 		 * Méthode de suppression d'un fichier
 		 * Renvoi le résultat de l'action, false si le fichier n'existe pas
-		 * @param String $pFile					Chemin du fichier
-		 * @return boolean
+		 * @param string $pFile					Chemin du fichier
+		 * @return bool
 		 */
-		static public function delete($pFile)
+		static public function delete(string $pFile):bool
 		{
 			if(file_exists($pFile))
 			{
@@ -115,11 +118,11 @@ namespace core\system
 		/**
 		 * Méthode de renommage d'un fichier/dossier
 		 * Renvoi le résultat de l'action, false si le fichier n'existe pas
-		 * @param String $pFile					Chemin actuel
-		 * @param String $pNewName				Nouveau Chemin
-		 * @return boolean
+		 * @param string $pFile					Chemin actuel
+		 * @param string $pNewName				Nouveau Chemin
+		 * @return bool
 		 */
-		static public function rename($pFile, $pNewName)
+		static public function rename(string $pFile, string $pNewName):bool
 		{
 			if(file_exists($pFile))
 				return @rename($pFile, $pNewName);
@@ -129,10 +132,10 @@ namespace core\system
 
 		/**
 		 * Méthode d'échappement des caract&egrave;res pouvant poser probl&egrave;me dans certains syst&egrave;mes de fichiers
-		 * @param String $pFileName				Nom du fichier
-		 * @return String
+		 * @param string $pFileName				Nom du fichier
+		 * @return string
 		 */
-		static public function sanitizeFileName($pFileName)
+		static public function sanitizeFileName(string $pFileName):string
 		{
 			$pFileName = strtolower($pFileName);
 			$chars = array(" "=>"-",
@@ -159,23 +162,19 @@ namespace core\system
 			return $pFileName;
 		}
 
-
 		/**
 		 * Méthode de récupération d'une extension d'un fichier &agrave; partir du nom de ce même fichier
-		 * @param String $pFile		Nom du fichier - peut être le chemin relatif ou absolu de celui-ci
-		 * @return String(2,3)
+		 * @param string $pFile		Nom du fichier - peut être le chemin relatif ou absolu de celui-ci
+		 * @return string(2,3)
 		 */
-		static public function getExtension($pFile)
+		static public function getExtension(string $pFile):string
 		{
 			preg_match(self::REGEXP_EXTENSION, $pFile, $extracts);
 			return $extracts[1];
 		}
 
-        /**
-         * @param string $pFile
-         * @return bool
-         */
-		static public function isImage($pFile)
+
+		static public function isImage(string $pFile):bool
 		{
 			$extension = self::getExtension($pFile);
 			return in_array($extension, array('gif', 'jpg', 'jpeg', 'png', 'tif'));
@@ -183,49 +182,35 @@ namespace core\system
 
 		/**
 		 * Méthode de récupération du MimType d'un fichier &agrave; partir de son nom
-		 * @param object $pFile		Nom du fichier - peut être le chemin relatif ou absolu de celui-ci
-		 * @return String
+		 * @param string $pFile		Nom du fichier - peut être le chemin relatif ou absolu de celui-ci
+		 * @return string
 		 */
-		static public function getMimeType($pFile)
+		static public function getMimeType(string $pFile):string
 		{
 			$extension = self::getExtension($pFile);
-			switch($extension)
-			{
-				case "gz":
-					$type = "application/x-gzip"; break;
-				case "tgz":
-					$type = "application/x-gzip"; break;
-				case "zip":
-					$type = "application/zip"; break;
-				case "rar":
-					$type = "application/rar"; break;
-				case "pdf":
-					$type = "application/pdf"; break;
-				case "png":
-					$type = "image/png"; break;
-				case "gif":
-					$type = "image/gif"; break;
-				case "jpg":
-					$type = "image/jpeg"; break;
-				case "txt":
-					$type = "text/plain"; break;
-				case "csv":
-					$type = "text/csv"; break;
-				default:
-					$type = "application/octet-stream"; break;
-			}
-			return $type;
+            return match ($extension) {
+                "tgz", "gz" => "application/x-gzip",
+                "zip" => "application/zip",
+                "rar" => "application/rar",
+                "pdf" => "application/pdf",
+                "png" => "image/png",
+                "gif" => "image/gif",
+                "jpg" => "image/jpeg",
+                "txt" => "text/plain",
+                "csv" => "text/csv",
+                default => "application/octet-stream",
+            };
 		}
-
 
 		/**
 		 * Méthode permettant de forcer le téléchargement d'un fichier ou un contenu via un fichier temporaire
 		 * Quitte l'applicatif - aucune sortie HTML générée
-		 * @param String 	$pFile		emplacement du fichier &agrave; télécharger
-		 * @param String	$pSource	contenu du fichier - peut être du contenu JSON, CSV, XML...
+		 * @param string 	$pFile		emplacement du fichier &agrave; télécharger
+		 * @param string	$pSource	contenu du fichier - peut être du contenu JSON, CSV, XML...
 		 * @return void
 		 */
-		static public function download($pFile, $pSource = "")
+        #[NoReturn]
+		static public function download(string $pFile, string $pSource = ""):void
 		{
 			if(empty($pFile))
 				return;

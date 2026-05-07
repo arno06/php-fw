@@ -1,7 +1,8 @@
 <?php
 namespace core\tools
 {
-    use \Exception;
+    use CurlHandle;
+    use Exception;
 
     /**
      * Class Request - permet de gérer une surcouche nécessaire &agrave; CURL pour se simplifier les traitements
@@ -12,47 +13,22 @@ namespace core\tools
      */
     class Request
     {
-        /**
-         * @var resource
-         */
-        private $curlResource;
+        private CurlHandle $curlResource;
 
-        /**
-         * @var string
-         */
-        private $url;
+        private string $url;
 
-        /**
-         * @var int
-         */
-        private $responseCode;
+        private int $responseCode;
 
-        /**
-         * @var string
-         */
-        private $responseContentType;
+        private string $responseContentType;
 
-        /**
-         * @var string
-         */
-        private $redirectURL;
+        private string $redirectURL;
 
-        /**
-         * @var int
-         */
-        private $keepResponseHeaders = 0;
+        private int $keepResponseHeaders;
 
-        /**
-         * @var string
-         */
-        private $responseHeaders = null;
+        private string|null $responseHeaders = null;
 
-        /**
-         * Constructor
-         * @param  string   $pUrl
-         * @param int $pKeepResponseHeaders
-         */
-        public function __construct($pUrl, $pKeepResponseHeaders = 0)
+
+        public function __construct(string $pUrl, int $pKeepResponseHeaders = 0)
         {
             $this->initResource();
             $this->setUrl($pUrl);
@@ -60,7 +36,9 @@ namespace core\tools
             $this->keepResponseHeaders = $pKeepResponseHeaders;
         }
 
-        public function initResource() {
+
+        public function initResource():void
+        {
             $this->curlResource = curl_init();
         }
 
@@ -69,7 +47,7 @@ namespace core\tools
          * @param  string   $pUrl
          * @return void
          */
-        public function setUrl($pUrl)
+        public function setUrl(string $pUrl):void
         {
             $this->url = $pUrl;
             curl_setopt($this->curlResource, CURLOPT_URL, $pUrl);
@@ -77,10 +55,10 @@ namespace core\tools
 
         /**
          * Définit les données à envoyer en POST
-         * @param array $pData
+         * @param mixed $pData
          * @return void
          */
-        public function setDataPost($pData)
+        public function setDataPost(mixed $pData):void
         {
             $this->setOption(CURLOPT_POST, true);
             $this->setOption(CURLOPT_POSTFIELDS, $pData);
@@ -88,30 +66,30 @@ namespace core\tools
 
         /**
          * Récupère la CURL Resource définie pour la requête en cours
-         * @return resource
+         * @return CurlHandle
          */
-        public function getResource()
+        public function getResource():CurlHandle
         {
             return $this->curlResource;
         }
 
         /**
          * Méthode de définition d'une option liée &agrave; la requête en cours
-         * @param Number $pCode
-         * @param string $pValue
+         * @param int $pCode
+         * @param mixed $pValue
          * @return void
          */
-        public function setOption($pCode, $pValue)
+        public function setOption(int $pCode, mixed $pValue):void
         {
             curl_setopt($this->curlResource, $pCode, $pValue);
         }
 
         /**
          * Méthode d'éxecution de la requête - renvoi le résultat du traitement
-         * @throws Exception
          * @return string
+         * @throws Exception
          */
-        public function execute()
+        public function execute():string
         {
             ob_start();
             $return = curl_exec($this->curlResource);
@@ -133,7 +111,7 @@ namespace core\tools
                 }
             }
 
-            if(strpos($this->responseCode, "3") === 0)
+            if(str_starts_with($this->responseCode, "3"))
                 $this->redirectURL = curl_getinfo($this->curlResource, CURLINFO_REDIRECT_URL);
             curl_close($this->curlResource);
             if(!$return)
@@ -145,7 +123,7 @@ namespace core\tools
          * Code HTTP de la réponse
          * @return int
          */
-        public function getResponseHTTPCode()
+        public function getResponseHTTPCode():int
         {
             return $this->responseCode;
         }
@@ -154,7 +132,7 @@ namespace core\tools
          * Content-type de la réponse
          * @return int
          */
-        public function getResponseContentType()
+        public function getResponseContentType():int
         {
             return $this->responseContentType;
         }
@@ -163,22 +141,19 @@ namespace core\tools
          * URL de redirection
          * @return string
          */
-        public function getRedirectURL()
+        public function getRedirectURL():string
         {
             return $this->redirectURL;
         }
 
-        /**
-         * @return string
-         */
-        public function getResponseHeaders(){
+
+        public function getResponseHeaders():string
+        {
             return $this->responseHeaders;
         }
 
-        /**
-         * @param $pValue
-         */
-        public function setMethod($pValue)
+
+        public function setMethod(string $pValue):void
         {
             curl_setopt($this->curlResource, CURLOPT_CUSTOMREQUEST, $pValue);
         }
@@ -190,18 +165,10 @@ namespace core\tools
          * @param  string   $pUrl
          * @return string
          */
-        static public function load($pUrl)
+        static public function load(string $pUrl):string
         {
             $r = new Request($pUrl);
-            try
-            {
-                $d = $r->execute();
-            }
-            catch(Exception $e)
-            {
-                throw $e;
-            }
-            return $d;
+            return $r->execute();
         }
 
         /**
@@ -209,12 +176,11 @@ namespace core\tools
          * @param string[] $pUrlArr
          * @return array
          */
-        static public function multiLoad($pUrlArr)
+        static public function multiLoad(array $pUrlArr):array
         {
-            $requests = array();
+            $requests = [];
             foreach($pUrlArr as $url)
             {
-                /** @var Request $r */
                 $r = new Request($url);
                 $r->setOption(CURLOPT_RETURNTRANSFER, 1);
                 $requests[] = $r;
@@ -225,7 +191,7 @@ namespace core\tools
             foreach($requests as $r)
                 curl_multi_add_handle($mh, $r->getResource());
 
-            $active = null;
+            $active = 0;
             //execute the handles
             do {
                 $mrc = curl_multi_exec($mh, $active);

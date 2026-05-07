@@ -26,6 +26,8 @@ namespace PHPSTORM_META{
 
     exitPoint(\trigger_error(ANY_ARGUMENT, 256));
     exitPoint(\core\application\Header::location());
+    exitPoint(\core\application\Go::to404());
+    exitPoint(\core\application\Go::to());
     exitPoint(\core\application\Header::handleOptionsRequest());
     exitPoint(\core\application\Core::performResponse());
     exitPoint(\core\application\Core::endApplication());

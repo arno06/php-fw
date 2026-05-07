@@ -4,8 +4,9 @@ namespace core\db\handler
 
     use core\db\InterfaceDatabaseHandler;
     use core\tools\debugger\Debugger;
-    use mysqli_result;
     use mysqli;
+    use mysqli_result;
+    use Exception;
 
     /**
      * Couche d'abstraction à la base de données (type mysql improved)
@@ -16,56 +17,42 @@ namespace core\db\handler
      */
     class MysqliHandler implements InterfaceDatabaseHandler
     {
-        /**
-         * @var string[]
-         */
-        static private $specials = array(
+        static private array $specials = array(
             "NOW()",
             "NULL"
         );
 
         /**
          * Chemin d'acc&egrave;s à la base de données
-         * @var String
+         * @var string
          */
-        protected $host;
+        protected string $host;
 
 
         /**
          * Nom d'utilisateur
-         * @var String
+         * @var string
          */
-        protected $user;
+        protected string $user;
 
 
         /**
          * Mot de passe d'acc&egrave;s à la base de données
-         * @var String
+         * @var string
          */
-        protected $mdp;
+        protected string $mdp;
 
 
         /**
          * Nom de la base de données
-         * @var String
+         * @var string
          */
-        protected $bdd;
+        protected string $bdd;
+
+        private mysqli $mysqliInstance;
 
 
-        /**
-         * Instance mysqli
-         * @var mysqli
-         */
-        private $mysqliInstance;
-
-
-        /**
-         * @param $pHost
-         * @param $pUser
-         * @param $pPassword
-         * @param $pName
-         */
-        public function __construct($pHost, $pUser, $pPassword, $pName)
+        public function __construct(string $pHost, string $pUser, string $pPassword, string $pName)
         {
             $this->host = $pHost;
             $this->user = $pUser;
@@ -74,16 +61,14 @@ namespace core\db\handler
             $this->connect();
         }
 
+
         public function __destruct()
         {
             $this->close();
         }
 
 
-        /**
-         *
-         */
-        protected function close()
+        protected function close():void
         {
             if($this->mysqliInstance->connect_error)
                 return;
@@ -91,15 +76,12 @@ namespace core\db\handler
                 $store_result = $this->mysqliInstance->store_result();
                 if($store_result)
                     $store_result->free();
-            }catch(\Exception $e){}
+            }catch(Exception){}
             $this->mysqliInstance->close();
         }
 
 
-        /**
-         *
-         */
-        protected function connect()
+        protected function connect():void
         {
             $this->mysqliInstance = new mysqli($this->host, $this->user, $this->mdp, $this->bdd);
             if($this->mysqliInstance->connect_error)
@@ -107,19 +89,13 @@ namespace core\db\handler
         }
 
 
-        /**
-         * @return string
-         */
-        public function getError()
+        public function getError():string
         {
             return $this->mysqliInstance->error;
         }
 
 
-        /**
-         * @return int
-         */
-        public function getErrorNumber()
+        public function getErrorNumber():int
         {
             return $this->mysqliInstance->errno;
         }
@@ -127,30 +103,26 @@ namespace core\db\handler
 
         /**
          * Méthode de récupération de la clé primaire générée à la suite d'une insertion
-         * @return Number
+         * @return int
          */
-        public function getInsertId()
+        public function getInsertId():int
         {
             return $this->mysqliInstance->insert_id;
         }
 
-
         /**
          * Méthode permettant de centraliser les commandes à effectuer avant l'excécution d'une requête
-         * @param String $pQuery				Requête à excécuter
+         * @param string $pQuery				Requête à excécuter
          * @param bool   $pRaw
-         * @return array|bool|mysqli_result
+         * @return mysqli_result|array|string|bool
          */
-        public function execute($pQuery, $pRaw = false)
+        public function execute(string $pQuery, bool $pRaw = false):mysqli_result|array|string|bool
         {
             Debugger::query($pQuery, "db", $this->bdd);
             try{
                 $result = $this->mysqliInstance->query($pQuery);
             }
-            catch(\Exception $e){
-                $result = false;
-            }
-            if(!$result){
+            catch(Exception){
                 trigger_error("Une erreur est apparue lors de la requête <b>".$pQuery."</b><br/><a href='https://www.google.com/search?q=mysql+error+".$this->getErrorNumber()."' target='_blank'>Error ".$this->getErrorNumber()."</a> : <i>".$this->getError()."</i>", E_USER_WARNING);
                 return false;
             }
@@ -167,21 +139,13 @@ namespace core\db\handler
         }
 
 
-        /**
-         * ToString()
-         * @return String
-         */
         public function __toString()
         {
             return '[Object MysqliHandler database="'.$this->bdd.'" user="'.$this->user.'"]';
         }
 
 
-        /**
-         * @param string $pString
-         * @return string
-         */
-        public function escapeValue($pString)
+        public function escapeValue(string $pString):string
         {
             if(!in_array(strtoupper($pString), self::$specials))
                 return "'".$this->mysqliInstance->escape_string($pString)."'";

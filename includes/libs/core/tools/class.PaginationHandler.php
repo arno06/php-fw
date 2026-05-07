@@ -21,43 +21,32 @@ namespace core\tools
 		 * Nombre d'entrée &agrave; afficher par page
 		 * @var int
 		 */
-		private $itemsByPage;
+		private int $itemsByPage;
 
 		/**
 		 * Nombre de pages max
 		 * @var int
 		 */
-		private $nbPages;
+		private int $nbPages;
 
 		/**
 		 * Numero de la page en cours
 		 * @var int
 		 */
-		private $currentPage;
+		private int $currentPage;
 
 		/**
 		 * Nombre d'entrées maximum
 		 * @var int
 		 */
-		private $nbItems;
+		private int $nbItems;
 
-		/**
-		 * @var int
-		 */
-		public $first;
+		public int $first;
 
-		/**
-		 * @var int
-		 */
-		public $number;
+		public int $number;
 
-		/**
-		 * Constructor
-		 * @param int $pCurrentPage		Page en cours
-		 * @param int $pNbItemByPage	Nombre d'item par page
-		 * @param int $pNbItemsMax		Nombre total d'item dans la base
-		 */
-		public function __construct($pCurrentPage, $pNbItemByPage, $pNbItemsMax)
+
+		public function __construct(int $pCurrentPage, int $pNbItemByPage, int $pNbItemsMax)
 		{
 			$this->currentPage = $pCurrentPage>0?$pCurrentPage:1;
 			$this->itemsByPage = $pNbItemByPage;
@@ -71,20 +60,19 @@ namespace core\tools
 		 * Méthode de récupération des infos nécessaires &agrave; la mise en place de la pagination dans la vue
 		 * @return array
 		 */
-		public function getPaginationInfo()
+		public function getPaginationInfo():array
 		{
 			return array("nbPages"=>$this->nbPages, "currentPage"=>$this->currentPage);
 		}
 
-		/**
-		 * @return QueryCondition
-		 */
-		public function getConditionLimit()
+
+		public function getConditionLimit():QueryCondition
 		{
 			return Query::condition()->limit($this->first, $this->number);
 		}
 
-        public function display($params = array())
+
+        public function display(array $params = array()):void
         {
             $info = $this->getPaginationInfo();
             $noPage = 0;

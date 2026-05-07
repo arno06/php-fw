@@ -1,6 +1,8 @@
 <?php
 namespace core\application\event
 {
+    use Exception;
+
 	/**
 	* Class EventDispatcher
 	*
@@ -11,11 +13,7 @@ namespace core\application\event
 	*/
 	class EventDispatcher
 	{
-		/**
-		 * @var array
-		 */
-		private $listeners = array();
-
+		private array $listeners = [];
 
 		/**
 		 * Méthode de définition d'un nouvel EventListener, le listener attendu est le nom d'une méthode (String) dont on peut définir le contexte
@@ -24,22 +22,21 @@ namespace core\application\event
 		 * @param null $pContext
 		 * @return void
 		 */
-		public function addEventListener($pType, $pListener, $pContext = NULL)
+		public function addEventListener(string $pType, string $pListener, mixed $pContext = NULL):void
 		{
 			if(!isset($this->listeners[$pType])||!is_array($this->listeners[$pType]))
-				$this->listeners[$pType] = array();
+				$this->listeners[$pType] = [];
 			if(!$pContext)
 				$pContext = $this;
 			$this->listeners[$pType][] = array("listener"=>$pListener, "context"=>$pContext);
 		}
-
 
 		/**
 		 * Méthode de déclenchement d'un év&egrave;nement, appel basiquement l'ensemble des listeners définis
 		 * @param Event $pEvent
 		 * @return void
 		 */
-		public function dispatchEvent(Event $pEvent)
+		public function dispatchEvent(Event $pEvent):void
 		{
 			$type = $pEvent->type;
 			if(!isset($this->listeners[$type])||!is_array($this->listeners[$type]))
@@ -53,10 +50,9 @@ namespace core\application\event
 				{
 					$ctx->$lst($pEvent);
 				}
-				catch(Exception $e){}
+				catch(Exception){}
 			}
 		}
-
 
 		/**
 		 * Méthode de suppression d'un EventListener, stop l'écoute d'un év&egrave;nement du Listener en fonction de son contexte
@@ -65,7 +61,7 @@ namespace core\application\event
 		 * @param null $pContext
 		 * @return void
 		 */
-		public function removeEventListener($pType, $pListener, $pContext = NULL)
+		public function removeEventListener(string $pType, string $pListener, mixed $pContext = NULL):void
 		{
 			if(!isset($this->listeners[$pType])||!is_array($this->listeners[$pType]))
 				return;
@@ -83,10 +79,7 @@ namespace core\application\event
 		}
 
 
-		/**
-		 * @return void
-		 */
-		public function removeAllEventListeners()
+		public function removeAllEventListeners():void
 		{
 			$this->listeners = array();
 		}

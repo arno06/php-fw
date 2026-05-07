@@ -8,7 +8,7 @@ namespace core\application\routing
 	use core\application\Go;
     use core\application\Module;
     use core\data\SimpleJSON;
-	use \Exception;
+	use Exception;
 
 	/**
 	 * Class RoutingHandler - gestionnaire par défault de réécriture d'url
@@ -21,20 +21,25 @@ namespace core\application\routing
 	abstract class RoutingHandler
 	{
         const HTTP_METHOD_WILDCARD = "*";
+
 		const REGEXP_LANGUAGE   = '/^([a-z]{2,3})\//';
-		const REGEXP_CONTROLLER = '/^([a-z\-]{1,})\//';
-		const REGEXP_ACTION     = '/^([a-z\-]{1,})\//';
+
+		const REGEXP_CONTROLLER = '/^([a-z\-]+)\//';
+
+		const REGEXP_ACTION     = '/^([a-z\-]+)\//';
+
 		const REGEXP_PARAMETERS = '/^(([a-z][a-z0-9\_\-]*:.*)*)\//i';
+
 
 		/**
 		 * Méthode de parsing d'une url
 		 * Renvoie nécessairement un tableau contenant les informations :  controller - action - application - paramètre - langue
-		 * @param String $pUrl		Url à parser
-		 * @return array
+		 * @param string $pUrl Url à parser
+		 * @return array|null
 		 */
-		static public function parse($pUrl)
+		static public function parse(string $pUrl):array|null
 		{
-            $static = preg_match('/^statique\//', $pUrl, $matches);
+            $static = preg_match('/^statique\//', $pUrl);
 
 			if(!$static && Application::getInstance()->getModule()->useRoutingFile)
 			{
@@ -67,7 +72,7 @@ namespace core\application\routing
          * @param string $pUrl
          * @return array|null
          */
-		static private function handleRoutingRules($pUrl)
+		static private function handleRoutingRules(string $pUrl):array|null
 		{
             if(empty($pUrl))
                 $pUrl = "/";
@@ -79,7 +84,7 @@ namespace core\application\routing
 			{
 				$rules = SimpleJSON::import($rules_file);
 			}
-			catch(Exception $e)
+			catch(Exception)
 			{
 				return null;
 			}
@@ -108,14 +113,14 @@ namespace core\application\routing
                 $parameters = array();
                 foreach($rule["parameters"] as $name=>$re)
                 {
-                    if(!preg_match('/\{\$'.$name.'\}/', $re_url))
+                    if(!preg_match('/\{\$'.$name.'}/', $re_url))
                     {
                         $parameters[$name] = $re;
                         continue;
                     }
 
                     $index_parameters[++$index_param] = $name;
-                    $re_url = preg_replace('/\{\$'.$name.'\}/', '('.$re.')', $re_url);
+                    $re_url = preg_replace('/\{\$'.$name.'}/', '('.$re.')', $re_url);
                 }
                 $re_url = "/^".$re_url.'$/';
 
@@ -128,7 +133,7 @@ namespace core\application\routing
                 }
                 unset($rule['parameters']);
 
-                if(isset($rule[$request_method]) && !empty($rule[$request_method]))
+                if(!empty($rule[$request_method]))
                 {
                     $final_rule = $rule[$request_method];
                 }
@@ -155,12 +160,12 @@ namespace core\application\routing
                 }
 
 
-                if(isset($parameters["controller"])&&!empty($parameters["controller"]))
+                if(!empty($parameters["controller"]))
                 {
                     $final_rule["controller"] = $parameters["controller"];
                     unset($parameters["controller"]);
                 }
-                if(isset($parameters["action"])&&!empty($parameters["action"]))
+                if(!empty($parameters["action"]))
                 {
                     $final_rule["action"] = $parameters["action"];
                     unset($parameters["action"]);
@@ -173,7 +178,6 @@ namespace core\application\routing
 			return null;
 		}
 
-
 		/**
 		 * Méthode d'écriture d'une URL
 		 * @static
@@ -183,14 +187,14 @@ namespace core\application\routing
 		 * @param string $pLangue
 		 * @return string
 		 */
-		static public function rewrite($pController = "", $pAction = "", $pParams = array(), $pLangue = "")
+		static public function rewrite(string $pController = "", string $pAction = "", array $pParams = array(), string $pLangue = ""):string
 		{
 			$pController =  self::getAlias($pController);
 			$pAction = self::getAlias($pAction);
 			$return = "";
             if(Application::getInstance()->multiLanguage)
             {
-                $return .= ((!isset($pLangue)||empty($pLangue))?Application::getInstance()->currentLanguage:$pLangue)."/";
+                $return .= ((empty($pLangue))?Application::getInstance()->currentLanguage:$pLangue)."/";
             }
 			if(!empty($pController))
 				$return .= $pController."/";
@@ -204,22 +208,21 @@ namespace core\application\routing
 			return $return;
 		}
 
-
 		/**
 		 *
-		 * @param String $pValue
+		 * @param string $pValue
 		 * @return string
 		 */
-		static public function getAlias($pValue = "")
+		static public function getAlias(string $pValue = ""):string
 		{
-            return preg_replace('/(\_)/', "-", $pValue);
+            return preg_replace('/(_)/', "-", $pValue);
 		}
 
         /**
-         * @param $pUrl
-         * @return mixed|string
+         * @param string $pUrl
+         * @return string
          */
-		static public function extractApplication(&$pUrl)
+		static public function extractApplication(string &$pUrl):string
 		{
 			$folder = preg_replace('/(\/)/', '\/', Configuration::$server_folder);
 			$pUrl = preg_replace('/^(\/'.(!empty($folder)?$folder.'\/':"").")/","",$pUrl);
@@ -233,11 +236,11 @@ namespace core\application\routing
 		}
 
         /**
-         * @param $pUrl
-         * @param $pAvailableModule
+         * @param string $pUrl
+         * @param array $pAvailableModule
          * @return string
          */
-		static public function extractModule(&$pUrl, $pAvailableModule = array('default'))
+		static public function extractModule(string &$pUrl, array $pAvailableModule = array('default')):string
 		{
             $modules = implode("|", $pAvailableModule);
             $modules = str_replace('_', '-', $modules);
@@ -246,20 +249,13 @@ namespace core\application\routing
                 Go::to();
             if($module === false)
                 $module = Module::DEFAULT_MODULE;
-            $module = str_replace('-', '_', $module);
-            return $module;
+            return str_replace('-', '_', $module);
 		}
 
 
-		/**
-		 * @static
-		 * @param  $pURL
-		 * @return bool|string
-		 */
-		static public function extractLanguage(&$pURL)
+		static public function extractLanguage(string &$pURL):string
 		{
-
-			if(Application::getInstance()->multiLanguage&&!preg_match("/^statique/",$pURL, $matches))
+			if(Application::getInstance()->multiLanguage&&!str_starts_with($pURL, "statique/"))
 			{
 				$language = self::shift($pURL, self::REGEXP_LANGUAGE);
 				if(!$language)
@@ -270,40 +266,32 @@ namespace core\application\routing
 		}
 
 
-		/**
-		 * @static
-		 * @param  $pURL
-		 * @return bool|String
-		 */
-		static public function extractController(&$pURL)
+		static public function extractController(string &$pURL):bool|string
 		{
-			$controller = self::shift($pURL, self::REGEXP_CONTROLLER);
-			return $controller;
+			return self::shift($pURL, self::REGEXP_CONTROLLER);
 		}
 
 
 		/**
 		 * @static
-		 * @param  $pURL
-		 * @return bool|String
+		 * @param string $pURL
+		 * @return string|bool
 		 */
-		static public function extractAction(&$pURL)
+		static public function extractAction(string &$pURL):string|bool
 		{
-			$action = self::shift($pURL, self::REGEXP_ACTION);
-			return $action;
+			return self::shift($pURL, self::REGEXP_ACTION);
 		}
-
 
 		/**
 		 * Méthode permettant de dépiler une chaine de caractères de l'url passée en paramètre et respectant l'expression régulière souhaitée
 		 * @static
-		 * @param  $pURL
-		 * @param  $pRegExp
+		 * @param string $pURL
+		 * @param string $pRegExp
 		 * @return bool|string
 		 */
-		static public function shift(&$pURL, $pRegExp)
+		static public function shift(string &$pURL, string $pRegExp):string|bool
 		{
-			if(isset($pURL)&&preg_match($pRegExp, $pURL, $extract, PREG_OFFSET_CAPTURE))
+			if(preg_match($pRegExp, $pURL, $extract, PREG_OFFSET_CAPTURE))
 			{
 				if(!isset($extract[1][0]))
 					return false;
@@ -315,12 +303,7 @@ namespace core\application\routing
 		}
 
 
-		/**
-		 * @static
-		 * @param  $pUrl
-		 * @return array
-		 */
-		static public function extractParameters(&$pUrl)
+		static public function extractParameters(string &$pUrl):array
 		{
 			$parameters = array();
 			if(empty($pUrl))
@@ -345,14 +328,13 @@ namespace core\application\routing
 			return $parameters;
 		}
 
-
 		/**
 		 * Méthode permettant de filtrer une chaine de caractères pour son utilisation dans une url
-		 * @param String $pTexte			Chaine de caractères a filtrer
+		 * @param string $pTexte			Chaine de caractères a filtrer
 		 * @param bool $pLower
-		 * @return String
+		 * @return string
 		 */
-		static public function sanitize($pTexte, $pLower = true)
+		static public function sanitize(string $pTexte, bool $pLower = true):string
 		{
 			$chars = array(
 				"ç"=>"c",
@@ -382,10 +364,9 @@ namespace core\application\routing
 				$pTexte = str_replace(mb_strtoupper($key, Configuration::$global_encoding), mb_strtoupper($change, Configuration::$global_encoding), $pTexte);
 			}
 			if ($pLower) $pTexte = strtolower($pTexte);
-			$pTexte = preg_replace("/[\s]/i", "-", $pTexte);
-			$pTexte = preg_replace("/[^\_0-9a-z]/i", "-", $pTexte);
-			$pTexte = preg_replace(array("/^-+/", "/-+$/", "/-+/"), array("", "", "-"), $pTexte);
-			return $pTexte;
+			$pTexte = preg_replace("/\s/i", "-", $pTexte);
+			$pTexte = preg_replace("/[^_0-9a-z]/i", "-", $pTexte);
+			return preg_replace(array("/^-+/", "/-+$/", "/-+/"), array("", "", "-"), $pTexte);
 		}
 	}
 }

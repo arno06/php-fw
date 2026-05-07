@@ -13,64 +13,59 @@ namespace core\tools
      */
     class AsyncRequest
     {
-        /**
-         * @var String
-         */
-        private $url;
+        private string $host;
 
-        /**
-         * @var String
-         */
-        private $host;
+        private int $port;
 
-        /**
-         * @var int
-         */
-        private $port;
+        private string $scheme;
 
-        private $scheme;
+        private string $path;
 
-        private $path;
+        private string $httpMethod = "GET";
 
-        private $httpMethod = "GET";
+        private array $headers = [];
 
-        private $headers = [];
+        private string $body = "";
 
-        private $body = "";
+        private array $queryParameters = [];
 
-        private $queryParameters = [];
-
-        public function __construct($pUrl)
+        public function __construct(string $pUrl)
         {
             $this->setUrl($pUrl);
         }
 
-        public function setMethod($pMethod)
+
+        public function setMethod(string $pMethod):void
         {
             $this->httpMethod = $pMethod;
         }
 
-        public function setHeaders(array $pHeaders)
+
+        public function setHeaders(array $pHeaders):void
         {
             $this->headers = $pHeaders;
         }
 
-        public function addHeader($pHeader)
+
+        public function addHeader(array $pHeader):void
         {
             $this->headers[] = $pHeader;
         }
 
-        public function addQueryParam($pName, $pValue)
+
+        public function addQueryParam(string $pName, mixed $pValue):void
         {
             $this->queryParameters[$pName] = $pValue;
         }
 
-        public function setBody($pBody)
+
+        public function setBody(string $pBody):void
         {
             $this->body = $pBody;
         }
 
-        public function execute()
+
+        public function execute():void
         {
             $hostname = $this->host;
             if($this->scheme==='https'){
@@ -81,7 +76,7 @@ namespace core\tools
             $fp = fsockopen($hostname, $this->port, $errNo, $errStr, 30);
 
 
-            if($fp==false){
+            if(!$fp){
                 trigger_error('AsyncRequest : Unable to initialize socket connection ('.$errNo.' - '.$errStr.')', E_USER_WARNING);
                 return;
             }
@@ -107,15 +102,15 @@ namespace core\tools
             fclose($fp);
         }
 
-        public function setUrl($pUrl)
+
+        public function setUrl(string $pUrl):void
         {
-            $this->url = $pUrl;
             $parts = parse_url($pUrl);
             $this->scheme = $parts['scheme'];
             $this->host = $parts['host'];
             $this->port = $parts['port']??'80';
             $this->path = $parts['path'];
-            if(isset($parts['query']) && !empty($parts['query'])){
+            if(!empty($parts['query'])){
                 $params = explode("&", $parts['query']);
                 for($i = 0, $max = count($params); $i<$max; $i++){
                     $p = explode("=", $params[$i]);

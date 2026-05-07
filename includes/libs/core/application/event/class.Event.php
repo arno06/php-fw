@@ -12,25 +12,14 @@ namespace core\application\event
     */
     class Event
     {
-        /**
-         * @var string
-         */
-        public $type;
+        public string $type;
 
-        /**
-         * @var array
-         */
-        public $args;
+        public array $args;
 
-        /**
-         * @var EventDispatcher
-         */
-        public $target;
+        public EventDispatcher $target;
 
-        /**
-         * @param $pType
-         */
-        public function __construct($pType)
+
+        public function __construct(string $pType)
         {
             $this->type = $pType;
             $this->args = array();
@@ -45,17 +34,13 @@ namespace core\application\event
             }
         }
 
-        /**
-         * @return Event
-         */
+
         public function __clone()
         {
             return new Event($this->type);
         }
 
-        /**
-         * @return string
-         */
+
         public function __toString()
         {
             return "[Event type='".$this->type."']";

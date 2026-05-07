@@ -14,11 +14,11 @@ namespace core\system
 		/**
 		 * Méthode permettant de lister les dossiers et les fichiers contenus dans un dossier passé en param&egrave;tre
 		 * Renvoi un tableau multidimensionnel sous la forme
-		 * @param String $pFolder					Chemin du dossier &agrave; lire
-		 * @param Boolean $pRecursive				Indique si la lecture du dossier se fait de fa�on récurcive
+		 * @param string $pFolder Chemin du dossier &agrave; lire
+		 * @param bool $pRecursive Indique si la lecture du dossier se fait de façon récurcive
 		 * @return array
 		 */
-		static public function read($pFolder,$pRecursive = true)
+		static public function read(string $pFolder, bool $pRecursive = true):array
 		{
 			$return = array();
 			$dossier = opendir($pFolder);
@@ -38,16 +38,11 @@ namespace core\system
 			return $return;
 		}
 
-		/**
-		 * @static
-		 * @param $pFolder
-		 * @return bool
-		 */
-		static public function isEmpty($pFolder)
+
+		static public function isEmpty(string $pFolder):bool
 		{
 			return (($childs = scandir($pFolder))&&count($childs)<=2);
 		}
-
 
 		/**
 		 * Méthode de création d'un nouveau dossier
@@ -57,7 +52,7 @@ namespace core\system
 		 * @param int $pMode
 		 * @return bool
 		 */
-		static public function create($pPath, $pMode = 0777)
+		static public function create(string $pPath, int $pMode = 0777):bool
 		{
 			if(file_exists($pPath))
 				return chmod($pPath, $pMode);
@@ -68,10 +63,10 @@ namespace core\system
 		/**
 		 * Méthode de destruction d'un dossier et de tout son contenu <!!!>
 		 * Renvoi le résultat du traitement
-		 * @param String $pPath					Chemin du dossier &agrave; supprimer
-		 * @return Boolean
+		 * @param string $pPath Chemin du dossier &agrave; supprimer
+		 * @return bool
 		 */
-		static public function deleteRecursive($pPath)
+		static public function deleteRecursive(string $pPath):bool
 		{
 			if (!is_dir($pPath))
 				return false;

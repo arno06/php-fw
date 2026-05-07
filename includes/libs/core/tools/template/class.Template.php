@@ -4,6 +4,7 @@ namespace core\tools\template
 
     use core\application\Application;
     use core\system\File;
+    use Exception;
 
     /**
      * Class Template
@@ -18,78 +19,69 @@ namespace core\tools\template
          * Chemin du dossier de cache
          * @var string
          */
-        public $cacheDir;
+        public string $cacheDir;
 
         /**
          * Chemin du dossier de template
          * @var string
          */
-        public $templateDir;
+        public string $templateDir;
 
         /**
          * Nom du fichier du template
          * @var string
          */
-        public $templateFile;
+        public string $templateFile;
 
         /**
          * Chemin du fichier du template
          * @var string
          */
-        private $templatePath;
-
-        /**
-         * Nom du fichier de cache du template
-         * @var string
-         */
-        private $cacheFile;
+        private string $templatePath;
 
         /**
          * Chemin du chemin du fichier de cache du template
          * @var string
          */
-        private $cachePath;
+        private string $cachePath;
 
         /**
          * Booléen définissant si le contexte d'exécution autorise l'usage des tags PHP <?php ?>
          * @var bool
          */
-        public $safeMode = true;
+        public bool $safeMode = true;
 
         /**
          * Booléen définissant si on utilise le cache (en lecture et écriture)
          * @var bool
          */
-        public $cacheEnabled = true;
+        public bool $cacheEnabled = true;
 
         /**
          * Durée de la dernière exécution d'un template
          * @var float
          */
-        public $duration;
+        public float $duration;
 
         /**
          * Instance de RenderingContext
          * @var RenderingContext
          */
-        private $context;
+        private RenderingContext $context;
 
         /**
          * Variable contenant l'incrément sur les blocs en cours
-         * @var number
+         * @var int
          */
-        private $step;
+        private int $step;
 
         /**
          * Tableau contenant l'identifiant des blocs en cours ainsi que leur état d'ouverture
          * @var array
          */
-        private $opened;
+        private array $opened;
 
-        /**
-         * @var array
-         */
-        private $available_functions = array(
+        private array $available_functions = array(
             "implode"=>array("parameters"=>array("data"=>array(), "separator"=>"|"), "template"=>'implode({$separator}, {$data})'),
             "json_encode"=>array("parameters"=>array("data"=>array()), "template"=>'json_encode({$data})'),
             "nl2br"=>array("parameters"=>array("string"=>""), "template"=>'nl2br({$string})'),
@@ -98,11 +90,7 @@ namespace core\tools\template
         );
 
 
-        /**
-         * Template constructor.
-         * @param null $pDefaultData
-         */
-        public function __construct($pDefaultData = null)
+        public function __construct(array $pDefaultData = null)
         {
             $this->context = new RenderingContext();
             if(!is_null($pDefaultData))
@@ -119,8 +107,9 @@ namespace core\tools\template
          * Méthode d'assignation d'une variable
          * @param string $pName     Nom de la variable
          * @param mixed $pValue     Valeur
+         * @return void
          */
-        public function assign($pName, &$pValue)
+        public function assign(string $pName, mixed &$pValue):void
         {
             $this->context->assign($pName, $pValue);
         }
@@ -128,24 +117,23 @@ namespace core\tools\template
         /**
          * Méthode de réinitialisation des données accessibles au sein du context de rendu du template
          */
-        public function clearData()
+        public function clearData():void
         {
             $this->context->setData([]);
         }
-
 
         /**
          * Méthode de définition des différents dossiers de travail
          * @param string $pTemplateDir
          * @param string $pCacheDir
+         * @return void
          */
-        public function setup($pTemplateDir, $pCacheDir)
+        public function setup(string $pTemplateDir, string $pCacheDir):void
         {
             $this->templateDir = $pTemplateDir;
             $this->cacheDir = $pCacheDir;
             $this->context->prepare($pTemplateDir, $pCacheDir);
         }
-
 
         /**
          * Méthode de rendu d'un template
@@ -153,12 +141,12 @@ namespace core\tools\template
          * @param bool $pDisplay            Indique sur le template doit être affiché ou renvoyé
          * @return bool|string
          */
-        public function render($pTemplateFile, $pDisplay = true)
+        public function render(string $pTemplateFile, bool $pDisplay = true):bool|string
         {
             $this->templateFile = $pTemplateFile;
             $this->templatePath = $this->templateDir."/".$this->templateFile;
-            $this->cacheFile = str_replace("/", "%", $this->templateFile).".php";
-            $this->cachePath = $this->cacheDir."/".$this->cacheFile;
+            $cacheFile = str_replace("/", "%", $this->templateFile).".php";
+            $this->cachePath = $this->cacheDir."/".$cacheFile;
 
             $this->context->setFile($this->cachePath);
 
@@ -171,12 +159,11 @@ namespace core\tools\template
             return $this->execute($pDisplay);
         }
 
-
         /**
          * Méthode privée indiquant si un cache est existant pour le template en cours et si il est à jour
          * @return bool
          */
-        private function pullFromCache()
+        private function pullFromCache():bool
         {
             if(!$this->cacheEnabled)
                 return false;
@@ -193,12 +180,11 @@ namespace core\tools\template
             return true;
         }
 
-
         /**
          * Méthode privée de stockage du résultat du template en cours dans un fichier de cache
          * @param string $pContent
          */
-        private function storeInCache($pContent)
+        private function storeInCache(string $pContent):void
         {
             if(!$this->cacheEnabled)
                 return;
@@ -211,28 +197,26 @@ namespace core\tools\template
             file_put_contents($this->cachePath, $pContent);
         }
 
-
         /**
          * Méthode d'exécution du template sur le context en cours
          * @param bool $pDisplay    Indique sur le template doit être affiché ou renvoyé
          * @return bool|string
          */
-        private function execute($pDisplay = true)
+        private function execute(bool $pDisplay = true):bool|string
         {
             return $this->context->render($pDisplay);
         }
 
-
         /**
          * Méthode de transformation de la source du fichier de template pour l'évaluer et le transformer dans une version PHP exécutable
          */
-        private function evaluate()
+        private function evaluate():void
         {
             try
             {
                 $content = File::read($this->templatePath);
             }
-            catch (\Exception $e)
+            catch (Exception)
             {
                 trigger_error("Le fichier '".$this->templateFile."' n'existe pas. ".$this->templatePath, E_USER_WARNING);
                 return;
@@ -255,14 +239,13 @@ namespace core\tools\template
 
             $blocks = "[a-z0-9\_]+";
 
-            $re_block = "/((?<!\\".$to.")\\".$to."(".$blocks.")|(?<!\\".$to.")\\".$to."\/(".$blocks."))([^\\".$tc."]*)\\".$tc."/i";
-            $re_vars = "/\\$([a-z0-9\_\.\|]+)/i";
+            $re_block = "/((?<!".$to.")".$to."(".$blocks.")|(?<!".$to.")".$to."\/(".$blocks."))([^".$tc."]*)".$tc."/i";
+            $re_vars = "/\\$([a-z0-9_.|]+)/i";
 
             $content = preg_replace_callback($re_vars, function($pMatches)
             {
                 $modifiers = explode('|', $pMatches[1]);
-                $var = $this->extractVar(array_shift($modifiers), array_reverse($modifiers));
-                return $var;
+                return $this->extractVar(array_shift($modifiers), array_reverse($modifiers));
             }, $content);
 
             $re_vars = "/".$to."\\$([^".$tc."]+)".$tc."/i";
@@ -290,7 +273,7 @@ namespace core\tools\template
          * @param array $pMatches
          * @return string
          */
-        private function parseBlock(array $pMatches)
+        private function parseBlock(array $pMatches):string
         {
             $opener = !empty(trim($pMatches[2]));
             $name = $opener?$pMatches[2]:$pMatches[3];
@@ -307,7 +290,6 @@ namespace core\tools\template
                     {
                         return "<?php endif; ?>";
                     }
-                    break;
                 case "foreach":
                     if($opener)
                     {
@@ -320,8 +302,8 @@ namespace core\tools\template
 
                         $array_var = 'data_'.$this->step;
                         $var = '$'.$array_var.'='.$default["from"].';';
-                        $item = preg_replace("/(\"|')/", '', $default['item']);
-                        $key = preg_replace("/(\"|')/", '', $default['key']);
+                        $item = preg_replace("/([\"'])/", '', $default['item']);
+                        $key = preg_replace("/([\"'])/", '', $default['key']);
 
                         return '<?php '.$var.' if($'.$array_var.'&&is_array($'.$array_var.')&&!empty($'.$array_var.')):
 foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'.$item.'); $this->assign("'.$key.'", $'.$key.'); ?>';
@@ -333,19 +315,17 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
                         unset($this->opened[$this->step--]);
                         return "<?php ".$extra."endif; ?>";
                     }
-                    break;
                 case "foreachelse":
                     unset($this->opened[$this->step]);
                     $array_var = 'data_'.$this->step;
                     return "<?php endforeach; unset(\$".$array_var."); else: ?>";
-                    break;
                 case "else":
                     return "<?php else: ?>";
-                    break;
                 case "include":
                     $default = array();
                     $this->parseParameters($params, $default);
                     $extra = 'array(';
+                    $file = null;
                     foreach($default as $n=>$v){
                         if($n === "file"){
                             $file = $v;
@@ -362,7 +342,6 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
                         return '';
                     }
                     return "<?php \$this->includeTpl(".$file.", ".$extra."); ?>";
-                    break;
                 default:
                     if(isset($this->available_functions[$name]) && !empty($this->available_functions[$name]))
                     {
@@ -374,14 +353,13 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
                             $tpl = str_replace('{$'.$n.'}', $v, $tpl);
                         }
                         return "<?php echo ".$tpl."; ?>";
-                        break;
                     }
-                    $re_object = "/\\".TemplateDictionary::$TAGS[0]."([a-z0-9\\.\\_]+)(\\-\\>[a-z\\_]+)*([^\\".TemplateDictionary::$TAGS[1]."]+)*\\".TemplateDictionary::$TAGS[1]."/i";
+                    $re_object = "/".TemplateDictionary::$TAGS[0]."([a-z0-9._]+)(->[a-z_]+)*([^".TemplateDictionary::$TAGS[1]."]+)*".TemplateDictionary::$TAGS[1]."/i";
                     preg_match($re_object, $pMatches[0], $matches);
-                    if(isset($matches)&&!empty($matches)&&!empty($matches[1])&&!empty($matches[2]))
+                    if(!empty($matches)&&!empty($matches[1])&&!empty($matches[2]))
                     {
                         $p = "";
-                        if(isset($matches[3])&&!empty($matches[3]))
+                        if(!empty($matches[3]))
                         {
                             $ptr = array();
                             $this->parseParameters($matches[3], $ptr);
@@ -397,26 +375,20 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
                         }
                         return "<?php ".$this->extractVar($matches[1]).$matches[2]."(".$p."); ?>";
                     }
-                    else
-                    {
-                        //todo identifier les cas d'usage
-                    }
+                    //todo identifier les cas d'usage
 
                     return $pMatches[0];
-                    break;
             }
         }
-
-
 
         /**
          * Méthode d'échappement de block
          * @param string $content       Chaîne de caractères contextuelle
          * @param string $pStartTag     Tag de début du block
          * @param string $pEndTag       Tag de fin du block
-         * @return mixed
+         * @return string
          */
-        private function escapeBlock($content, $pStartTag, $pEndTag)
+        private function escapeBlock(string $content, string $pStartTag, string $pEndTag):string
         {
             while(($s = strpos($content, $pStartTag))!==false)
             {
@@ -427,15 +399,15 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
             return $content;
         }
 
-
         /**
          * Méthode d'identification et de parsing des paramètres envoyés à un block
          * @param string $pString       Chaîne de caractères contextuelle
          * @param array &$pParams       Tableau des valeurs par défaut
+         * @return void
          */
-        private function parseParameters($pString, &$pParams)
+        private function parseParameters(string $pString, array &$pParams):void
         {
-            $re = "/(([a-z0-9A-Z\_]+)=)/";
+            $re = "/(([a-z0-9A-Z_]+)=)/";
             preg_match_all($re, $pString, $matches);
             for($i = 0, $max = count($matches[0]); $i<$max; $i++){
                 $m = $matches[0][$i];
@@ -445,14 +417,13 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
             }
         }
 
-
         /**
          * Méthode de récupération de la chaîne de caractères correspondant à une variable
          * @param string $pId           Identifiant de la variable dans le tableau de contenu contextuel
          * @param array $pModifiers     Tableau des méthodes de modification à appliquer au résultat de la valeur
          * @return string
          */
-        private function extractVar($pId, $pModifiers = array())
+        private function extractVar(string $pId, array $pModifiers = array()):string
         {
             $modifiers = "[]";
             if(!empty($pModifiers))
@@ -460,6 +431,7 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
             return '$this->get("'.$pId.'",'.$modifiers.')';
         }
     }
+
 
     /**
      * Class TemplateDictionary
@@ -469,25 +441,6 @@ foreach($'.$array_var.' as $'.$key.'=>$'.$item.'): $this->assign("'.$item.'", $'
      */
     class TemplateDictionary
     {
-        /**
-         * @var array
-         */
-        static public $TAGS = ["{", "}"];
-
-        /**
-         * @var array
-         */
-        static public $BLOCKS = [
-            "foreach",
-            "if"
-        ];
-
-        /**
-         * @var array
-         */
-        static public $NEUTRALS = [
-            "foreachelse",
-            "else"
-        ];
+        static public array $TAGS = ["{", "}"];
     }
 }

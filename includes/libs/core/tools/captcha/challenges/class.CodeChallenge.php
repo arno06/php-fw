@@ -6,14 +6,11 @@ namespace core\tools\captcha\challenges
     use core\system\Image;
     use core\tools\captcha\Challenge;
     use core\tools\captcha\InterfaceChallenge;
-    use core\tools\form\Captcha;
     use core\utils\SimpleRandom;
 
     class CodeChallenge extends Challenge implements InterfaceChallenge
     {
         const DEFAULT_FONT = "includes/libs/core/tools/captcha/assets/font.LinLibertine.ttf";
-
-        const DEFAULT_TYPE = "random";
 
         public int $width = 100;
 
@@ -39,8 +36,9 @@ namespace core\tools\captcha\challenges
 
         protected string $displayedValue;
 
-        protected function generateSetup(){
 
+        protected function generateSetup():void
+        {
             switch($this->type){
                 case "calculus":
                     $this->value = rand(0, $this->valueMax);
@@ -72,6 +70,7 @@ namespace core\tools\captcha\challenges
             }
         }
 
+
         public function get(): array
         {
             if(empty($this->fontColors))
@@ -97,7 +96,7 @@ namespace core\tools\captcha\challenges
                 $c = $this->fontColors[rand(0, count($this->fontColors)-1)];
                 $f = self::DEFAULT_FONT;
                 $s = rand($fontSizeMin, $fontSizeMax);
-                $img->drawText(substr($this->displayedValue, $i, 1), $s, $f, ($distance/4) + $i*$distance, $s + (($this->height-$s)/2), hexdec(substr($c, 1,2)),hexdec(substr($c, 3,2)),hexdec(substr($c, 5,2)), rand(-$this->rotation,$this->rotation));
+                $img->drawText(substr($this->displayedValue, $i, 1), $s, $f, intval(($distance/4) + $i*$distance), intval($s + (($this->height-$s)/2)), hexdec(substr($c, 1,2)),hexdec(substr($c, 3,2)),hexdec(substr($c, 5,2)), rand(-$this->rotation,$this->rotation));
             }
 
             return [
@@ -106,6 +105,7 @@ namespace core\tools\captcha\challenges
                 "response"=>"<div class='webc-captcha-code'><input type='text' autocomplete='off' class='webc-captcha-input'><input type='button' class='webc-captcha-button' value='".Dictionary::term('captcha.code.check')."'></div>"
             ];
         }
+
 
         public function submit(string $pValue): bool
         {

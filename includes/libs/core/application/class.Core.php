@@ -6,14 +6,15 @@ namespace core\application {
     use core\db\DBManager;
     use core\application\routing\RoutingHandler;
     use core\utils\CLI;
-    use \Exception;
+    use Exception;
+    use JetBrains\PhpStorm\NoReturn;
 
 
     /**
      * Noyau central
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 3.0
+     * @version 5.0
      * @package application
      */
     abstract class Core
@@ -21,7 +22,7 @@ namespace core\application {
         /**
          * Version en cours du framework
          */
-        const VERSION = "4.0";
+        const VERSION = "5.0";
 
         /**
          * Erreur de configuration
@@ -31,64 +32,63 @@ namespace core\application {
         /**
          * @var string
          */
-        static public $config_file = null;
+        static public string $config_file;
 
         /**
          * Définit le chemin vers le dossier de l'application en cours
-         * @var String
-         */
-        static public $path_to_application;
-
-        /**
          * @var string
          */
-        static public $path_to_components = "includes/components";
+        static public string $path_to_application;
+
+        /**
+         * Définit le chemin vers le dossier des composants js/css
+         * @var string
+         */
+        static public string $path_to_components = "includes/components";
 
         /**
          * Contient l'url requêtée (sans l'application ni la langue)
-         * @var String
+         * @var string
          */
-        static public $url;
+        static public string $url;
 
-        /**
-         * @var Application
-         */
-        static public $application;
+        static public Application|null $application;
 
         /**
          * Définit le module en cours - front ou back
-         * @var String
+         * @var string
          */
-        static public $module;
+        static public string $module;
 
         /**
          * Définit le nom du controller
-         * @var String
+         * @var string
          */
-        static public $controller = "";
+        static public string $controller;
 
         /**
          * Définit le nom de l'action
-         * @var String
+         * @var string
          */
-        static public $action = "";
+        static public string $action;
 
         /**
          * Fait référence &agrave; l'instance du controller en cours
-         * @var DefaultController
+         * @var DefaultController|null
          */
-        static private $instance_controller;
+        static private DefaultController|null $instance_controller;
 
         /**
+         * Détermine sur la requête est déclenchée par une requête asynchrone (type XMLHttpRequest)
          * @var bool
          */
-        static public $request_async = false;
+        static public bool $request_async = false;
 
         /**
          * Initialisation du Core applicatif du framework
          * @return void
          */
-        static public function init()
+        static public function init():void
         {
             session_name(Configuration::$global_session);
             session_start();
@@ -102,7 +102,7 @@ namespace core\application {
          * Instanciation des objects globlaux de l'application
          * @return void
          */
-        static public function defineGlobalObjects()
+        static public function defineGlobalObjects():void
         {
             if (self::debug())
                 Debugger::prepare();
@@ -111,11 +111,16 @@ namespace core\application {
         /**
          * Méthode d'identification de l'environnement en fonction du domaine
          * @param string $pFile
-         * @throws \Exception
          */
-        static public function checkEnvironment($pFile = "includes/applications/setup.json")
+        static public function checkEnvironment(string $pFile = "includes/applications/setup.json"):void
         {
-            $setup = SimpleJSON::import($pFile);
+            try{
+                $setup = SimpleJSON::import($pFile);
+            }
+            catch(Exception $e){
+                trigger_error("Une erreur est apparue lors du chargement du fichier d'environnements ".$e->getMessage(), E_USER_WARNING);
+                $setup = false;
+            }
             self::$config_file = "/includes/applications/dev.config.json";
             if (!$setup) {
                 return;
@@ -126,10 +131,10 @@ namespace core\application {
                         self::$config_file = "/includes/applications/" . $env . ".config.json";
                         break 2;
                     }
-                    else if (strpos($domain, "*") === 0) {
+                    else if (str_starts_with($domain, "*")) {
                         $domain = str_replace("*", "", $domain);
                         $domain = str_replace(".", "\.", $domain);
-                        if (preg_match('/' . $domain . '$/', $_SERVER["SERVER_NAME"], $matches)) {
+                        if (preg_match('/' . $domain . '$/', $_SERVER["SERVER_NAME"])) {
                             self::$config_file = "/includes/applications/" . $env . ".config.json";
                             break 2;
                         }
@@ -143,19 +148,20 @@ namespace core\application {
          * Méthode statique de définition de l'objet Configuration via le fichier JSON
          * Récupération + parsing du fichier JSON
          * Défintition des propriétés statiques de l'objet Configuration
-         * @param String $pConfigurationFile Url du fichier de configuration
-         * @return Void
+         * @param string|null $pConfigurationFile Url du fichier de configuration
+         * @return void
          */
-        static public function setConfiguration($pConfigurationFile = null)
+        static public function setConfiguration(string $pConfigurationFile = null):void
         {
             if (is_null($pConfigurationFile))
                 $pConfigurationFile = Autoload::$folder . self::$config_file;
             $configurationData = array();
             try {
                 $configurationData = SimpleJSON::import($pConfigurationFile);
-            } catch (Exception $e) {}
-            if ((!is_array($configurationData) || empty($configurationData)) && $pConfigurationFile == Autoload::$folder . self::$config_file)
-                trigger_error(self::ERROR_CONFIG, E_USER_ERROR);
+            } catch (Exception $e) {
+                if ($pConfigurationFile == Autoload::$folder . self::$config_file)
+                    trigger_error(self::ERROR_CONFIG."<div>".$e->getMessage()."</div>", E_USER_ERROR);
+            }
 
             foreach ($configurationData as $prefix => $property) {
                 if (property_exists('core\application\Configuration', $prefix)) {
@@ -170,7 +176,7 @@ namespace core\application {
                     }
                 }
             }
-            if (isset($configurationData['extra']) && !empty($configurationData['extra'])) {
+            if (!empty($configurationData['extra'])) {
                 Configuration::setExtra($configurationData['extra']);
             }
 
@@ -178,25 +184,12 @@ namespace core\application {
         }
 
         /**
-         * @static
-         * @param string $pController
-         * @param string $pAction
-         * @param array $pParams
-         * @param string $pLangue
-         * @return mixed
-         */
-        static public function rewriteURL($pController = "", $pAction = "", $pParams = array(), $pLangue = "")
-        {
-            return RoutingHandler::rewrite($pController, $pAction, $pParams, $pLangue);
-        }
-
-        /**
          * Méthode de parsing de l'url en cours
          * récupère le controller, l'action, la langue (si multilangue) ainsi que les paramètres $_GET
-         * @param $pUrl
+         * @param string|null $pUrl
          * @return void
          */
-        static public function parseURL($pUrl = null)
+        static public function parseURL(string $pUrl = null):void
         {
             Configuration::$server_domain = $_SERVER["SERVER_NAME"];
             $protocol = "http" . (self::isHttps() ? 's' : '') . "://";
@@ -209,8 +202,8 @@ namespace core\application {
             /**
              * Définition de l'url + suppression des paramètres GET ?var=value
              */
-            $url = isset($pUrl) && !is_null($pUrl) ? $pUrl : $_SERVER["REQUEST_URI"];
-            if (preg_match("/([^\?]*)\?.*$/", $url, $matches)) {
+            $url = $pUrl ?? $_SERVER["REQUEST_URI"];
+            if (preg_match("/([^?]*)\?.*$/", $url, $matches)) {
                 $url = $matches[1];
             }
 
@@ -264,7 +257,7 @@ namespace core\application {
          * Stop l'application et renvoie une erreur si le fichier existe mais pas la classe demandée
          * @return DefaultController
          */
-        static public function getController()
+        static public function getController():DefaultController
         {
             if (Core::$controller === "statique") {
                 self::$instance_controller = new StaticController();
@@ -300,14 +293,14 @@ namespace core\application {
          * Méthode permettant de définir le dictionnaire en fonction d'un fichier de langue
          * @return void
          */
-        static public function setDictionary()
+        static public function setDictionary():void
         {
             $dictionary_path = self::$path_to_application . "/localization/" . Application::getInstance()->currentLanguage . ".json";
             try {
                 $data = SimpleJSON::import($dictionary_path);
             } catch (Exception $e) {
                 if (self::debug())
-                    trigger_error('Fichier de langue "<b>' . $dictionary_path . '</b>" introuvable', E_USER_ERROR);
+                    trigger_error('An error occured while importing dictionary file "<b>' . $dictionary_path . '</b>" <div>'.$e->getMessage().'</div>', E_USER_ERROR);
                 else {
                     Application::getInstance()->currentLanguage = Application::getInstance()->defaultLanguage;
                     Go::to404();
@@ -325,77 +318,62 @@ namespace core\application {
             Dictionary::defineLanguage(Application::getInstance()->currentLanguage, $terms, $seo, $alias);
         }
 
-
         /**
          * Méthode vérifiant l'existance de la méthode action dans la classe controller précédemment instanciée
-         * @return String
+         * @return string
          */
-        static public function getAction()
+        static public function getAction():string
         {
             if (!method_exists(self::$instance_controller, self::$action))
                 Go::to404();
             return self::$action;
         }
 
-
         /**
          * Méthode de récupération du template par défault en fonction du controller et de l'action demandée
-         * @return String
+         * @return string
          */
-        static public function getTemplate()
+        static public function getTemplate():string
         {
             return self::$controller . "/" . self::$action . ".tpl";
         }
-
 
         /**
          * Méthode de vérification si l'application est disponible en mode développeur (en fonction du config.json et de l'authentication)
          * @return bool
          */
-        static public function debug()
+        static public function debug():bool
         {
             $authHandler = Application::getInstance()->authenticationHandler;
             return Configuration::$global_debug || call_user_func_array(array($authHandler, "is"), array($authHandler::DEVELOPER));
         }
 
-
         /**
          * @static
          * @return bool
          */
-        static public function isBot()
+        static public function isBot():bool
         {
-            $ua = $_SERVER["HTTP_USER_AGENT"];
-            $UA_bots = array('Googlebot\/', 'bingbot\/', "Yahoo");
-            for ($i = 0, $max = count($UA_bots); $i < $max; $i++) {
-                if (preg_match("/" . $UA_bots[$i] . "/i", $ua, $matches))
-                    return true;
-            }
-            return false;
+            return !in_array(preg_match("/(Googlebot\/|bingbot\/|Yahoo)/i", $_SERVER["HTTP_USER_AGENT"]), [0, false]);
         }
 
         /***
          * Méthode permettant d'afficher simplement un contenu sans passer par le système de templating
          * Sert notamment dans le cadre de requêtes asychrones (avec du Flash ou du JS par exemple)
          * @param string $pContent Contenu &agrave; afficher
-         * @param string $pType [optional]    Type de contenu &agrave; afficher - doit être spécifié pour assurer une bonne comptatilité &agrave; l'affichage
+         * @param string $pType Type de contenu &agrave; afficher - doit être spécifié pour assurer une bonne comptatilité &agrave; l'affichage
          * @return void
          */
-        static public function performResponse($pContent, $pType = "text")
+        #[NoReturn]
+        static public function performResponse(string $pContent, string $pType = "text"):void
         {
             $pType = strtolower($pType);
-            switch ($pType) {
-                case "json":
-                    $content = "application/json";
-                    break;
-                case "xml":
-                    $content = "application/xml";
-                    break;
-                case "text":
-                default:
-                    $content = "text/plain";
-                    break;
-            }
+            $content = match ($pType) {
+                "json" => "application/json",
+                "xml" => "application/xml",
+                "text" => "text/plain",
+                default => $pType,
+            };
             Header::contentType($content);
             echo $pContent;
             self::endApplication();
@@ -405,11 +383,11 @@ namespace core\application {
          * Méthode de vérification de l'existance de variables GET
          * @return bool
          */
-        static public function checkRequiredGetVars()
+        static public function checkRequiredGetVars():bool
         {
             $gets = func_get_args();
             for ($i = 0, $max = count($gets); $i < $max; $i++) {
-                if (!isset($_GET[$gets[$i]]) || empty($_GET[$gets[$i]]))
+                if (empty($_GET[$gets[$i]]))
                     return false;
             }
             return true;
@@ -418,11 +396,11 @@ namespace core\application {
         /**
          * @static
          * @param DefaultController|null $pController
-         * @param null $pAction
+         * @param string|null $pAction
          * @param string $pTemplate
          * @return void
          */
-        static public function execute(DefaultController $pController = null, $pAction = null, $pTemplate = "")
+        static public function execute(DefaultController $pController = null, string $pAction = null, string $pTemplate = ""):void
         {
             if ($pController != "statique")
                 $pController->setTemplate(self::$controller, self::$action, $pTemplate);
@@ -431,8 +409,9 @@ namespace core\application {
             if (!Core::$request_async) {
                 Header::contentType("text/html");
                 $pController->render();
-                if (Core::debug())
+                if (Core::debug()){
                     Debugger::getInstance()->render();
+                }
             } else {
                 $return = $pController->getGlobalVars();
                 if (Core::debug()) {
@@ -447,30 +426,25 @@ namespace core\application {
         }
 
         /**
-         * @return bool
-         */
-        static public function isHttps(){
-            return (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443')
-                || isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] == '443';
-        }
-
-        /**
          * Méthode appelée afin de clore l'application
          * @param int $pExitCode
          * @return void
          */
-        static public function endApplication($pExitCode = 0)
+        #[NoReturn]
+        static public function endApplication(int $pExitCode = 0):void
         {
             self::$instance_controller = null;
-            self::$action = null;
-            self::$controller = null;
             self::$application = null;
-            self::$module = null;
-            self::$path_to_application = null;
-            self::$path_to_components = null;
             Singleton::dispose();
             DBManager::dispose();
             exit($pExitCode);
+        }
+
+
+        static private function isHttps():bool
+        {
+            return (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443')
+                || isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] == '443';
         }
     }
 }

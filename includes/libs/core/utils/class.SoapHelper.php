@@ -2,7 +2,8 @@
 namespace core\utils
 {
     use core\data\SimpleXML;
-    use \ReflectionClass;
+    use ReflectionException;
+    use ReflectionClass;
 
     /**
      * Class SoapHelper
@@ -16,14 +17,14 @@ namespace core\utils
         /**
          * Méthode de génération d'un fichier WSDL à partir d'une classe de définition
          * Les méthodes publics de la classe doivent être commentées par le biais de PHPDocComment décrivant les paramètres (nom & type) ainsi que le format de retour
-         *
          * @param string $pServiceName
          * @param string $pNamespace
          * @param string $pSoapLocation
          * @param string $pClassName
-         * @return String   XML préformaté par le biais de la classe SimpleXML
+         * @return string
+         * @throws ReflectionException
          */
-        static public function generateWSDLFromClass($pServiceName, $pNamespace, $pSoapLocation, $pClassName)
+        static public function generateWSDLFromClass(string $pServiceName, string $pNamespace, string $pSoapLocation, string $pClassName):string
         {
             $ref = new ReflectionClass($pClassName);
 
@@ -156,16 +157,15 @@ namespace core\utils
             return SimpleXML::encode($wsdl);
         }
 
-
         /**
          * @param string $pComments
          * @return array
          */
-        static private function parseDocComment($pComments)
+        static private function parseDocComment(string $pComments):array
         {
             $parameters = array();
             $parametersOrder = array();
-            if(preg_match_all('/@param\s*([a-z]+)\s*\$([a-z\_]+)/i', $pComments, $matches))
+            if(preg_match_all('/@param\s*([a-z]+)\s*\$([a-z_]+)/i', $pComments, $matches))
             {
                 foreach($matches[0] as $i=>$m)
                 {

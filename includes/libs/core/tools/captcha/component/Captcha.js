@@ -1,4 +1,3 @@
-NodeList.prototype.forEach = NodeList.prototype.forEach||Array.prototype.forEach;
 class WebCCaptcha extends HTMLElement
 {
     static LS_KEY = "webc-captcha";
@@ -223,7 +222,7 @@ class WebCCaptcha extends HTMLElement
     }
 
     #getLabel(pId){
-        let val = DICTIONARY?.captcha||DEFAULT_DICTIONARY;
+        let val = DICTIONARY?.captcha||WebCCaptcha.DEFAULT_DICTIONARY;
         let parts = pId.split(".");
         for(let i = 0, max = parts.length; i<max; i++){
             let id = parts[i];

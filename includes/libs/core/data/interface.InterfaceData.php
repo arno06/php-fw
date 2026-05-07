@@ -14,22 +14,22 @@ namespace core\data
 		/**
 		 * Méthode d'encodage d'un tableau en données formatées vers le format spécifique
 		 * @param array $pArray		Tableau des données
-		 * @return String
+		 * @return string
 		 */
-		static function encode(array $pArray);
+		static function encode(array $pArray):string;
 
 		/**
 		 * Méthode de récupération d'un tableau associatif multidimensionnel &agrave; partir d'une chaine de caract&egrave;res
-		 * @param String $pString		Contenu au format spécifique
+		 * @param string $pString		Contenu au format spécifique
 		 * @return array
 		 */
-		static function decode($pString);
+		static function decode(string $pString):array;
 
 		/**
 		 * Méthode de chargement de décodage d'un fichier au format spécifique
-		 * @param String $pFile
-		 * @return array
+		 * @param string $pFile
+		 * @return array|null
 		 */
-		static function import($pFile);
+		static function import(string $pFile):array|null;
 	}
 }

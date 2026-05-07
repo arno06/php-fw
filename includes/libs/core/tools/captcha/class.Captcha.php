@@ -8,7 +8,9 @@ namespace core\tools\captcha
     class Captcha
     {
         const CHECK_LIFETIME = 7 * 24 * 60 * 60;
+
         const MAX_ATTEMPT = 3;
+
         const MAX_ATTEMPT_LIFTIME = 2 * 60 * 60;
 
         const TABLE = 'captcha_challenges';
@@ -29,7 +31,8 @@ namespace core\tools\captcha
 
         public array $config;
 
-        public function __construct($pToken = null, $pType = "icons", $pConfig = [])
+
+        public function __construct(string $pToken = null, string $pType = "icons", array $pConfig = [])
         {
             $this->token = $pToken;
             $this->type = $pType;
@@ -37,7 +40,9 @@ namespace core\tools\captcha
             $this->init();
         }
 
-        private function init():void{
+
+        private function init():void
+        {
             $setup = null;
             $this->challenge = null;
             if(!empty($this->token)){
@@ -107,7 +112,9 @@ namespace core\tools\captcha
             $this->saveChallenge();
         }
 
-        public function submit($pValue):bool{
+
+        public function submit(string $pValue):bool
+        {
             if(!$this->challenge){
                 return false;
             }
@@ -145,14 +152,17 @@ namespace core\tools\captcha
             return false;
         }
 
-        public function get():array{
+
+        public function get():array
+        {
             unset($this->result["setup"]);
             $this->result["token"] = $this->token;
             return $this->result;
         }
 
 
-        private function clearToken():void{
+        private function clearToken():void
+        {
             if(!$this->cleanToken){
                 return;
             }
@@ -160,7 +170,9 @@ namespace core\tools\captcha
             $this->token = null;
         }
 
-        private function saveChallenge():void{
+
+        private function saveChallenge():void
+        {
             Query::update(self::TABLE)->values($this->challenge)->where("token_cc", Query::EQUAL, $this->token)->execute();
         }
     }

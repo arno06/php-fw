@@ -7,25 +7,24 @@ namespace core\application
 	class PrivateClass{}
 
 	/**
-	 * Class d'implémentation d'un singleton PHP 5.3
-	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package application
 	 */
 	abstract class Singleton
 	{
 		/**
 		 * Tableau contenant les instances des Singletons invoqués
-		 * @var array
+		 * @var array|null
 		 */
-		protected static $instances = array();
+		protected static array|null $instances = [];
+
 
 		/**
 		 * Méthode de récupération de l'instance de la classe en cours
-		 * @return Object
+		 * @return $this
 		 */
-		public static function getInstance()
+		public static function getInstance():mixed
 		{
             $className = get_called_class();
 			if(!isset(self::$instances[$className]))
@@ -38,17 +37,14 @@ namespace core\application
 		 * Déclenche la méthode __destructor() sur ces instances
 		 * @return void
 		 */
-		public static function dispose()
+		public static function dispose():void
 		{
 			foreach(self::$instances as &$i)
 				unset($i);
 			self::$instances = null;
 		}
 
-		/**
-		 * Clone
-		 * @return void
-		 */
+
 		public function __clone()
 		{
 			trigger_error("Impossible de clôner un object de type Singleton", E_USER_ERROR);

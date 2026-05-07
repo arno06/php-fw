@@ -6,6 +6,7 @@ namespace core\tools
     use core\data\SimpleJSON;
     use core\system\File;
     use core\system\Folder;
+    use Exception;
 
     /**
      * Class Stash
@@ -13,36 +14,20 @@ namespace core\tools
      */
     class Stash
     {
-        /**
-         * @var string
-         */
-        private $cache_folder;
+        private string $cache_folder;
 
-        /**
-         * @var bool
-         */
-        private $cache_enabled = true;
+        private bool $cache_enabled = true;
 
-        /**
-         * @var int
-         */
-        protected $cache_duration = 60;//minutes
+        protected int $cache_duration = 60;//minutes
 
-        /**
-         * Stash constructor.
-         * @param string $pCacheFolder
-         */
-        public function __construct($pCacheFolder)
+
+        public function __construct(string $pCacheFolder)
         {
             $this->cache_folder = Application::getInstance()->getFilesPath().'/_cache/'.Application::getInstance()->getModule()->name.'/'.$pCacheFolder.'/';
         }
 
-        /**
-         * @param mixed $pData
-         * @param string $pFileName
-         * @return bool
-         */
-        protected function storeInCache($pData, $pFileName)
+
+        protected function storeInCache(mixed $pData, string $pFileName):bool
         {
             if(!$this->cache_enabled||!$pData)
                 return false;
@@ -55,11 +40,8 @@ namespace core\tools
             return true;
         }
 
-        /**
-         * @param string $pFileName
-         * @return array|bool|mixed|string
-         */
-        protected function pullFromCache($pFileName)
+
+        protected function pullFromCache(string $pFileName):mixed
         {
             if(!$this->cache_enabled)
                 return false;
@@ -78,18 +60,17 @@ namespace core\tools
                     return false;
                 $jsonParsed = SimpleJSON::import($pFileName);
             }
-            catch(\Exception $e)
+            catch(Exception)
             {
                 return false;
             }
-            $jsonParsed = Encoding::fromNumericEntities($jsonParsed);
-            return $jsonParsed;
+            return Encoding::fromNumericEntities($jsonParsed);
         }
 
         /**
          * Méthode d'activation du cache
          */
-        public function activateCache()
+        public function activateCache():void
         {
             $this->cache_enabled = true;
         }
@@ -97,7 +78,7 @@ namespace core\tools
         /**
          * Méthode de désactivation du cache
          */
-        public function deactivateCache()
+        public function deactivateCache():void
         {
             $this->cache_enabled = false;
         }

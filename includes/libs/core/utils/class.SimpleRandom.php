@@ -11,16 +11,18 @@ namespace core\utils
 	abstract class SimpleRandom
 	{
 		const ALPHA_LOW = 1;
+
 		const ALPHA_UP = 2;
+
 		const NUMERIC = 4;
 
 		/**
 		 * Méthode static de génération d'une chaine de caract&egrave;res aléatoires (majuscule, minuscule, chiffre)
-		 * @param Number $pLength		Longueur souhaitée de la chaine
+		 * @param int $pLength		Longueur souhaitée de la chaine
 		 * @param int $pType
 		 * @return String
 		 */
-		static public function string($pLength, $pType = 7)
+		static public function string(int $pLength, int $pType = 7):string
 		{
 			if(!is_numeric($pLength))
 				return false;

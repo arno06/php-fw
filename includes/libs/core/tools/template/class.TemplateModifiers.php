@@ -10,17 +10,10 @@ namespace core\tools\template
      */
     class TemplateModifiers
     {
-        /**
-         * @var array
-         */
-        static private $list = [];
+        static private array $list = [];
 
 
-        /**
-         * @param $pName
-         * @return null|string
-         */
-        static public function get($pName)
+        static public function get(string $pName):string|null
         {
             if(isset(self::$list[$pName])&&is_callable(self::$list[$pName]))
                 return self::$list[$pName];
@@ -28,11 +21,7 @@ namespace core\tools\template
         }
 
 
-        /**
-         * @param string $pName
-         * @param string $pMethod
-         */
-        static public function set($pName, $pMethod)
+        static public function set(string $pName, string $pMethod):void
         {
             self::$list[$pName] = $pMethod;
         }

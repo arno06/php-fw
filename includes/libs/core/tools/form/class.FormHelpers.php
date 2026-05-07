@@ -15,7 +15,7 @@ namespace core\tools\form
      */
     class FormHelpers
     {
-        static private $helpers = array(
+        static private array $helpers = array(
             Form::TAG_CHECKBOXGROUP=>"checkboxgroup",
             Form::TAG_UPLOAD=>"upload",
             Form::TAG_DATEPICKER=>"datepicker",
@@ -28,11 +28,12 @@ namespace core\tools\form
             Form::TAG_TEXTAREA=>"input"
         );
 
-        static private $ct_upload = 0;
+        static private int $ct_upload = 0;
 
-        static private $ct_datepicker = 0;
+        static private int $ct_datepicker = 0;
 
-        static public function script($pContent = "", $pSrc = "", $pReturn=false)
+
+        static public function script(string $pContent = "", string $pSrc = "", bool $pReturn=false):string
         {
             $d = "<script type='text/javascript'";
             if(!empty($pSrc))
@@ -44,7 +45,8 @@ namespace core\tools\form
             return "";
         }
 
-        static public function getLabel($pLabel, $pFor, $pColon = true)
+
+        static public function getLabel(string $pLabel, string $pFor, bool $pColon = true):string
         {
             if(empty($pLabel))
             {
@@ -56,19 +58,22 @@ namespace core\tools\form
             return "<label for='".$pFor."'>".$pLabel."</label>";
         }
 
-        static public function getComponent($pComponent, $pClassName = "")
+
+        static public function getComponent(string $pComponent, string $pClassName = ""):string
         {
-            $className = isset($pClassName) && !empty($pClassName)?" ".$pClassName:"";
+            $className = !empty($pClassName)?" ".$pClassName:"";
             $className = "input".$className;
             return '<div class="'.$className.'">'.$pComponent.'</div>';
         }
 
-        static public function has($ptag)
+
+        static public function has(string $ptag):bool
         {
             return array_key_exists(strtolower($ptag), self::$helpers);
         }
 
-        static public function get($pTag, $pParams)
+
+        static public function get(string $pTag, array $pParams):string
         {
             $class = "component"." ".$pParams[1];
             if(isset($pParams[2]["attributes"]["type"])
@@ -83,7 +88,8 @@ namespace core\tools\form
             return "<div class='".$class."'>".call_user_func_array(array('core\tools\form\FormHelpers', self::$helpers[$pTag]), $pParams)."<div class='inp_separator'></div></div>";
         }
 
-        static private function checkboxgroup($pName, $pId,$pData, $pRequire = "")
+
+        static private function checkboxgroup(string $pName, string $pId, array$pData, string $pRequire = ""):string
         {
             if(!isset($pData["options"])||!is_array($pData["options"]))
                 return "";
@@ -105,7 +111,7 @@ namespace core\tools\form
             $values = array();
             if(isset($pData["attributes"]["value"])) {
                 for ($i = 0, $max = count($pData["attributes"]["value"]); $i < $max; $i++) {
-                    array_push($values, $pData["attributes"]["value"][$i]);
+                    $values[] = $pData["attributes"]["value"][$i];
                 }
             }
 
@@ -116,7 +122,7 @@ namespace core\tools\form
                     $value = $opt["value"];
                     $label = $opt["label"];
                     $i++;
-                    $defaultChecked = array_key_exists('checked', $opt) ? $opt["checked"] : false;
+                    $defaultChecked = isset($opt["checked"]) && $opt["checked"];
                     $c = "";
                     if($defaultChecked || in_array($value, $values))
                         $c = " checked";
@@ -131,7 +137,8 @@ namespace core\tools\form
             return $input;
         }
 
-        static private function upload($pName, $pId, $pData, $pRequire = "")
+
+        static private function upload(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             self::$ct_upload++;
             $file = $value = "";
@@ -139,22 +146,22 @@ namespace core\tools\form
 
             $disabled = isset($pData["attributes"]["disabled"]) && $pData["attributes"]["disabled"] == "disabled"?"disabled":"";
 
-            if(isset($pData["attributes"]["value"])&&!empty($pData["attributes"]["value"]))
+            if(!empty($pData["attributes"]["value"]))
             {
                 $value = $pData["attributes"]["value"];
                 $file = $server_url;
                 /** @var ModelUpload $m */
-                $m = (isset($pData["model"]) && !empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
+                $m = (!empty($pData["model"])) ? $pData["model"] : "core\\models\\ModelUpload";
                 if(Form::isNumeric($value))
                     $file .= Application::getInstance()->getPathPart().$m::getPathById($value);
                 else
                     $file .= $value;
             }
             $deleteFileAction = "";
-            if(isset($pData['deleteFileAction']) && !empty($pData['deleteFileAction']))
+            if(!empty($pData['deleteFileAction']))
             {
                 if($value&&Form::isNumeric($value))
-                    $action = preg_replace('/\{id\}/', $value, $pData['deleteFileAction']);
+                    $action = preg_replace('/\{id}/', $value, $pData['deleteFileAction']);
                 else
                     $action = $pData['deleteFileAction'];
                 $deleteFileAction = 'data-delete_file_action="'.$action.'"';
@@ -165,20 +172,13 @@ namespace core\tools\form
             return $input;
         }
 
-        /**
-         * @static
-         * @param $pName
-         * @param $pId
-         * @param $pData
-         * @param string $pRequire
-         * @return string
-         */
-        static private function datepicker($pName, $pId, $pData, $pRequire = "")
+
+        static private function datepicker(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             self::$ct_datepicker++;
             $component = "<input ";
             $attributes = $pData["attributes"];
-            if(!isset($attributes["id"]) || empty($attributes["id"]))
+            if(empty($attributes["id"]))
                 $attributes["id"] = $pId."-dpicker";
             $attributes["name"] = $pName;
             $attributes["type"] = "text";
@@ -197,7 +197,8 @@ namespace core\tools\form
             return $input;
         }
 
-        static private function colorpicker($pName, $pId, $pData, $pRequire = "")
+
+        static private function colorpicker(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             $component = '<input type="text" name="'.$pName.'" id="'.$pId.'" class="color"';
             if(isset($pData["attributes"]))
@@ -215,15 +216,8 @@ namespace core\tools\form
             return $input;
         }
 
-        /**
-         * @static
-         * @param $pName
-         * @param $pId
-         * @param $pData
-         * @param string $pRequire
-         * @return string
-         */
-        static private function radiogroup($pName, $pId, $pData, $pRequire = "")
+
+        static private function radiogroup(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             if(!isset($pData["options"])||!is_array($pData["options"]))
                 return "";
@@ -250,7 +244,7 @@ namespace core\tools\form
                     $label = $opt["label"];
                     $i++;
                     $select = "";
-                    if(isset($pData['attributes']) && isset($pData['attributes']['value']) && $pData["attributes"]["value"]==$value)
+                    if(isset($pData['attributes']['value']) && $pData["attributes"]["value"]==$value)
                         $select = ' checked="checked"';
                     if (isset($opt["disabled"]) && $opt["disabled"] == "disabled")
                         $select .= " disabled=\"disabled\"";
@@ -265,13 +259,14 @@ namespace core\tools\form
             return $input;
         }
 
-        static private function richeditor($pName, $pId, $pData, $pRequire = "")
+
+        static private function richeditor(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             trigger_error('To Be Implemented', E_USER_ERROR);
-            return false;
         }
 
-        static private function captcha($pName, $pId, $pData, $pRequire = "")
+
+        static private function captcha(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             $infos = [
                 "form"=>$pData["form_name"],
@@ -285,7 +280,8 @@ namespace core\tools\form
             return $r;
         }
 
-        static private function input($pName, $pId, $pData, $pRequire = "")
+
+        static private function input(string $pName, string $pId, array $pData, string $pRequire = ""):string
         {
             $label = $selectValue = $textareaValue = $extra = "";
             $inline = isset($pData["inline"]) && $pData["inline"];
@@ -407,7 +403,8 @@ namespace core\tools\form
             return $input;
         }
 
-        static private function comboBoxOptions($pDisplay, $pValue, $pRealValue)
+
+        static private function comboBoxOptions(string $pDisplay, string $pValue, mixed $pRealValue):string
         {
             $s = "";
             if(is_string($pRealValue) && $pValue == $pRealValue)

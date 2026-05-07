@@ -17,31 +17,31 @@ namespace core\db
          * @param bool   $pRaw                  Détermine si le gestionnaire doit renvoyer un tableau ou le résultat brute
 		 * @return bool|array|resource
 		 */
-		public function execute($pQuery, $pRaw = false);
+		public function execute(string $pQuery, bool $pRaw = false):mixed;
 
 		/**
 		 * Méthode de récupération de lé clé primaire venant d'être générée par la base de données
 		 * @return int
 		 */
-		public function getInsertId();
+		public function getInsertId():int;
 
 		/**
 		 * @abstract
 		 * @return int
 		 */
-		public function getErrorNumber();
+		public function getErrorNumber():int;
 
 		/**
 		 * @abstract
 		 * @return string
 		 */
-		public function getError();
+		public function getError():string;
 
         /**
          * Méthode d'échappement des caractères spéciaux
          * @param string $pString
          * @return string
          */
-        public function escapeValue($pString);
+        public function escapeValue(string $pString):string;
 	}
 }

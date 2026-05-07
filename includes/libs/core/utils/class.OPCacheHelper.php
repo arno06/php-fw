@@ -7,9 +7,10 @@ namespace core\utils{
 
     class OPCacheHelper extends Singleton
     {
+        private bool $enabled = false;
 
-        private $enabled = false;
-        private $scripts = array();
+        private array $scripts = array();
+
 
         public function __construct()
         {
@@ -22,18 +23,22 @@ namespace core\utils{
             $this->enabled = $status['opcache_enabled']==1;
 
             foreach($status['scripts'] as $path=>$file){
-                if(strpos($path, Autoload::$folder)===false || !$file['timestamp']){
+                if(!str_contains($path, Autoload::$folder) || !$file['timestamp']){
                     continue;
                 }
                 $this->scripts[] = $file;
             }
         }
 
-        public function countScripts(){
+
+        public function countScripts():int
+        {
             return count($this->scripts);
         }
 
-        private function getScripts(){
+
+        private function getScripts():array|null
+        {
             if(!$this->enabled){
                 return null;
             }
@@ -65,36 +70,27 @@ namespace core\utils{
             return $scripts;
         }
 
-        /**
-         * @param $pScript
-         * @return bool
-         */
-        public function invalidate($pScript){
+
+        public function invalidate(string $pScript):bool
+        {
             if(!opcache_is_script_cached($pScript)){
                 return false;
             }
             return opcache_invalidate($pScript, true);
         }
 
-        /**
-         * @return bool
-         */
-        public function isEnabled(){
+
+        public function isEnabled():bool
+        {
             return $this->enabled;
         }
 
-        /**
-         * @return OPCacheHelper|Object
-         */
-        public static function getInstance()
-        {
-            return parent::getInstance();
-        }
 
-        public function prettyPrint(){
+        public function prettyPrint():string
+        {
             $scripts = $this->getScripts();
             if(empty($scripts)||!$this->enabled){
-                return;
+                return "";
             }
             $return = "<ul class='opcache'>";
             $return .= $this->prepareData($scripts);
@@ -102,11 +98,13 @@ namespace core\utils{
             return $return;
         }
 
-        private function prepareData($pScripts){
+
+        private function prepareData(array $pScripts):string
+        {
             $return = '';
             foreach($pScripts as $script){
                 if($script['type'] == 'dir'){
-                    $return .= '<li class="opcache-dir"><span>📁 '.$script['name'].'</span>';
+                    $return .= '<li class="opcache-dir closed"><span>📁 '.$script['name'].'</span>';
                     $return .= '<ul>'.$this->prepareData($script['children']).'</ul></li>';
                 }else{
                     $return .= '<li class="opcache-file"><span>📄 '.$script['name'].'</span><span class="invalidate" data-script="'.$script['fullPath'].'">Invalider</span></li>';
@@ -115,7 +113,9 @@ namespace core\utils{
             return $return;
         }
 
-        private function order(&$pFiles){
+
+        private function order(array &$pFiles):void
+        {
             $cmp = function($pA, $pB){
                 if($pA["type"]===$pB["type"]){
                     return strcmp($pA['name'], $pB['name']);

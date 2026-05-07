@@ -1,7 +1,7 @@
 <?php
 namespace core\application\authentication
 {
-    use \core\application\Configuration;
+    use core\application\Configuration;
     use core\application\Core;
     use core\models\ModelAuthentication;
 
@@ -19,41 +19,39 @@ namespace core\application\authentication
          * Nom de base de la variable de session
          * @var String
          */
-        protected $sessionVar = "Authentication_";
+        protected string $sessionVar = "Authentication_";
 
         /**
          * Indique la valeur des permissions alouées &agrave; l'utilisateur
          * @var int
          */
-        public $permissions;
+        public int $permissions;
 
         /**
          * Mot de passe
-         * @var String
+         * @var string
          */
-        protected $mdp_user;
+        protected string $mdp_user;
 
         /**
          * Login
-         * @var String
+         * @var string
          */
-        protected $login_user;
+        protected string $login_user;
 
         /**
          * Jeton
-         * @var String
+         * @var string
          */
-        protected $token;
+        protected string $token;
 
         /**
          * Données de l'utilisateur si son authentication est vérifiée
          * @var	array
          */
-        public $data;
+        public array $data;
 
-        /**
-         * Constructor
-         */
+
         public function __construct()
         {
             $this->sessionVar .= Core::$application;
@@ -70,7 +68,7 @@ namespace core\application\authentication
          * Méthode de vérification de l'identité de l'utilisateur (dans le cas où on aura detecté une session correspondante)
          * @return void
          */
-        public function checkIfLogged()
+        public function checkIfLogged():void
         {
             if(!$this->login_user||!$this->mdp_user||!$this->token)
             {
@@ -87,10 +85,8 @@ namespace core\application\authentication
                 $this->unsetAuthentication();
         }
 
-        /**
-         * @return void
-         */
-        private function checkIfNoLogged()
+
+        private function checkIfNoLogged():void
         {
             ModelAuthentication::checkLoginAndHash($this->login_user, $this->mdp_user);
             $this->data = ModelAuthentication::$data;
@@ -99,21 +95,21 @@ namespace core\application\authentication
 
         /**
          * Méthode de définition des variables de session pour l'instance d'authentication en cours
-         * @param  $pLogin
-         * @param  $pMdp
+         * @param string $pLogin
+         * @param string $pMdp
          * @param bool $pAdmin
          * @return bool
          */
-        public function setAuthentication($pLogin, $pMdp, $pAdmin = false)
+        public function setAuthentication(string $pLogin, string $pMdp, bool $pAdmin = false):bool
         {
             if(ModelAuthentication::isUser($pLogin, $pMdp))
             {
                 $lvl = AuthenticationHandler::$permissions[AuthenticationHandler::USER];
                 if($pAdmin)
                     $lvl = AuthenticationHandler::$permissions[AuthenticationHandler::ADMIN];
-                $isAutorized = $lvl&ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
+                $isAuthorized = $lvl&ModelAuthentication::$data[Configuration::$authentication_fieldPermissions];
 
-                if($isAutorized)
+                if($isAuthorized)
                 {
                     $pass = ModelAuthentication::$data[Configuration::$authentication_fieldPassword];
                     $token = $this->getToken($pass);
@@ -129,7 +125,7 @@ namespace core\application\authentication
          * Méthode de parsing des variables de la session d'authentication en cours
          * @return void
          */
-        protected function parseSessionVar()
+        protected function parseSessionVar():void
         {
             foreach($_SESSION[$this->sessionVar] as $name=>$value)
             {
@@ -143,7 +139,7 @@ namespace core\application\authentication
          * Méthode de suppression des variables de session pour l'instance d'authentication en cours
          * @return void
          */
-        public function unsetAuthentication()
+        public function unsetAuthentication():void
         {
             $_SESSION[$this->sessionVar] = array();
             unset($_SESSION[$this->sessionVar]);
@@ -152,10 +148,10 @@ namespace core\application\authentication
 
         /**
          * Méthode de définition du jeton
-         * @param String $pMdp		Mot de passe hashé
-         * @return String
+         * @param string $pMdp		Mot de passe hashé
+         * @return string
          */
-        protected function getToken($pMdp)
+        protected function getToken(string $pMdp):string
         {
             return md5($_SERVER["REMOTE_ADDR"].$pMdp);
         }

@@ -2,6 +2,7 @@
 namespace core\application
 {
 
+    use core\tools\captcha\Captcha;
     use core\tools\debugger\Debugger;
     use core\tools\Dependencies;
     use core\tools\form\Form;
@@ -11,13 +12,12 @@ namespace core\application
     use core\data\SimpleJSON;
     use core\db\Query;
     use core\tools\form\Upload;
-    use core\tools\form\Captcha;
     use core\utils\OPCacheHelper;
-    use \Exception;
+    use Exception;
+    use JetBrains\PhpStorm\NoReturn;
 
     /**
      * Controller StaticController - définit les pages statiques "utilitaires"
-     *
      *
      * @author Arnaud NICOLAS <arno06@gmail.com>
      * @version 1.1
@@ -27,15 +27,12 @@ namespace core\application
     class StaticController extends DefaultController
     {
 
-        public function check_env()
-        {
-            /**
-             * Vérifier la configuration
-             * Vérifier les dossiers de caches (existence + droit d'écriture)
-             */
-        }
-
-        public function dependencies()
+        /**
+         * @return void
+         * @throws Exception
+         */
+        #[NoReturn]
+        public function dependencies():void
         {
             $type = Dependencies::TYPE_JS;
             if(isset($_GET['type'])&&in_array($_GET['type'], array(Dependencies::TYPE_JS, Dependencies::TYPE_CSS)))
@@ -53,7 +50,8 @@ namespace core\application
          * $_GET["h"]		int		hauteur max souhait&eacute;e
          * @return void
          */
-        public function resize()
+        #[NoReturn]
+        public function resize():void
         {
             if(!Form::isNumeric($_GET["id"])||!Form::isNumeric($_GET["w"])||!Form::isNumeric($_GET["h"]))
                 Go::to404();
@@ -73,83 +71,93 @@ namespace core\application
             Header::location(Configuration::$server_url.$file_cache);
         }
 
-        /**
-         * @return void
-         */
-        public function autocomplete()
+
+        public function autocomplete():void
         {
-            $datas = null;
             $response = array("error"=>"");
-            if(!isset($_GET["form_name"])||empty($_GET["form_name"]))
+            if(empty($_GET["form_name"]))
                 $response["error"] = '$_GET["form_name"] require';
-            if(!isset($_GET["input_name"])||empty($_GET["input_name"]))
+            if(empty($_GET["input_name"]))
                 $response["error"] = '$_GET["input_name"] require';
-            if(empty($response["error"]))
+            if(!empty($response["error"])) {
+                $this->response($response);
+            }
+
+            $path_to_form = "includes/applications/".$_GET["application"]."/modules/";
+            if($_GET["module"])
+                $path_to_form .= $_GET["module"]."/";
+            else
+                $path_to_form .= "front/";
+            $path_to_form .= "forms/form.".$_GET["form_name"].".json";
+
+            $input = $this->getFormInput($path_to_form, $_GET["input_name"]);
+
+            if($input["tag"]!=Form::TAG_INPUT || $input["attributes"]["type"]!="text")
             {
-                $path_to_form = "includes/applications/".$_GET["application"]."/modules/";
-                if($_GET["module"])
-                    $path_to_form .= $_GET["module"]."/";
-                else
-                    $path_to_form .= "front/";
-                $path_to_form .= "forms/form.".$_GET["form_name"].".json";
-                try
-                {
-                    $datas = SimpleJSON::import($path_to_form);
-                }
-                catch (Exception $e)
-                {
-                    $response["error"] = "Formulaire introuvable ".$path_to_form;
-                    $this->response($response);
-                }
-                if(!is_array($datas[$_GET["input_name"]]))
-                {
-                    $response["error"] = "Champs cibl&eacute; introuvable";
-                    $this->response($response);
-                }
+                $response["error"] = "Champs cibl&eacute; n'est pas un input type 'text'";
+                $this->response($response);
+            }
 
-                $input = $datas[$_GET["input_name"]];
+            if(!$input["autoComplete"] || !is_array($input["autoComplete"]))
+            {
+                $response["error"] = "Les &eacute;l&eacute;ments de bases ne sont pas renseign&eacute;s";
+                $this->response($response);
+            }
+            $model = new $input["autoComplete"]["model"]();
+            $cond = Query::condition()->andWhere($input["autoComplete"]["value"], Query::LIKE, "%".$_GET["q"]."%");
+            if(isset($input["autoComplete"]["condition"])&&is_array($input["autoComplete"]["condition"])&&count($input["autoComplete"]["condition"]))
+            {
+                foreach($input["autoComplete"]["condition"] as $m=>$p)
+                    call_user_func_array(array($cond, $m), $p);
+            }
 
-                if($input["tag"]!=Form::TAG_INPUT || $input["attributes"]["type"]!="text")
+            if (isset($_GET["replies"]) && Form::isNumeric($_GET["replies"]))
+                $result = $model->$input["autoComplete"]["method"]($_GET["replies"]);
+            else
+                $result = $model->$input["autoComplete"]["method"]($cond, $input["autoComplete"]["value"]);
+
+            $response["responses"] = array();
+            foreach($result as $r)
+            {
+                $d = array("value"=>$r[$input["autoComplete"]["value"]]);
+                if(isset($input["autoComplete"]["raw"]) && is_array($input["autoComplete"]["raw"]))
                 {
-                    $response["error"] = "Champs cibl&eacute; n'est pas un input type 'text'";
-                    $this->response($response);
+                    foreach($input["autoComplete"]["raw"] as $v)
+                        $d[$v] = $r[$v];
                 }
+                $response["responses"][] =$d;
 
-                if(!$input["autoComplete"] || !is_array($input["autoComplete"]))
-                {
-                    $response["error"] = "Les &eacute;l&eacute;ments de bases ne sont pas renseign&eacute;s";
-                    $this->response($response);
-                }
-                $model = new $input["autoComplete"]["model"]();
-                $cond = Query::condition()->andWhere($input["autoComplete"]["value"], Query::LIKE, "%".$_GET["q"]."%");
-                if(isset($input["autoComplete"]["condition"])&&is_array($input["autoComplete"]["condition"])&&count($input["autoComplete"]["condition"]))
-                {
-                    foreach($input["autoComplete"]["condition"] as $m=>$p)
-                        call_user_func_array(array($cond, $m), $p);
-                }
-
-                if (isset($_GET["replies"]) && Form::isNumeric($_GET["replies"]))
-                    $result = $model->$input["autoComplete"]["method"]($_GET["replies"]);
-                else
-                    $result = $model->$input["autoComplete"]["method"]($cond, $input["autoComplete"]["value"]);
-
-                $response["responses"] = array();
-                foreach($result as $r)
-                {
-                    $d = array("value"=>$r[$input["autoComplete"]["value"]]);
-                    if(isset($input["autoComplete"]["raw"]) && is_array($input["autoComplete"]["raw"]))
-                    {
-                        foreach($input["autoComplete"]["raw"] as $v)
-                            $d[$v] = $r[$v];
-                    }
-                    $response["responses"][] =$d;
-
-                }
             }
             $this->response($response);
         }
 
-        static private function convertConfSize($pSize){
+
+        private function getFormInput(string $pPathToForm, string $pInputName){
+            try
+            {
+                $datas = SimpleJSON::import($pPathToForm);
+            }
+            catch (Exception)
+            {
+                Header::http("1.0 404 Not Found");
+                Header::status("404 Not Found");
+                $response["error"] = "Formulaire introuvable ".$pPathToForm;
+                $this->response($response);
+            }
+            if(!is_array($datas[$pInputName]))
+            {
+                Header::http("1.0 404 Not Found");
+                Header::status("404 Not Found");
+                $response["error"] = "Champs cibl&eacute; introuvable";
+                $this->response($response);
+            }
+
+            return $datas[$pInputName];
+        }
+
+
+        static private function convertConfSize(string $pSize):int|bool
+        {
             if(!preg_match('/^([0-9]+)([OKMGT])/', $pSize, $matches)){
                 return false;
             }
@@ -170,9 +178,8 @@ namespace core\application
          *
          * @return void
          */
-        public function upload_async()
+        public function upload_async():void
         {
-            $datas = null;
             $response = array("error"=>"");
 
             $upload_size = self::convertConfSize(ini_get("upload_max_filesize"));
@@ -186,25 +193,25 @@ namespace core\application
                 $this->response($response);
             }
 
-            if(!isset($_POST["form_name"])||empty($_POST["form_name"]))
+            if(empty($_POST["form_name"]))
             {
                 $response["error"] = '$_POST["form_name"] require';
                 $this->response($response);
             }
-            if(!isset($_POST["input_name"])||empty($_POST["input_name"]))
+            if(empty($_POST["input_name"]))
             {
                 $response["error"] = '$_POST["input_name"] require';
                 $this->response($response);
             }
 
             $file = $_FILES[$_POST["input_name"]];
-            if(!isset($file)||empty($file)){
+            if(empty($file)){
                 $response["error"] = "Aucun fichier n'a été transmis";
                 $this->response($response);
             }
             $app = $_POST["application"];
             $path_to_form = "includes/applications/".$app."/modules/";
-            if(isset($_POST["module"])&&!empty($_POST['module']))
+            if(!empty($_POST['module']))
                 $path_to_form .= $_POST["module"]."/";
             else
                 $path_to_form .= "front/";
@@ -212,23 +219,8 @@ namespace core\application
             $path_to_form .= "forms/form.".$form_name.".json";
             if (!file_exists($path_to_form))
                 $path_to_form = preg_replace("/_[0-9]+\.json$/", ".json", $path_to_form);
-            try
-            {
-                $datas = SimpleJSON::import($path_to_form);
-            }
-            catch (Exception $e)
-            {
-                $response["error"] = "Formulaire introuvable ".$path_to_form;
-                $this->response($response);
-            }
 
-            if(!is_array($datas[$_POST["input_name"]]))
-            {
-                $response["error"] = "Champs cibl&eacute; introuvable";
-                $this->response($response);
-            }
-
-            $input = $datas[$_POST["input_name"]];
+            $input = $this->getFormInput($path_to_form, $_POST["input_name"]);
 
             if($input["tag"]!=Form::TAG_UPLOAD && ($input["tag"]!="input"&&$input["attributes"]["type"]!="file"))
             {
@@ -254,6 +246,7 @@ namespace core\application
             $upload = new Upload($file, $folderName, $fileName);
             if(isset($input["resize"])&&is_array($input["resize"]))
                 $upload->resizeImage($input["resize"][0],$input["resize"][1]);
+
             if(!$upload->isMimeType($input["fileType"]))
             {
                 $response["error"] = "Type de fichier non-autorisé (".$input["fileType"].")";
@@ -268,17 +261,19 @@ namespace core\application
                 $response["error"] = "Upload impossible ".$e->getMessage();
                 $this->response($response);
             }
-            if(isset($input["fileName"])&&!empty($input["fileName"]))
+            if(!empty($input["fileName"]))
             {
                 $fileName = preg_replace("/(\{id})/", $upload->id_upload, $input["fileName"]);
                 $upload->renameFile($fileName);
             }
             $response["path_upload"] = Application::getInstance()->getPathPart().$upload->pathFile;
             $response["id_upload"] = $upload->id_upload;
+            $response["filename"] = $fileName;
             $this->response($response);
         }
 
-        private function response($response)
+        #[NoReturn]
+        private function response($response):void
         {
             Core::performResponse(json_encode($response), "json");
         }
@@ -302,7 +297,9 @@ namespace core\application
          *  Note dans l'action du controller ciblé par la méthode HTTP appelée par un domaine distant, il est nécessaire d'appeler :
          *      Header::allowOrigin('domain.tld');
          */
-        public function handleOptionsRequest(){
+        #[NoReturn]
+        public function handleOptionsRequest():void
+        {
             if(!Core::checkRequiredGetVars("OPTIONS")){
                 Go::to404();
             }
@@ -313,7 +310,9 @@ namespace core\application
             Header::handleOptionsRequest($domains, $methods, $headers);
         }
 
-        public function opcache_invalidate(){
+        #[NoReturn]
+        public function opcache_invalidate():void
+        {
             if(!Core::debug() || !Core::checkRequiredGetVars('script')){
                 Go::to404();
             }
@@ -321,8 +320,9 @@ namespace core\application
             Core::performResponse($result?'true':'false');
         }
 
-        public function webc_captcha(){
-
+        #[NoReturn]
+        public function webc_captcha():void
+        {
             $headers = getallheaders();
 
             if(!isset($headers['x-token']) || !isset($headers['x-http-with']) || !isset($headers['x-http-from'])){
@@ -336,27 +336,15 @@ namespace core\application
             $infos = SimpleJSON::decode(base64_decode($headers["x-infos"]));
 
             $path_to_form = "includes/applications/".$infos["application"]."/modules/".$infos["module"]."/forms/form.".$infos["form"].".json";
-            try
-            {
-                $datas = SimpleJSON::import($path_to_form);
-            }
-            catch (Exception $e)
-            {
-                Go::to404();
-            }
-            if(!is_array($datas[$infos["field"]]))
-            {
-                Go::to404();
-            }
 
-            $input = $datas[$infos["field"]];
+            $input = $this->getFormInput($path_to_form, $infos["field"]);
 
             if($input["tag"]!=Form::TAG_CAPTCHA)
             {
                 Go::to404();
             }
 
-            $captcha = new \core\tools\captcha\Captcha($headers['x-token'], $input["type"]??"icons", $input["config"]??[]);
+            $captcha = new Captcha($headers['x-token'], $input["type"]??"icons", $input["config"]??[]);
 
             if(isset($_POST["value"])){
                 $captcha->submit($_POST["value"]);

@@ -18,17 +18,19 @@ namespace core\utils
 	abstract class Logs
 	{
 		const NOTICE = "notice";
+
 		const WARNING = "warning";
+
 		const ERROR = "error";
 
 		/**
 		 * Méthode permettant d'enregistrer des données textuelles dans un fichier de Logs
 		 * Définit le nom du dossier ainsi que celui du fichier en fonction de la date
-		 * @param String $pMessage					Message &agrave; enregistrer dans le fichier
-		 * @param String $pLevel					Niveau d'importance de l'information
+		 * @param string $pMessage					Message &agrave; enregistrer dans le fichier
+		 * @param string $pLevel					Niveau d'importance de l'information
 		 * @return void
 		 */
-		static final public function write($pMessage, $pLevel= self::NOTICE)
+		static final public function write(string $pMessage, string $pLevel= self::NOTICE):void
 		{
 			$ip = $_SERVER["REMOTE_ADDR"];
 			$folder = Autoload::$folder."/includes/logs/".date("m-y")."/";

@@ -1,12 +1,12 @@
-var Autocomplete = (function(){
+let Autocomplete = (function(){
 
-    var pool = [];
+    let pool = [];
 
-    var req;
+    let req;
 
     function handlePool()
     {
-        for(var i = 0, max = pool.length; i<max;i++)
+        for(let i = 0, max = pool.length; i<max;i++)
         {
             setup(pool[i]);
         }
@@ -28,16 +28,15 @@ var Autocomplete = (function(){
 
     function keyUpHandler(e)
     {
-        var el = e.currentTarget;
-        var source_url = el.getAttribute('data-ac_source');
-        var min_query_length = Number(el.getAttribute('data-ac_minQueryLength'))||3;
-        var results_locator = el.getAttribute('ac_resultsLocator');
+        let el = e.currentTarget;
+        let source_url = el.getAttribute('data-ac_source');
+        let min_query_length = Number(el.getAttribute('data-ac_minQueryLength'))||3;
+        let results_locator = el.getAttribute('ac_resultsLocator');
         if(el.value.length<min_query_length)
         {
             return;
         }
         el.classList.add('loading');
-        console.log(el.getAttribute("data-ac_source"));
         if (req)
         {
             req.cancel();
@@ -49,6 +48,7 @@ var Autocomplete = (function(){
         req.onComplete(function(pResponse)
         {
             console.log(pResponse);
+            console.log(results_locator);
         });
     }
 

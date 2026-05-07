@@ -10,17 +10,10 @@ namespace core\db
 	 */
 	class DBManager
 	{
-		/**
-		 * @var array
-		 */
-		static private $handlers = array();
+		static private array|null $handlers = array();
 
-		/**
-		 * @static
-		 * @param string $pName
-		 * @return InterfaceDatabaseHandler
-		 */
-		static public function get($pName = "default")
+
+		static public function get(string $pName = "default"):InterfaceDatabaseHandler|null
 		{
 			if(!array_key_exists($pName, self::$handlers))
 			{
@@ -34,12 +27,8 @@ namespace core\db
 			return self::$handlers[$pName];
 		}
 
-		/**
-		 * @static
-		 * @param $pName
-		 * @param $pInfo
-		 */
-		static public function set($pName, $pInfo)
+
+		static public function set(string $pName, array $pInfo):void
 		{
 			if(isset(self::$handlers[$pName]))
 				trigger_error("L'identifiant \"".$pName."\" est déj&agrave; utilisé. Impossible de stocker le gestionnaire créé.");
@@ -53,19 +42,15 @@ namespace core\db
 			{
 				$instance = new $pInfo["handler"]($pInfo["host"], $pInfo["user"], $pInfo["password"], $pInfo["name"]);
 			}
-			catch(Exception $e)
+			catch(Exception)
 			{
 				trigger_error("Une erreur est apparue lors de l'initialisation du gestionnaire \"".$pName."\". Merci de vérifier les informations saisie.", E_USER_ERROR);
-				return;
 			}
 			self::$handlers[$pName] = $instance;
 		}
 
-		/**
-		 * @static
-		 * @return void
-		 */
-		static public function dispose()
+
+		static public function dispose():void
 		{
 			foreach(self::$handlers as $name=>$instance)
 			{

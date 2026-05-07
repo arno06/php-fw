@@ -9,6 +9,8 @@ namespace core\tools
     use core\system\File;
     use core\data\SimpleJSON;
     use core\utils\Stack;
+    use Exception;
+    use JetBrains\PhpStorm\NoReturn;
 
     /**
      * Class Dependencies
@@ -28,47 +30,26 @@ namespace core\tools
          */
         const NEED_SEPARATOR = ',';
 
-        /**
-         * Type javascript
-         */
         const TYPE_JS = "javascript";
 
-        /**
-         * Type CSS
-         */
         const TYPE_CSS = "css";
 
-        /**
-         * @var string
-         */
-        static private $current_folder;
+        static private string $current_folder;
 
-        /**
-         * @var string
-         */
-        private $output = "";
+        private string $output = "";
 
-        /**
-         * @var array
-         */
-        private $manifest = array();
+        private array $manifest;
 
-        /**
-         * @var string
-         */
-        private $type;
+        private string $type;
 
-        /**
-         * @var array
-         */
-        private $configuration = array();
+        private array $configuration;
 
         /**
          * Constructor
          * @param string $pType
-         * @throws \Exception
+         * @throws Exception
          */
-        public function __construct($pType = self::TYPE_JS)
+        public function __construct(string $pType = self::TYPE_JS)
         {
             $this->type = $pType;
             switch($this->type)
@@ -89,7 +70,7 @@ namespace core\tools
 
             $this->manifest = SimpleJSON::import(self::MANIFEST);
 
-            $this->configuration = isset($this->manifest["config"])?$this->manifest["config"]:array();
+            $this->configuration = $this->manifest["config"] ?? [];
             unset($this->manifest["config"]);
 
             /**
@@ -104,19 +85,20 @@ namespace core\tools
         }
 
         /**
-         * @throws \Exception
+         * @throws Exception
          */
-        public function retrieve()
+        #[NoReturn]
+        public function retrieve():void
         {
             /**
              * Check get vars
              */
-            $need = Core::checkRequiredGetVars("need")?explode(self::NEED_SEPARATOR, $_GET["need"]):array();
+            $need = Core::checkRequiredGetVars("need")?explode(self::NEED_SEPARATOR, $_GET["need"]):[];
 
             if(empty($need))
                 $this->output($this->log("No lib to load", "warn"));
 
-            $needs = array();
+            $needs = [];
 
             $this->calculateNeeds($need, $needs);
 
@@ -148,7 +130,7 @@ DIC;
 
                     for($i = 0, $max = count($files); $i<$max;$i++)
                     {
-                        $absolute_link = preg_match('/^http(s*)\:\/\//', $files[$i], $matches);
+                        $absolute_link = preg_match('/^http(s*):\/\//', $files[$i], $matches);
                         if(!$absolute_link)
                         {
                             $files[$i] = dirname(self::MANIFEST)."/".$this->configuration["relative"].$files[$i];
@@ -183,11 +165,8 @@ DIC;
             $this->output($this->output);
         }
 
-        /**
-         * @param array $pNeeded
-         * @param array $pFinalList
-         */
-        private function calculateNeeds($pNeeded, &$pFinalList)
+
+        private function calculateNeeds(array $pNeeded, array &$pFinalList):void
         {
 
             foreach($pNeeded as $lib)
@@ -207,29 +186,19 @@ DIC;
             }
         }
 
-        /**
-         * @param string $pText
-         * @param string $pLevel
-         * @return string
-         */
-        private function log($pText, $pLevel='log')
+
+        private function log(string $pText, string $pLevel='log'):string
         {
-            switch($this->type)
-            {
-                case self::TYPE_JS:
-                    return "console.".$pLevel."('Dependencies : ".addslashes($pText)."');".PHP_EOL;
-                    break;
-                case self::TYPE_CSS:
-                    return "/* Dependencies -".$pLevel."- : ".$pText." */".PHP_EOL;
-                    break;
-            }
-            return "";
+            return match ($this->type) {
+                self::TYPE_JS => "console." . $pLevel . "('Dependencies : " . addslashes($pText) . "');" . PHP_EOL,
+                self::TYPE_CSS => "/* Dependencies -" . $pLevel . "- : " . $pText . " */" . PHP_EOL,
+                default => "",
+            };
         }
 
-        /**
-         * @param string $pContent
-         */
-        private function output($pContent)
+
+        #[NoReturn]
+        private function output(string $pContent):void
         {
             Header::contentLength(strlen($pContent));
             echo $pContent;
@@ -241,7 +210,7 @@ DIC;
          * @param array $pMatches
          * @return string
          */
-        static private function correctUrls($pMatches)
+        static private function correctUrls(array $pMatches):string
         {
             if(strpos($pMatches[2], 'data:image')>-1)
             {

@@ -25,9 +25,9 @@ namespace core\application\authentication
 
         /**
          * Ensemble des permissions acceptées pour l'application
-         * @var array
+         * @var array|null
          */
-        static public $permissions = array(
+        static public array|null $permissions = array(
             self::INVITE    =>  0,
             self::USER		=>	1,
             self::ADMIN		=>	2,
@@ -36,15 +36,15 @@ namespace core\application\authentication
 
         /**
          * Données relatives à l'utilisateur connecté
-         * @var array
+         * @var array|null
          */
-        static public $data;
+        static public array|null $data = null;
 
         /**
          * Instance Authenficiation configurée pour un utilisateur
-         * @var Authentication
+         * @var Authentication|null
          */
-        protected $userAuth;
+        protected Authentication|null $userAuth;
 
 
         /**
@@ -53,8 +53,6 @@ namespace core\application\authentication
          */
         public function __construct(PrivateClass $pInstance)
         {
-            if(!$pInstance instanceOf PrivateClass)
-                trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
             self::$permissions = array_merge(self::$permissions, Configuration::$global_permissions);
             $this->parseUserSession();
         }
@@ -64,7 +62,7 @@ namespace core\application\authentication
          * Définit la variable isUser
          * @return void
          */
-        protected function parseUserSession()
+        protected function parseUserSession():void
         {
             $this->userAuth = new Authentication();
             self::$data = $this->userAuth->data;
@@ -73,11 +71,11 @@ namespace core\application\authentication
         /**
          * Méthode de définition d'une nouvelle session administrateur
          * Renvoie false si l'administrateur n'existe pas
-         * @param String $pLogin		Login
-         * @param String $pMdp			Mot de passe non hashé
-         * @return boolean
+         * @param string $pLogin		Login
+         * @param string $pMdp			Mot de passe non hashé
+         * @return bool
          */
-        static public function setAdminSession($pLogin, $pMdp)
+        static public function setAdminSession(string $pLogin, string $pMdp):bool
         {
             $i = self::getInstance();
             return $i->userAuth->setAuthentication($pLogin, $pMdp, true);
@@ -86,11 +84,11 @@ namespace core\application\authentication
         /**
          * Méthode de définition d'une nouvelle session utilisateur
          * Renvoie false si l'utilisateur n'existe pas
-         * @param String $pLogin		Login
-         * @param String $pMdp			Mot de passe non hashé
-         * @return boolean
+         * @param string $pLogin		Login
+         * @param string $pMdp			Mot de passe non hashé
+         * @return bool
          */
-        static public function setUserSession($pLogin, $pMdp)
+        static public function setUserSession(string $pLogin, string $pMdp):bool
         {
             $i = self::getInstance();
             return $i->userAuth->setAuthentication($pLogin, $pMdp,  false);
@@ -100,7 +98,7 @@ namespace core\application\authentication
          * Méthode de suppression de la session Utilisateur
          * @return void
          */
-        static public function unsetUserSession()
+        static public function unsetUserSession():void
         {
             $i = self::getInstance();
             $i->userAuth->unsetAuthentication();
@@ -108,10 +106,10 @@ namespace core\application\authentication
 
         /**
          * Méthode permettant de savoir si l'utilisateur en cours a le niveau de permission demandé
-         * @param String $pLevel Niveau de permissions &agrave; tester (peuvent être définit dans le fichier de configuration)
-         * @return boolean
+         * @param string $pLevel Niveau de permissions &agrave; tester (peuvent être définit dans le fichier de configuration)
+         * @return bool
          */
-        static public function is($pLevel)
+        static public function is(string $pLevel):bool
         {
             $i = self::getInstance();
 
@@ -120,23 +118,19 @@ namespace core\application\authentication
             return $i->userAuth->permissions&self::$permissions[$pLevel];
         }
 
-        static public function isLoggedToBack()
+
+        static public function isLoggedToBack():bool
         {
             return (AuthenticationHandler::is(AuthenticationHandler::ADMIN));
         }
 
-        /**
-         * ToString()
-         * @return String
-         */
+
         public function __toString()
         {
             return "[Object AuthenticationHandler]";
         }
 
-        /**
-         * @return void
-         */
+
         public function __destruct()
         {
             self::$data = null;

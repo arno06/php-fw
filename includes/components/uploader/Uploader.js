@@ -6,11 +6,11 @@
 const Uploader = (function(pDict){
     "use strict";
 
-    var dict = pDict||{
+    let dict = pDict||{
         "seeFile":"Voir le fichier"
     };
 
-    var states = {
+    let states = {
         LOADING:"loading",
         IDLE:"",
         HAS_FILE:"has_file"
@@ -21,7 +21,7 @@ const Uploader = (function(pDict){
         document.querySelectorAll('input[type="file"]').forEach(function(input)
         {
             setupContext(input);
-            input.dataset.progress = 0;
+            input.dataset.progress = "0";
             input.addEventListener("change", fileChangedHandler, false);
             let dropZone = input.parentNode;
             dropZone.addEventListener('drop', dropHandler);
@@ -51,25 +51,25 @@ const Uploader = (function(pDict){
 
     function setupContext(pInput)
     {
-        var name = pInput.dataset.form_name+'['+pInput.dataset.input_name+']';
-        var parent = pInput.parentNode;
+        const name = pInput.dataset.form_name+'['+pInput.dataset.input_name+']';
+        const parent = pInput.parentNode;
 
-        var hasFile = pInput.dataset.file && pInput.dataset.value;
+        const hasFile = pInput.dataset.file && pInput.dataset.value;
 
-        var progrDiv = document.createElement('div');
+        const progrDiv = document.createElement('div');
         progrDiv.classList.add('status_bar');
         progrDiv.appendChild(document.createElement('div')).classList.add('background');
         progrDiv.appendChild(document.createElement('div')).classList.add('foreground');
         progrDiv.appendChild(document.createElement('span'));
         parent.appendChild(progrDiv);
 
-        var iHidden = document.createElement('input');
+        const iHidden = document.createElement('input');
         iHidden.setAttribute('name', name);
         iHidden.setAttribute('type', 'hidden');
         iHidden.setAttribute('value', '');
         parent.appendChild(iHidden);
 
-        var aFile = document.createElement("a");
+        const aFile = document.createElement("a");
         aFile.classList.add('file');
         aFile.innerHTML = dict.seeFile;
         aFile.setAttribute('target', '_blank');
@@ -77,7 +77,7 @@ const Uploader = (function(pDict){
         aFile.appendChild(document.createElement('span'));
         parent.appendChild(aFile);
 
-        var aDelete = document.createElement("a");
+        const aDelete = document.createElement("a");
         aDelete.classList.add('delete');
         aDelete.setAttribute('href', '#');
         aDelete.appendChild(document.createElement('span'));
@@ -103,9 +103,9 @@ const Uploader = (function(pDict){
     function uploadFile(pInput, pFile)
     {
         pInput.parentNode.className = "input upload "+states.LOADING;
-        var xhr = new XMLHttpRequest();
-        var formData = new FormData();
-        for(var i in pInput.dataset)
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+        for(let i in pInput.dataset)
         {
             if(pInput.dataset.hasOwnProperty(i))
                 formData.append(i, pInput.dataset[i]);
@@ -126,9 +126,10 @@ const Uploader = (function(pDict){
                 {
                     case 304:
                     case 200:
-                        var ct = xhr.getResponseHeader("Content-Type");
-                        if(ct.indexOf("json")>-1)
-                            eval("xhr.responseJSON = "+xhr.responseText+";");
+                        const ct = xhr.getResponseHeader("Content-Type");
+                        if(ct.indexOf("json")>-1){
+                            xhr.responseJSON = JSON.parse(xhr.responseText);
+                        }
                         if(xhr.responseJSON.error && xhr.responseJSON.error !== "")
                         {
                             resetUploadInput(pInput);
@@ -154,17 +155,17 @@ const Uploader = (function(pDict){
 
     function updateProgress(pInput, pValue)
     {
-        var value = pValue||"";
+        let value = pValue||"";
         if(value !== "")
         {
-            value = Math.round(value);
+            value = Math.round(Number(value));
             M4Tween.killTweensOf(pInput.dataset);
-            return M4Tween.to(pInput.dataset, 1, {progress:100, useStyle:false})
+            return M4Tween.to(pInput.dataset, 1, {progress:value, useStyle:false})
                         .onUpdate(
                         function()
                         {
-                            pInput.parentNode.querySelector('div.status_bar .background').style.width = Math.round(pInput.dataset.progress)+"%";
-                            pInput.parentNode.querySelector('div.status_bar .foreground').innerHTML = Math.round(pInput.dataset.progress)+"%";
+                            pInput.parentNode.querySelector('div.status_bar .background').style.width = Math.round(Number(pInput.dataset.progress))+"%";
+                            pInput.parentNode.querySelector('div.status_bar .foreground').innerHTML = Math.round(Number(pInput.dataset.progress))+"%";
                         });
         }
         else
@@ -176,22 +177,22 @@ const Uploader = (function(pDict){
 
     function resetUploadInput(pInput)
     {
-        var hidden = pInput.parentNode.querySelector('input[type="hidden"]');
+        const hidden = pInput.parentNode.querySelector('input[type="hidden"]');
         if(pInput.dataset.delete_file_action)
         {
-            var action = pInput.dataset.delete_file_action;
-            var id = hidden.value;
+            let action = pInput.dataset.delete_file_action;
+            const id = hidden.value;
             if(action.indexOf('{id}')>-1)
             {
                 action = action.replace('{id}', id);
             }
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open('GET', action);
             xhr.send();
         }
         hidden.value = "";
         M4Tween.killTweensOf(pInput.dataset);
-        pInput.dataset.progress = 0;
+        pInput.dataset.progress = "0";
         pInput.parentNode.querySelector('div.status_bar .foreground').innerHTML = "";
         pInput.value = pInput.defaultValue;
         updateProgress(pInput, '');
@@ -201,12 +202,12 @@ const Uploader = (function(pDict){
     function uploadCompleted(pInput, pData)
     {
         pInput.parentNode.querySelector('input[type="hidden"]').value = pData.id_upload;
-        var aFile = pInput.parentNode.querySelector('a.file');
+        const aFile = pInput.parentNode.querySelector('a.file');
         aFile.href = pData.path_upload;
         if (/\.(png|gif|jpg|jpeg)$/i.exec(pData.path_upload))
         {
             aFile.classList.add('img');
-            aFile.innerHTML = "<img src='"+aFile.href+"'>";
+            aFile.innerHTML = "<img src='"+aFile.href+"' alt=''>";
         }
         else
         {
@@ -217,7 +218,6 @@ const Uploader = (function(pDict){
         pInput.parentNode.className = "input upload "+states.HAS_FILE;
     }
 
-    NodeList.prototype.forEach = Array.prototype.forEach;
     window.addEventListener('DOMContentLoaded', init, false);
 
     return {

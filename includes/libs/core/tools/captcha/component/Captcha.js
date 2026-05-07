@@ -110,23 +110,9 @@ class WebCCaptcha extends HTMLElement
             this.#enableForm();
         }
         if(pJson.too_many_attempts){
-            let waiting = pJson.waiting_time;
-            let units = ["sec", "min", "h"];
-            let unit = units[0];
-            for(let i = 1; i<units.length; i++){
-                if(waiting >= 60){
-                    let sub = waiting%60;
-                    waiting = Math.floor(waiting/60);
-                    unit = units[i];
-                    if(sub>0){
-                        unit += sub+units[i-1];
-                    }
-                }
-            }
-            let message = this.#getLabel("too_many_attempts").replace('%x', waiting+unit);
-            container.innerHTML = `
-            <div class='webc-captcha-error'>${message}</div>
-`;
+            this.waiting = pJson.waiting_time;
+            this.free_timestamp = Date.now() + (pJson.waiting_time * 1000);
+            this.#updateWaitingError();
             this.#disableForm();
         }
         if(pJson.wrong_answer){
@@ -136,6 +122,37 @@ class WebCCaptcha extends HTMLElement
         this.#i18n();
         this.token = pJson.token;
         this.#saveState();
+    }
+
+    #updateWaitingError(){
+        let waiting = Math.round((this.free_timestamp-Date.now())/1000);
+        let container = this.shadow.querySelector('.webc-captcha-container');
+        if(waiting <= 0){
+            setTimeout(()=>{
+                this.shadow.querySelector('.webc-captcha-container').classList.remove("webc-captcha-block");
+                container.insertAdjacentHTML('afterbegin', '<div class="webc-captcha-loader-overlay" data-label="loading"></div>');
+                this.#i18n();
+                this.#loadCaptcha();
+            }, 500);
+            return;
+        }
+            let units = ["sec", "min", "h"];
+            let unit = units[0];
+            for(let i = 1; i<units.length; i++){
+                if(waiting >= 60){
+                    let sub = waiting%60;
+                    waiting = Math.floor(waiting/60);
+                    unit = units[i];
+                    if(sub>0){
+                    unit += " "+sub;
+                    }
+                }
+            }
+        let message = this.#getLabel("too_many_attempts").replace('%x', waiting+" "+unit);
+            container.innerHTML = `
+            <div class='webc-captcha-error'>${message}</div>
+`;
+        setTimeout(this.#updateWaitingError.bind(this), 1000);
     }
 
     #itemFocusHandler(e){

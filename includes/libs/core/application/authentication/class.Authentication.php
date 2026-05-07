@@ -25,7 +25,7 @@ namespace core\application\authentication
          * Indique la valeur des permissions alouées &agrave; l'utilisateur
          * @var int
          */
-        public int $permissions;
+        public int $permissions = 0;
 
         /**
          * Mot de passe
@@ -49,7 +49,7 @@ namespace core\application\authentication
          * Données de l'utilisateur si son authentication est vérifiée
          * @var	array
          */
-        public array $data;
+        public array $data = [];
 
 
         public function __construct()

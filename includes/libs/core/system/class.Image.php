@@ -361,14 +361,14 @@ namespace core\system
         }
 
 
-        public function drawImage(string $pSrc, int $pWidth = null, int $pHeight = null, int $pX = 0, int $pY = 0):void
+        public function drawImage(string $pSrc, int $pWidth = null, int $pHeight = null, float $pX = 0, float $pY = 0):void
         {
             $srcSize = Image::getSize($pSrc);
             if(!$pWidth)
                 $pWidth = $srcSize[0];
             if(!$pHeight)
                 $pHeight = $srcSize[1];
-            $this->command[] = array("type"=>self::COMMAND_DRAWIMAGE, "src"=>$pSrc, "srcWidth"=>$srcSize[0], "srcHeight"=>$srcSize[1], "width"=>$pWidth, "height"=>$pHeight, "x"=>$pX, "y"=>$pY);
+            $this->command[] = array("type"=>self::COMMAND_DRAWIMAGE, "src"=>$pSrc, "srcWidth"=>$srcSize[0], "srcHeight"=>$srcSize[1], "width"=>$pWidth, "height"=>$pHeight, "x"=>intval($pX), "y"=>intval($pY));
         }
 
 
@@ -395,15 +395,15 @@ namespace core\system
         }
 
 
-        public function moveTo(int $pX, int $pY):void
+        public function moveTo(float $pX, float $pY):void
         {
-            $this->command[] = array("type"=>self::COMMAND_MOVETO, "x"=>$pX, "y"=>$pY);
+            $this->command[] = array("type"=>self::COMMAND_MOVETO, "x"=>intval($pX), "y"=>intval($pY));
         }
 
 
-        public function lineTo(int $pX, int $pY):void
+        public function lineTo(float $pX, float $pY):void
         {
-            $this->command[] = array("type"=>self::COMMAND_LINETO,"x"=>$pX, "y"=>$pY);
+            $this->command[] = array("type"=>self::COMMAND_LINETO,"x"=>intval($pX), "y"=>intval($pY));
         }
 
         /**
@@ -411,53 +411,53 @@ namespace core\system
          * @param string  $pString
          * @param int  $pSize
          * @param string  $pFont
-         * @param int $pX
-         * @param int $pY
+         * @param float $pX
+         * @param float $pY
          * @param int $pR
          * @param int $pG
          * @param int $pB
          * @param int $pRotation
          * @return void
          */
-        public function drawText(string $pString, int $pSize, string $pFont, int $pX=0, int $pY=0, int $pR=0, int $pG=0, int $pB=0, int $pRotation = 0):void
+        public function drawText(string $pString, int $pSize, string $pFont, float $pX=0, float $pY=0, int $pR=0, int $pG=0, int $pB=0, int $pRotation = 0):void
         {
-            $this->command[] = array("type"=>self::COMMAND_DRAWTEXT, "text"=>$pString, "size"=>$pSize, "font"=>$pFont, "x"=>$pX, "y"=>$pY, "r"=>$pR, "g"=>$pG, "b"=>$pB, "rotation"=>$pRotation);
+            $this->command[] = array("type"=>self::COMMAND_DRAWTEXT, "text"=>$pString, "size"=>$pSize, "font"=>$pFont, "x"=>intval($pX), "y"=>intval($pY), "r"=>$pR, "g"=>$pG, "b"=>$pB, "rotation"=>$pRotation);
         }
 
         /**
          * Méthode de dessin d'un cercle
-         * @param int $pX
-         * @param int $pY
-         * @param int $pRadius
+         * @param float $pX
+         * @param float $pY
+         * @param float $pRadius
          * @return void
          */
-        public function drawCircle(int $pX, int $pY, int $pRadius):void
+        public function drawCircle(float $pX, float $pY, float $pRadius):void
         {
-            $this->command[] = array("type"=>self::COMMAND_DRAWCIRCLE, "x"=>$pX, "y"=>$pY, "width"=>$pRadius*2, "height"=>$pRadius*2);
+            $this->command[] = array("type"=>self::COMMAND_DRAWCIRCLE, "x"=>intval($pX), "y"=>intval($pY), "width"=>$pRadius*2, "height"=>$pRadius*2);
         }
 
         /**
          * Méthode de dessin d'une ellipse
-         * @param int $pX
-         * @param int $pY
+         * @param float $pX
+         * @param float $pY
          * @param int $pWidth
          * @param int $pHeight
          * @return void
          */
-        public function drawEllipse(int $pX, int $pY, int $pWidth, int $pHeight):void
+        public function drawEllipse(float $pX, float $pY, int $pWidth, int $pHeight):void
         {
-            $this->command[] = array("type"=>self::COMMAND_DRAWELLIPSE, "x"=>$pX, "y"=>$pY, "width"=>$pWidth, "height"=>$pHeight);
+            $this->command[] = array("type"=>self::COMMAND_DRAWELLIPSE, "x"=>intval($pX), "y"=>intval($pY), "width"=>$pWidth, "height"=>$pHeight);
         }
 
         /**
          * Méthode de dessin d'un rectangle
-         * @param int $pX
-         * @param int $pY
+         * @param float $pX
+         * @param float $pY
          * @param int $pWidth
          * @param int $pHeight
          * @return void
          */
-        public function drawRectangle(int $pX, int $pY, int $pWidth, int $pHeight):void
+        public function drawRectangle(float $pX, float $pY, int $pWidth, int $pHeight):void
         {
             $this->moveTo($pX, $pY);
             $this->lineTo($pX+$pWidth, $pY);
@@ -467,9 +467,9 @@ namespace core\system
         }
 
 
-        public function setPixel(int $pX, int $pY, int $pR = 0, int $pG = 0, int $pB = 0):void
+        public function setPixel(float $pX, float $pY, int $pR = 0, int $pG = 0, int $pB = 0):void
         {
-            $this->command[] = array("type"=>self::COMMAND_SETPIXEL, "x"=>$pX, "y"=>$pY, "r"=>$pR, "g"=>$pG, "b"=>$pB);
+            $this->command[] = array("type"=>self::COMMAND_SETPIXEL, "x"=>intval($pX), "y"=>intval($pY), "r"=>$pR, "g"=>$pG, "b"=>$pB);
         }
 
 
@@ -555,7 +555,7 @@ namespace core\system
                         if($fill_color>-1)
                             imagefilledpolygon($pResource, $path, $fill_color);
                         if($line_color>-1)
-                            imagepolygon($pResource, $path, count($path)/2, $line_color);
+                            imagepolygon($pResource, $path, $line_color);
                         $drawingPolygon = false;
                         $fill_color = -1;
                         $path = array();

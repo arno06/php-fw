@@ -41,5 +41,10 @@ namespace core\utils
 			chmod($folder.$file, 0666);
 			File::append($folder.$file, $message);
 		}
+
+        static final public function write_r($pData, $pLevel= self::NOTICE):void
+        {
+            self::write(print_r($pData, true), $pLevel);
+        }
 	}
 }

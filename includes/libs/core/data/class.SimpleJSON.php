@@ -2,7 +2,7 @@
 namespace core\data
 {
 	use core\system\File;
-    use \Exception;
+    use Exception;
 
 	/**
 	 * Class SimpleJSON
@@ -16,30 +16,29 @@ namespace core\data
 	{
 		/**
 		 * Méthode de chargement et de décodage d'un fichier JSON
-		 * @param String $pFile
-		 * @return array
-		 * @throws \Exception
+		 * @param string $pFile
+		 * @return array|null
+		 * @throws Exception
 		 */
-		static public function import($pFile)
+		static public function import(string $pFile):array|null
 		{
 			try
 			{
 				$contenu = 	File::read($pFile);
 			}
-			catch (Exception $e)
+			catch (Exception)
 			{
 				throw new Exception("Impossible de lire le fichier source <b>".$pFile."</b>");
 			}
 			return self::decode($contenu);
 		}
 
-
 		/**
 		 * Méthode de décodage d'un String en Tableau
-		 * @param String $pString				donnée string &agrave; decoder
+		 * @param string $pString				donnée string &agrave; decoder
 		 * @return array
 		 */
-		static public function decode($pString)
+		static public function decode(string $pString):array
 		{
 			return json_decode($pString,true);
 		}
@@ -47,9 +46,9 @@ namespace core\data
 		/**
 		 * Méthode d'encodage d'un String en Tableau
 		 * @param array $pArray				Tableau &agrave; encoder
-		 * @return String
+		 * @return string
 		 */
-		static public function encode(array $pArray)
+		static public function encode(array $pArray):string
 		{
 			return json_encode(self::parseToNumericEntities($pArray));
 		}
@@ -59,7 +58,7 @@ namespace core\data
 		 * @param array $pArray
 		 * @return array
 		 */
-		static public function parseToNumericEntities(array $pArray)
+		static public function parseToNumericEntities(array $pArray):array
 		{
 			$return = array();
 			foreach($pArray as $key=>$value)
@@ -71,10 +70,11 @@ namespace core\data
 			return $return;
 		}
 
-		static public function indent($pData)
+
+		static public function indent(string $pData):string
 		{
-			$pData = preg_replace('/(\,)/', '${1}'."\r\n", $pData);
-			$pData = preg_replace('/(\{|\})/', "\r\n".'${1}'."\r\n", $pData);
+			$pData = preg_replace('/(,)/', '${1}'."\r\n", $pData);
+			$pData = preg_replace('/([{}])/', "\r\n".'${1}'."\r\n", $pData);
 			$new = array();
 			$lignes = explode("\r\n", $pData);
 			$deep = 0;
@@ -84,22 +84,21 @@ namespace core\data
 				if(empty($lignes[$i]))
 					continue;
 				$l = $lignes[$i];
-				if(preg_match('/^\}$/', $l))
+				if($l == "}")
 				{
 					$t = "";
 					for($j = 0, $maxj = --$deep; $j<$maxj;$j++)
 						$t .= "\t";
 				}
 				$new[]= $t.$l;
-				if(preg_match('/^\{$/', $l))
+				if($l == "{")
 				{
 					$t = "";
 					for($j = 0, $maxj = ++$deep; $j<$maxj;$j++)
 						$t .= "\t";
 				}
 			}
-			$pData = implode("\r\n", $new);
-			return $pData;
+			return implode("\r\n", $new);
 		}
 	}
 }

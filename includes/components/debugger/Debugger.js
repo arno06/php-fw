@@ -1,6 +1,4 @@
-NodeList.prototype.forEach = Array.prototype.forEach;
-
-var Debugger =
+const Debugger =
 {
     error:false,
 	current:"sortie",
@@ -10,14 +8,14 @@ var Debugger =
 			Debugger.current = document.querySelector("#debug .debugselected a");
 		document.querySelectorAll("#debug .debug_buttons div").forEach(function(div)
 		{
-			var listener = Debugger.__controlConsoleClickHandler;
+			let listener = Debugger.__controlConsoleClickHandler;
 			if(div.classList.contains("vars"))
 				listener = Debugger.__controlVarsClickHandler;
 			div.addEventListener("click", listener);
 		});
         if(Debugger.error)
         {
-            var el = document.querySelector("#debug .debug_console");
+            const el = document.querySelector("#debug .debug_console");
             el.scrollTop = el.scrollHeight;
         }
 		document.querySelector("#debug .debug_toggle").addEventListener("click", Debugger.toggle);
@@ -26,27 +24,32 @@ var Debugger =
 		document.querySelectorAll("#debug .opcache .invalidate").forEach(function(pEl){
 			pEl.addEventListener('click', Debugger.invalidateHandler);
 		});
+        document.querySelectorAll("#debug .opcache .opcache-dir span").forEach(function(pEl){
+            pEl.addEventListener('click', Debugger.toggleDir);
+        });
 		window.addEventListener("keydown", Debugger.keyDownHandler);
 	},
-	invalidateHandler:function(e){
-		let url = document.querySelector('base').getAttribute("href")+'statique/opcache-invalidate/';
-		url += '?script='+encodeURIComponent(e.currentTarget.getAttribute("data-script"));
-		let target = e.currentTarget;
-		fetch(url).then((pResponse)=>pResponse.text()).then(function(pResult){
-			console.log(pResult);
-			if(pResult!=='true'){
-				console.error('Debugger.js - OPCache invalidate error');
-				return;
-			}
-			let parent = target.parentNode.parentNode;
-			parent.removeChild(target.parentNode);
-			while(!parent.querySelectorAll('.opcache-file').length){
-				let p = parent.parentNode;
-				parent = p.parentNode;
-				parent.removeChild(p);
-			}
-		});
-	},
+    toggleDir:function(e){
+        e.currentTarget.parentNode.classList.toggle('closed');
+    },
+    invalidateHandler:function(e){
+        let url = document.querySelector('base').getAttribute("href")+'statique/opcache-invalidate/';
+        url += '?script='+encodeURIComponent(e.currentTarget.getAttribute("data-script"));
+        let target = e.currentTarget;
+        fetch(url).then((pResponse)=>pResponse.text()).then(function(pResult){
+            if(pResult!=='true'){
+                console.error('Debugger.js - OPCache invalidate error');
+                return;
+            }
+            let parent = target.parentNode.parentNode;
+            parent.removeChild(target.parentNode);
+            while(!parent.querySelectorAll('.opcache-file').length){
+                let p = parent.parentNode;
+                parent = p.parentNode;
+                parent.removeChild(p);
+            }
+        });
+    },
 	keyDownHandler:function(e)
 	{
 		switch(e.keyCode)
@@ -90,7 +93,7 @@ var Debugger =
 	{
 		document.querySelectorAll("#debug .debug_buttons div").forEach(function(button)
 		{
-			var display = "table-row";
+			let display = "table-row";
 			if(button.classList.contains("disabled"))
 				display = "none";
 			document.querySelectorAll("#debug .debug_console table.console tr."+button.getAttribute("rel")).forEach(function(tr)
@@ -102,7 +105,7 @@ var Debugger =
 	__controlVarsClickHandler:function(e)
 	{
 		e.preventDefault();
-		var t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
+		let t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
 		document.querySelectorAll("#debug .debug_buttons div.vars").forEach(function(div)
 		{
 			if(!div.classList.contains("disabled"))
@@ -123,7 +126,7 @@ var Debugger =
 	__controlConsoleClickHandler:function(e)
 	{
 		e.preventDefault();
-		var t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
+		let t = e.target.nodeName.toLowerCase()!=="div" ? e.target.parentNode : e.target;
 		if (!t.toggle_alone) {
 			t.toggle_alone = false;
 		}
@@ -202,7 +205,7 @@ const FlameGraph = (()=>{
         });
     }
 
-    function handleOutSpan(e){
+    function handleOutSpan(){
         document.querySelectorAll('#debug table.console tr').forEach((pEl)=>{
             pEl.style.opacity = 1;
         });
@@ -244,5 +247,4 @@ const FlameGraph = (()=>{
     return {display};
 })();
 
-NodeList.prototype.forEach = Array.prototype.forEach;
 window.addEventListener("load", Debugger.__init);

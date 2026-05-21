@@ -4,72 +4,41 @@ namespace core\application
     /**
      * Class Application
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version 1.0
+     * @version 1.1
      * @package core\application
      */
     class Application extends Singleton
     {
         const DEFAULT_APPLICATION = "main";
 
-        /**
-         * @var string
-         */
-        private $name = "";
+        private string $name = "";
 
-        /**
-         * @var Module
-         */
-        private $module;
+        private Module $module;
 
-        /**
-         * @var string
-         */
-        private $url = "";
+        private string $url = "";
 
-        /**
-         * @var string
-         */
-        private $relative_path = "";
+        private string $relative_path = "";
 
-        /**
-         * @var bool
-         */
-        public $multiLanguage = false;
+        public bool $multiLanguage = false;
 
-        /**
-         * @var string
-         */
-        public $currentLanguage = "fr";
+        public string $currentLanguage = "fr";
 
-        /**
-         * @var string
-         */
-        public $defaultLanguage = "fr";
+        public string $defaultLanguage = "fr";
 
-        /**
-         * @var string
-         */
-        public $dbHandler = "default";
+        public string $dbHandler = "default";
 
-        /**
-         * @var string
-         */
-        public $authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
+        public string $authenticationHandler = "core\\application\\authentication\\AuthenticationHandler";
 
         /**
          * @param PrivateClass $pInstance
          */
         public function __construct(PrivateClass $pInstance)
         {
-            if(!$pInstance instanceOf PrivateClass)
-                trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
+
         }
 
-        /**
-         * @param string $pName
-         * @return $this
-         */
-        public function setup($pName = self::DEFAULT_APPLICATION)
+
+        public function setup(string $pName = self::DEFAULT_APPLICATION):Application
         {
             $this->name = $pName;
             if($pName != self::DEFAULT_APPLICATION)
@@ -95,10 +64,8 @@ namespace core\application
             return $this;
         }
 
-        /**
-         * @param string $pName
-         */
-        public function setModule($pName = Module::DEFAULT_MODULE)
+
+        public function setModule(string $pName = Module::DEFAULT_MODULE):void
         {
             if($pName != Module::DEFAULT_MODULE)
             {
@@ -109,65 +76,49 @@ namespace core\application
             $this->module = new Module($pName, $data);
         }
 
-        /**
-         * @return array
-         */
-        public function getModulesAvailable()
+
+        public function getModulesAvailable():array
         {
             return array_keys(Configuration::$applications[$this->name]['modules']);
         }
 
-        /**
-         * @return string
-         */
-        public function getUrlPart()
+
+        public function getUrlPart():string
         {
             return $this->url;
         }
 
-        /**
-         * @return string
-         */
-        public function getPathPart()
+
+        public function getPathPart():string
         {
             return $this->relative_path;
         }
 
-        /**
-         * @return string
-         */
-        public function getTemplatesCachePath()
+
+        public function getTemplatesCachePath():string
         {
             return $this->getFilesPath()."/_cache/".$this->module->name;
         }
 
-        /**
-         * @return string
-         */
-        public function getTemplatesPath()
+
+        public function getTemplatesPath():string
         {
             return $this->getFilesPath()."/modules/".$this->module->name."/views";
         }
 
-        /**
-         * @return string
-         */
-        public function getFilesPath()
+
+        public function getFilesPath():string
         {
             return Autoload::$folder."/includes/applications/".$this->name;
         }
 
-        /**
-         * @return Module
-         */
-        public function getModule()
+
+        public function getModule():Module
         {
             return $this->module;
         }
 
-        /**
-         * @return string
-         */
+
         public function __toString()
         {
             return $this->name;
@@ -188,28 +139,28 @@ namespace core\application
         /**
          * @var string
          */
-        public $name = self::DEFAULT_MODULE;
+        public string $name = self::DEFAULT_MODULE;
 
         /**
          * @var bool
          */
-        public $useRoutingFile = true;
-
-        /**
-         * @var DefaultController
-         */
-        public $defaultController = "core\\application\\DefaultController";
+        public bool $useRoutingFile = true;
 
         /**
          * @var string
          */
-        public $action404 = "not_found";
+        public string $defaultController = "core\\application\\DefaultController";
+
+        /**
+         * @var string
+         */
+        public string $action404 = "not_found";
 
         /**
          * @param string $pName
          * @param array $pData
          */
-        public function __construct($pName, $pData)
+        public function __construct(string $pName, array $pData)
         {
             $this->name = $pName;
             $props = get_class_vars(__CLASS__);

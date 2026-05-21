@@ -20,7 +20,7 @@ namespace core\utils
          * @param string|null $pDomain
          * @return void
          */
-        static public function set($pId, $pValue, $pTime = "default", $pDomain = null)
+        static public function set(string $pId, string $pValue, string $pTime = "default", string $pDomain = null):void
         {
             $ids = explode(".", $pId);
             $t = "";
@@ -50,7 +50,7 @@ namespace core\utils
          * @param  string $pId
          * @return string|bool
          */
-        static public function get($pId)
+        static public function get(string $pId):mixed
         {
             return Stack::get($pId, $_COOKIE);
         }
@@ -60,7 +60,7 @@ namespace core\utils
          * @param string $pId
          * @return void
          */
-        static public function delete($pId)
+        static public function delete(string $pId):void
         {
             $ids = explode(".", $pId);
             self::set($pId, "", time()-3600);

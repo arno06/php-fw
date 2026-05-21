@@ -3,8 +3,7 @@ namespace core\db\handler
 {
 	use core\db\InterfaceDatabaseHandler;
 	use core\tools\debugger\Debugger;
-	use \SQLite3;
-	use \SQLite3Result;
+	use SQLite3;
 
 	/**
 	 * Couche d'abstraction à la base de données (type sqlite)
@@ -15,57 +14,39 @@ namespace core\db\handler
 	 */
 	class SqliteHandler implements InterfaceDatabaseHandler
 	{
-        /**
-         * @var array
-         */
-        static private $specials = array(
+        static private array $specials = array(
             "NOW()",
             "NULL"
         );
 
-		/**
-		 * Instance SQLite3 - natif php5
-		 * @var SQLite3
-		 */
-		protected $sqlite;
+		protected SQLite3 $sqlite;
 
 		/**
 		 * Chemin d'accès à la base de données
-		 * @var String
+		 * @var string
 		 */
-		protected $host;
+		protected string $host;
 
 		/**
 		 * Nom d'utilisateur
-		 * @var String
+		 * @var string
 		 */
-		protected $user;
+		protected string $user;
 
 		/**
 		 * Mot de passe d'accès à la base de données
-		 * @var String
+		 * @var string
 		 */
-		protected $mdp;
+		protected string $mdp;
 
 		/**
 		 * Nom de la base de données
-		 * @var String
+		 * @var string
 		 */
-		protected $bdd;
-
-		/**
-		 * @var Int
-		 */
-		public $lastId;
+		protected string $bdd;
 
 
-		/**
-		 * @param $pHost
-		 * @param $pUser
-		 * @param $pPassword
-		 * @param $pName
-		 */
-		public function __construct($pHost, $pUser, $pPassword, $pName)
+		public function __construct(string $pHost, string $pUser, string $pPassword, string $pName)
 		{
 			$this->host = $pHost;
 			$this->user = $pUser;
@@ -89,7 +70,7 @@ namespace core\db\handler
 		 * Stop l'exécution de l'application si la base n'est pas accessible
 		 * @return void
 		 */
-		protected function connect()
+		protected function connect():void
 		{
 			if(!$this->sqlite = new SQLite3($this->host, SQLITE3_OPEN_READWRITE))
 				trigger_error("Connexion au serveur de gestion de base de données impossible", E_USER_ERROR);
@@ -97,12 +78,12 @@ namespace core\db\handler
 
 		/**
 		 * Méthode permettant de centraliser les commandes à effectuer avant l'excécution d'une requête
-		 * @param String $pQuery				Requête à excécuter
+		 * @param string $pQuery				Requête à excécuter
          * @param bool   $pRaw
-		 * @return resource
-		 */
-		public function execute($pQuery, $pRaw = false)
-		{
+		 * @return array|bool
+         */
+		public function execute(string $pQuery, bool $pRaw = false): array|bool
+        {
 			Debugger::query($pQuery, "db", $this->bdd);
             if($pRaw){
                 return $this->sqlite->exec($pQuery);
@@ -115,16 +96,16 @@ namespace core\db\handler
             $return = array();
             while($data = $result->fetchArray(SQLITE3_ASSOC))
             {
-                array_push($return, $data);
+                $return[] = $data;
             }
             return $return;
 		}
 
 		/**
 		 * Méthode de récupération de la clé primaire générée à la suite d'une insertion
-		 * @return Number
+		 * @return int
 		 */
-		public function getInsertId()
+		public function getInsertId():int
 		{
 			return $this->sqlite->lastInsertRowID();
 		}
@@ -133,34 +114,29 @@ namespace core\db\handler
 		 * Méthode permettant de clore la connexion établie avec la base de données
 		 * @return void
 		 **/
-		protected function close()
+		protected function close():void
 		{
 			$this->sqlite->close();
 		}
 
-		/**
-		 * toString()
-		 * @return String
-		 */
-		public function toString()
+
+		public function __toString()
 		{
 			return "Object SqliteHandler";
 		}
 
-		/**
-		 * @return int
-		 */
-		public function getErrorNumber()
+
+		public function getErrorNumber():int
 		{
             trigger_error("SqliteHandler::getErrorNumber not implemented yet.", E_USER_WARNING);
+            return 0;
 		}
 
-		/**
-		 * @return string
-		 */
-		public function getError()
+
+		public function getError():string
 		{
             trigger_error("SqliteHandler::getError not implemented yet.", E_USER_WARNING);
+            return "not implemented yet";
 		}
 
         /**
@@ -168,7 +144,7 @@ namespace core\db\handler
          * @param string $pString
          * @return string
          */
-        public function escapeValue($pString)
+        public function escapeValue(string $pString):string
         {
             if(!in_array(strtoupper($pString), self::$specials))
                 return "'".SQLite3::escapeString($pString)."'";

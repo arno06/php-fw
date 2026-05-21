@@ -2,6 +2,8 @@
 
 namespace core\models{
 
+    use core\db\QueryCondition;
+
     /**
      * Interface InterfaceBackModel
      * @package core\models
@@ -11,18 +13,18 @@ namespace core\models{
 
         public function insert(array $pValues);
 
-        public function getTupleById($pId);
+        public function getTupleById(string $pId):array;
 
-        public function updateById($pId, array $pValues);
+        public function updateById(string $pId, array $pValues):mixed;
 
-        public function deleteById($pId);
+        public function deleteById(string $pId):mixed;
 
-        public function all($pCondition);
+        public function all(QueryCondition $pCondition):array;
 
-        public function count($pCondition);
+        public function count(QueryCondition $pCondition):int;
 
-        public function getInsertId();
+        public function getInsertId():int;
 
-        public function generateInputsFromDescribe();
+        public function generateInputsFromDescribe():array;
     }
 }

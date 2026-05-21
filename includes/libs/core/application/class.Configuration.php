@@ -3,6 +3,7 @@ namespace core\application
 {
 
     use core\utils\Stack;
+    use ReflectionClass;
 
     /**
 	 * Class Configuration
@@ -18,123 +19,95 @@ namespace core\application
          * Définit les applications disponibles ainsi que leurs configurations associées
 		 * @var array
 		 */
-		static public $applications;
+		static public array $applications;
 
-		/**
-		 * @var string
-		 */
-		static public $global_encoding = "UTF-8";
+		static public string $global_encoding = "UTF-8";
 
 		/**
 		 * Définit si Query génère automatiquement des requêtes Explain sur les Select
 		 * @var bool
 		 */
-		static public $global_explainOnSelect = true;
+		static public bool $global_explainOnSelect = true;
 
         /**
 		 * Définit l'email de contact du site
 		 * @var string
 		 */
-		static public $global_emailContact = "";
+		static public string $global_emailContact = "";
 
 		/**
 		 * Nom attribué à la session de l'application
-		 * @var String
+		 * @var string
 		 */
-		static public $global_session = "fw_php";
+		static public string $global_session = "fw_php";
 
 		/**
 		 * Tableau des permissions disponibles sur le site
 		 * @var array
 		 */
-		static public $global_permissions = array();
+		static public array $global_permissions = [];
 
-        /**
-         * @var bool
-         */
-        static public $global_debug = false;
+        static public bool $global_debug = false;
 
 		/**
 		 * Domaine du serveur
 		 * @var string
 		 */
-		static public $server_domain;
+		static public string $server_domain;
 
 		/**
 		 * Dossier de base dans lequel se trouve le framework
 		 * @var string
 		 */
-		static public $server_folder;
+		static public string $server_folder;
 
 		/**
 		 * URL du serveur (concaténation du domaine et du dossier)
 		 * @var string
 		 */
-		static public $server_url;
+		static public string $server_url;
 
 		/**
 		 * Définit l'adresse du serveur smtp
 		 * @var string
 		 */
-		static public $server_smtp = "";
+		static public string $server_smtp = "";
 
 		/**
 		 * Stock les informations des SGBD
 		 * @var array
 		 */
-		static public $db = array(
-			"default"=>array(
+		static public array $db = [
+			"default"=>[
 				"host"=>"localhost",
 				"user"=>"root",
 				"password"=>"",
 				"name"=>"fwphp",
 				"handler"=>"\\core\\data\\handler\\MysqliHandler"
-			)
-		);
+            ]
+		];
 
-		/**
-		 * @var string
-		 */
-		static public $authentication_tableName = "%s_users";
 
-		/**
-		 * @var string
-		 */
-		static public $authentication_tableId = "id_user";
+		static public string $authentication_tableName = "%s_users";
 
-		/**
-		 * @var string
-		 */
-		static public $authentication_fieldPassword = "password_user";
+		static public string $authentication_tableId = "id_user";
 
-		/**
-		 * @var string
-		 */
-		static public $authentication_fieldLogin = "login_user";
+		static public string $authentication_fieldPassword = "password_user";
 
-		/**
-		 * @var string
-		 */
-		static public $authentication_fieldPermissions = "permissions_user";
+		static public string $authentication_fieldLogin = "login_user";
 
-        /**
-         * @var array
-         */
-        static private $_extra;
+		static public string $authentication_fieldPermissions = "permissions_user";
 
-        /**
-         * @param array $pExtra
-         */
-        static public function setExtra($pExtra)
+        static private array $_extra = [];
+
+
+        static public function setExtra(array $pExtra):void
         {
             self::$_extra = $pExtra;
         }
 
-        /**
-         * @param string $pId
-         * @return mixed
-         */
-        static public function extra($pId)
+
+        static public function extra(string $pId):mixed
         {
             $env = getenv(str_replace(".", "_", strtoupper($pId)));
             if($env !== false){
@@ -143,8 +116,10 @@ namespace core\application
             return Stack::get($pId, self::$_extra);
         }
 
-        static public function fromEnvVars(){
-            $ref = new \ReflectionClass(Configuration::class);
+
+        static public function fromEnvVars():void
+        {
+            $ref = new ReflectionClass(Configuration::class);
             $props = $ref->getStaticProperties();
             foreach($props as $name=>$val){
                 $env = getenv(strtoupper($name));

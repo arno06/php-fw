@@ -2,7 +2,7 @@
 namespace core\data
 {
 	use core\system\File;
-	use \Exception;
+	use Exception;
 
 	/**
 	 * Class de gestion des fichiers CSV
@@ -21,29 +21,29 @@ namespace core\data
 
 		/**
 		 * Méthode de conversion de données au format Tableau en chaine de caractères formatée en CSV
-		 * @param array $pData				Données à convertir
+		 * @param array $pArray Données à convertir
          * @param bool $skipLabels
-		 * @return String
+		 * @return string
 		 */
-		static public function encode(array $pData, $skipLabels = false)
+		static public function encode(array $pArray, bool $skipLabels = false):string
 		{
-			if(!$pData)
+			if(!$pArray)
 				return "";
 			$result = '';
 			$libelles = array();
 			$donnees = "";
 
 			// if a unique entry is sent, put it in an envelope
-			if (!isset($pData[0])) {
-				$pData = array($pData);
+			if (!isset($pArray[0])) {
+                $pArray = array($pArray);
 			}
 
-			for($i = 0, $max = count($pData); $i<$max;$i++)
+			for($i = 0, $max = count($pArray); $i<$max;$i++)
 			{
-				foreach($pData[$i] as $champs=>$value)
+				foreach($pArray[$i] as $champs=>$value)
 				{
 					if(!in_array($champs, $libelles))
-						array_push($libelles, $champs);
+						$libelles[] = $champs;
 				}
 			}
 			$data = array();
@@ -53,11 +53,11 @@ namespace core\data
 				$d = array();
 				for($j = 0;$j<$maxj;$j++)
 				{
-					if(isset($pData[$i][$libelles[$j]]))
+					if(isset($pArray[$i][$libelles[$j]]))
 					{
-						$v = $pData[$i][$libelles[$j]];
+						$v = $pArray[$i][$libelles[$j]];
 						$v = str_replace('"', '""', $v);
-						if(preg_match("/(\r|\n|".self::SEPARATOR.")/", $v, $matches))
+						if(preg_match("/([\r\n".self::SEPARATOR."])/", $v))
 							$v = '"'.$v.'"';
 						$d[$libelles[$j]] = $v;
 					}
@@ -86,16 +86,16 @@ namespace core\data
 
 		/**
 		 * Méthode de conversion d'une chaine de caractères formatée en CSV vers un Tableau
-		 * @param String $pString				Chaine à convertir
+		 * @param string $pString Chaine à convertir
 		 * @return array
 		 */
-		static public function decode($pString)
+		static public function decode(string $pString):array
 		{
 			$return = array();
 			$dataArray = explode(PHP_EOL,$pString);
             $fields = explode(self::SEPARATOR, $dataArray[0]);
             foreach($fields as &$field){
-                $field = preg_replace('/(\r|\n)$/', '', $field);
+                $field = preg_replace('/([\r\n])$/', '', $field);
             }
             $maxFields = count($fields);
 			$max = count($dataArray);
@@ -121,10 +121,10 @@ namespace core\data
 		 * Méthode d'exportation de données provenant de la base vers un fichier CSV
 		 * Renvoie le résultat de l'écriture du fichier
 		 * @param array $pData					Tableau des données
-		 * @param String $pFileName				Nom du fichier
-		 * @return Boolean
+		 * @param string $pFileName				Nom du fichier
+		 * @return mixed
 		 */
-		static public function export(array $pData, $pFileName)
+		static public function export(array $pData, string $pFileName):mixed
 		{
 			if(!$pData)
 				return false;
@@ -136,16 +136,16 @@ namespace core\data
 
 		/**
 		 * Méthode d'import de données à partir d'un fichier CSV
-		 * @param String $pFileName				Nom du fichier
-		 * @return array
+		 * @param string $pFile				Nom du fichier
+		 * @return array|null
 		 */
-		static public function import($pFileName)
+		static public function import(string $pFile):array|null
 		{
 			try
 			{
-				$dataString = File::read($pFileName);
+				$dataString = File::read($pFile);
 			}
-			catch (Exception $e)
+			catch (Exception)
 			{
 				return null;
 			}

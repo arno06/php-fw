@@ -15,7 +15,7 @@ namespace core\utils
 
     class InteroperableObject
     {
-        public function parse($pRaw = null, $pParams = null, $pQueryString = null)
+        public function parse(mixed $pRaw = null, array $pParams = null, string $pQueryString = null):mixed
         {
             if(is_null($pRaw)&&is_null($pParams)&&is_null($pQueryString)){
                 return null;
@@ -48,7 +48,7 @@ namespace core\utils
                 }
 
                 if(!is_null($pQueryString)){
-                    if(strpos($api, "?")===false){
+                    if(!str_contains($api, "?")){
                         $api .= "?";
                     }else{
                         $api .= "&";
@@ -76,7 +76,6 @@ namespace core\utils
                 default:
                     trigger_error('Unknown source type for parsing', E_USER_WARNING);
                     return null;
-                    break;
             }
 
             for($i = 0, $max = count($allProps); $i<$max;$i++) {
@@ -102,18 +101,14 @@ namespace core\utils
             return $pRaw;
         }
 
-        /**
-         * @param string $pName
-         * @param string $pType
-         * @param mixed $pData
-         * @param string $pFormat
-         */
-        protected function setPropFromData($pName, $pType, $pData, $pFormat = "json"){
+
+        protected function setPropFromData(string $pName, string $pType, mixed $pData, string $pFormat = "json"):void
+        {
             if(!$pData){
                 return;
             }
 
-            $isArray = strpos($pType, '[]')!==false;
+            $isArray = str_contains($pType, '[]');
 
             if($isArray){
                 $pType = str_replace('[]', '', $pType);
@@ -130,12 +125,9 @@ namespace core\utils
             $this->{$pName} = $values;
         }
 
-        /**
-         * @param string $pType
-         * @param mixed $pSource
-         * @return mixed
-         */
-        static public function extractValue($pType, $pSource){
+
+        static public function extractValue(string $pType, mixed $pSource):mixed
+        {
             switch($pType){
                 case "string":
                     $val = strval($pSource);
@@ -168,11 +160,14 @@ namespace core\utils
         }
     }
 
+
     class IObjectDictionary
     {
-        static private $classes = [];
+        static private array $classes = [];
 
-        static public function getDefinition($pClassName){
+
+        static public function getDefinition(string $pClassName):array|null
+        {
             if(isset(self::$classes[$pClassName])){
                 return self::$classes[$pClassName];
             }
@@ -223,7 +218,7 @@ namespace core\utils
                     break;
             }
 
-            foreach($p as &$property){
+            foreach($p as $property){
                 $comment = $property->getDocComment();
                 $prop = array(
                     "name"=>$property->getName(),

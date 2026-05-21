@@ -2,15 +2,17 @@
 
 namespace core\tools\docs
 {
-    class PHPDocHelpers{
+    class PHPDocHelpers
+    {
+
         /**
          * @param string $pVarName
          * @param string $pComments
          * @return bool|string
          */
-        static public function extractDocVar($pVarName, $pComments)
+        static public function extractDocVar(string $pVarName, string $pComments):bool|string
         {
-            if(preg_match('/@'.$pVarName.'\s*([0-9a-z\_\[\]\/\"\=\:\^\@\(\)\\\\{\}\-\.\?\,\&]+)\s*/i', $pComments, $matches))
+            if(preg_match('/@'.$pVarName.'\s*([0-9a-z_\[\]\/\"=:^@()\\\\{}\-.?,&]+)\s*/i', $pComments, $matches))
             {
                 return $matches[1];
             }

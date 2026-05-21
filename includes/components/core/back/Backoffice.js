@@ -1,5 +1,5 @@
-var BO = {};
-BO.init = function(e)
+let BO = {};
+BO.init = function()
 {
 	document.querySelectorAll(".td-liste").forEach(function(pItem){pItem.addEventListener("click", BO.tdListeClickHandler);});
 	document.querySelectorAll(".target-blank").forEach(function(pItem){pItem.addEventListener("click", BO.aBlankClick);});
@@ -26,7 +26,7 @@ BO.aBlankClick = function(e)
 
 BO.tdListeClickHandler = function(e)
 {
-	var a = e.target.parentNode.parentNode("tr").querySelector(".a-edit");
+	let a = e.target.parentNode.parentNode("tr").querySelector(".a-edit");
 	if(a)
 	{
 		window.location.href=a.href;
@@ -38,7 +38,5 @@ BO.tdListeClickHandler = function(e)
 		window.location.href=a.item(0).getAttribute("href");
 	}
 };
-
-NodeList.prototype.forEach = Array.prototype.forEach;
 
 window.addEventListener('load', BO.init, false);

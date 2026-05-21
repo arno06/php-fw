@@ -8,7 +8,7 @@ namespace core\tools
 	 * Class Cart Permet de gérer un panier - cas d'une boutique en ligne
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .2
+	 * @version .3
 	 * @package core\tools
 	 */
 	class Cart extends Singleton
@@ -17,17 +17,15 @@ namespace core\tools
 		 * Nom de la variable de session gérant les items du panier
 		 * @var String
 		 */
-		const SESSION_VAR_NAME = "cbi_panier";
+		const SESSION_VAR_NAME = "fw_cart";
 
 
 		/**
 		 * Constructor
-		 * @param $pInstance
+		 * @param PrivateClass $pInstance
 		 */
-		public function __construct($pInstance)
+		public function __construct(PrivateClass $pInstance)
 		{
-			if(!$pInstance instanceOf PrivateClass)
-				trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
 			if(!$_SESSION[self::SESSION_VAR_NAME]||!is_array($_SESSION[self::SESSION_VAR_NAME]))
 				$_SESSION[self::SESSION_VAR_NAME] = array();
 		}
@@ -37,9 +35,10 @@ namespace core\tools
 		 * @param mixed $pId							Identifiant unique
 		 * @param int $pPrice						Prix unitaire
 		 * @param int $pQuantity						Quantité d'item de ce type
+         * @param mixed $pProperty
 		 * @return void
 		 */
-		public function add($pId, $pPrice, $pQuantity=1, $pProperty=null)
+		public function add(int|string $pId, int $pPrice, int $pQuantity=1, mixed $pProperty=null):void
 		{
 			if(!$pId || !$pPrice || $pQuantity<=0)
 				return;
@@ -54,11 +53,11 @@ namespace core\tools
 
 		/**
 		 * Méthode de mise-é-jour de la quantité souhaitée pour un item donnée
-		 * @param mixed $pId			Identifiant unique
-		 * @param object $pQuantity		Nouvelle quantité souhaité
+		 * @param int|string $pId			Identifiant unique
+		 * @param int $pQuantity		Nouvelle quantité souhaité
 		 * @return void
 		 */
-		public function updateQuantity($pId, $pQuantity)
+		public function updateQuantity(int|string $pId, int $pQuantity):void
 		{
 			if(!$_SESSION[self::SESSION_VAR_NAME][$pId])
 				return;
@@ -68,10 +67,10 @@ namespace core\tools
 
 		/**
 		 * Méthode de suppression d'un item du panier
-		 * @param mixed $pId					Identifiant unique
+		 * @param string|int $pId					Identifiant unique
 		 * @return void
 		 */
-		public function remove($pId)
+		public function remove(string|int $pId):void
 		{
 			unset($_SESSION[self::SESSION_VAR_NAME][$pId]);
 		}
@@ -80,7 +79,7 @@ namespace core\tools
 		 * Méthode de ré-initialisation du Panier
 		 * @return void
 		 */
-		public function trash()
+		public function trash():void
 		{
 			unset($_SESSION[self::SESSION_VAR_NAME]);
 			$_SESSION[self::SESSION_VAR_NAME] = array();
@@ -91,7 +90,7 @@ namespace core\tools
 		 * Renvoie un tableau associatif : array("estimation"=>x, "countItems"=>y);
 		 * @return array
 		 */
-		public function getResume()
+		public function getResume():array
 		{
 			return array("estimation"=>$this->getEstimation(),
 				"countItems"=>$this->getCountItems());
@@ -101,47 +100,47 @@ namespace core\tools
 		 * Méthode de récupération du tableau des items se trouvant dans le panier
 		 * @return array
 		 */
-		public function getItems()
+		public function getItems():array
 		{
 			return $_SESSION[self::SESSION_VAR_NAME];
 		}
 
 		/**
 		 * Méthode d'estimation de la valeur du panier
-		 * @return Number
+		 * @return float
 		 */
-		private function getEstimation()
+		private function getEstimation():float
 		{
 			$estimation = 0;
 			$max = count($_SESSION[self::SESSION_VAR_NAME]);
 			if(!$max)
 				return $estimation;
-			foreach($_SESSION[self::SESSION_VAR_NAME] as $id=>$datas)
+			foreach($_SESSION[self::SESSION_VAR_NAME] as $datas)
 				$estimation += $datas["quantity"] * $datas["price"];
 			return $estimation;
 		}
 
 		/**
 		 * Méthode de récupération du nombre d'items ajoutés au panier
-		 * @return Number
+		 * @return int
 		 */
-		private function getCountItems()
+		private function getCountItems():int
 		{
 			$count = 0;
 			$max = count($_SESSION[self::SESSION_VAR_NAME]);
 			if(!$max)
 				return $count;
-			foreach($_SESSION[self::SESSION_VAR_NAME] as $id=>$datas)
+			foreach($_SESSION[self::SESSION_VAR_NAME] as $datas)
 				$count += $datas["quantity"];
 			return $count;
 		}
 
         /**
          * Méthode de récupération de quantité pour un produit particulier
-         * @param $pId
-         * @return mixed
+         * @param string|int $pId
+         * @return int
          */
-		static public function getQuantityById($pId)
+		static public function getQuantityById(string|int $pId):int
 		{
 			return $_SESSION[self::SESSION_VAR_NAME][$pId]['quantity'];
 		}

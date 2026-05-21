@@ -3,13 +3,14 @@ namespace core\data
 {
 
     use core\system\File;
-    use \ZipArchive;
+    use JetBrains\PhpStorm\NoReturn;
+    use ZipArchive;
 
 	/**
 	 * Class de gestion des fichiers CSV
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version .2
+	 * @version .3
 	 * @package data
 	 */
 	abstract class SimpleExcel implements InterfaceData
@@ -17,9 +18,10 @@ namespace core\data
 		/**
 		 * Méthode d'encodage d'un tableau en données formatées vers le format spécifique
 		 * @param array $pArray		Tableau des données
-		 * @return String
+		 * @return string
 		 */
-		static function encode(array $pArray)
+        #[NoReturn]
+		static function encode(array $pArray):string
 		{
 			trigger_error("Not implemented yet.", E_USER_ERROR);
 		}
@@ -29,32 +31,27 @@ namespace core\data
 		 * @param String $pString		Contenu au format spécifique
 		 * @return array
 		 */
-		static function decode($pString)
+        #[NoReturn]
+		static function decode(string $pString):array
 		{
 			trigger_error("Not implemented yet.", E_USER_ERROR);
 		}
 
 		/**
 		 * Méthode de chargement de décodage d'un fichier au format spécifique
-		 * @param String $pFile
-		 * @return array
+		 * @param string $pFile
+		 * @return array|null
 		 */
-		static function import($pFile)
+		static function import(string $pFile):array|null
 		{
-			switch(strtolower(File::getExtension($pFile)))
-			{
-				case "xlsx";
-					return self::importXlsx($pFile);
-					break;
-			}
-			return false;
-		}
+            return match (strtolower(File::getExtension($pFile))) {
+                "xlsx" => self::importXlsx($pFile),
+                default => null,
+            };
+        }
 
-		/**
-		 * @param $pFile
-		 * @return array|bool
-		 */
-		static private function importXlsx($pFile)
+
+		static private function importXlsx($pFile):array|bool
 		{
 			$xlsxHandler = new XLSXHandler($pFile);
 			$data = $xlsxHandler->read();
@@ -65,7 +62,7 @@ namespace core\data
 			{
 				$cols = array();
 				for($j = 0; $j<$maxj; $j++)
-					$cols[$data[0][$j]] = isset($data[$i][$j])?$data[$i][$j]:"";
+					$cols[$data[0][$j]] = $data[$i][$j]??"";
 				$return[] = $cols;
 			}
 			return $return;
@@ -75,11 +72,13 @@ namespace core\data
 	class XLSXHandler
 	{
 		const XML_CELLS     = "xl/worksheets/sheet1.xml";
+
 		const XML_STRINGS   = "xl/sharedStrings.xml";
 
-		private $path;
-		private $data;
-		private $zipHandler;
+		private string $path;
+
+		private ZipArchive $zipHandler;
+
 
 		public function __construct($pFile)
 		{
@@ -87,20 +86,22 @@ namespace core\data
 			$this->zipHandler = new ZipArchive();
 		}
 
-		public function save()
+
+		public function save():void
 		{
 
 		}
 
-		public function read()
+
+		public function read():bool|array
 		{
 			if($this->zipHandler->open($this->path)===false)
 				return false;
-			$this->data = array();
+			$data = array();
 			$tmp_values = $this->zipHandler->getFromName(self::XML_STRINGS);
 			$tmp_values = SimpleXML::decode($tmp_values);
 			$string_values = array();
-			foreach($tmp_values["sst"]["si"] as &$v)
+			foreach($tmp_values["sst"]["si"] as $v)
 				$string_values[] = $v["t"]["nodeValue"];
 			$cells = $this->zipHandler->getFromName(self::XML_CELLS);
 			$tmp_data = SimpleXML::decode($cells);
@@ -113,11 +114,11 @@ namespace core\data
 					$cols[] = "";
 				foreach($r["c"] as &$c)
 				{
-					if(empty($this->data))
+					if(empty($data))
 						$columns++;
 					if(!isset($c["v"]) || !is_array($c["v"]))
 						continue;
-					$v = $c["v"]["nodeValue"];
+                    $v = $c["v"]["nodeValue"];
 					if(empty($c["v"]["nodeValue"]))
 						$c["v"]["nodeValue"] = 0;
 					if(isset($c["t"]) && $c["t"]=="s" && isset($string_values[$c["v"]["nodeValue"]]))
@@ -128,10 +129,10 @@ namespace core\data
 					$l = strtolower($matches[1]);
 					$cols[array_search($l, $range_letters)] = $v;
 				}
-				$this->data[] = $cols;
+				$data[] = $cols;
 			}
 			$this->zipHandler->close();
-			return $this->data;
+			return $data;
 		}
 
 		public function delete()

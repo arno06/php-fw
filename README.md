@@ -31,7 +31,7 @@ Yet another PHP Framework
 
 Pré-requis :
 * Apache
-* PHP 7.2
+* PHP 8.*
 * MySQL
 
 ### Windows
@@ -260,24 +260,24 @@ La méthode `addForm` déclare l'instance de la classe Form pour permettre son a
 #### Captcha
 
 ```  
-	{
-		"label":"Captcha",
-		"tag":"captcha",
-		"require":true|false,
-		"attributes":{
-			"backgroundColor":"#ffffff",
-			"fontSizeMax":13,
-			"fontSizeMin":13,
-			"width":100,
-			"height":30,
-			"rotation":15,
-			"fontColors":["#444444","#ff0000","#000000"],
-			"transparent":true,
-			"length":7,
-			"type":"random|calculus",
-			"valueMax":99
-		}
-	}
+    {
+        "label": "Captcha",
+        "tag": "captcha",
+        "type": "code|icons",
+        "config": {
+          "backgroundColor":"#ffffff",
+          "fontSizeMax":13,
+          "fontSizeMin":13,
+          "width":100,
+          "height":30,
+          "rotation":15,
+          "fontColors":["#444444","#ff0000","#00ff00"],
+          "transparent":true,
+          "length":7,
+          "type":"calculus|random",
+          "valueMax":99
+        }
+    }
 ```  
 
 ## Composants
@@ -330,6 +330,50 @@ trace_r($pObject, $pOpen);
 track($pId);
 ```
 
+## Logs
+
+En complément du Debugger, il est possible d'écrire dans des fichiers de logs personnalisés via la classe `core\utils\Logs` :
+
+```php
+/**
+ * Log d'une chaine de caractère
+ */
+\core\utils\Logs::write($pMessage, $pLogFile);
+
+/**
+ * Log d'un objet ou d'un tableau
+ */
+\core\utils\Logs::write_r($pData, $pLogFile);
+```
+
+
+## Authentification
+
+Une authentification locale basée sur des utilisateurs en bases de données & une session serveur est disponible sur le framework. 
+
+Il est possible de créer un utilisateur via la méthode `createUser` de la classe `ModelAuthentication` :
+```php
+\core\models\ModelAuthentication::createUser($pLogin, $pPassword, $pRole);
+```
+
+Les rôles sont définis par un entier (ex : 1 un utilisateur normal, 2 un administrateur - ayant accès au module back, 4 un développeur). Par le biais d'une manipulation bit à bit, il est possible s'assigner plusieurs droits à un même utilisateur (ex : 7 pour un utilisateur normal, un admin et un developpeur). 
+
+Note : les droits développeurs donnent accès au Debugger quelque soit le contexte (une configuration en mode `debug` ou non).
+
+Pour le modèle de données, se référer à la page wiki : [SQL Dump](https://github.com/arno06/php-fw/wiki/SQL-Dump)
+
+Il est possible de surcharger le mode d'authentification en écrivant une classe de type AuthenticationHandler personnalisé implémentant l'interface `core\interfaces\AuthenticationHandlerInterface` et en le déclarant dans la configuration de l'application (ex : `dev.config.json`).
+
+## Module de backoffice
+
+Un module de backoffice de type CRUD correspond à un module de backoffice permettant à un utilisateur administrateur de manipuler les données présentes dans une table de la base de données.
+
+La mise en place d'un tel module se fait en 4 étapes : 
+ * Création d'une table de base de données (eg : `posts` contenant les champs `id_post`, `title_post`, `creation_date_post`, `content_post`)
+ * Création d'un modèle de données (eg : `app\main\models\ModelPost`) - cette classe doit hériter de la classe `core\application\BaseModel` et doit préciser le nom de la table ainsi que le nom du champ de clé primaire dans le constructeur
+ * Création d'un fichier de configuration du formulaire (eg : `includes/applications/main/modules/back/forms/form.post.json`) - ce fichier doit préciser les champs à afficher dans le formulaire de création / modification d'un post ainsi que les types de champs (input, textarea, datepicker, ...) et les règles de validation associées
+ * Création d'un controller (eg : `app\main\controllers\back\posts`). Ce controller est une classe PHP devant héritée de `core\application\DefaultBackController` et qui doit préciser le modèle de données, le nom du formulaire ainsi que les champs à afficher dans le listing.
+
 ## Namespaces
 
 | namespace                                           | contexte    | description                                                       |
@@ -342,7 +386,6 @@ track($pId);
 
 ## Todo (nice to have)
 
-* [ ] Integrate a light Dictionary class with the Dependencies's loaded scripts
 * [ ] RoutingHandler : method to get a route depending upon controller/action/method/parameters
 * [ ] Integrate services managing
 * [ ] Develop an Autocomplete component

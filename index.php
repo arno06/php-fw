@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set("Europe/Paris");
-define("MEMORY_REAL_USAGE", true);
+const MEMORY_REAL_USAGE = true;
 define('INIT_TIME', microtime(true));
 define('INIT_MEMORY', memory_get_usage(MEMORY_REAL_USAGE));
 

@@ -1,99 +1,59 @@
 <?php
 namespace core\db
 {
-    use Exception;
     use core\application\Configuration;
+    use Exception;
+    use SQLite3;
 
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .4
+     * @version .5
      * @package db
      * @subpackage query
      */
     class Query
     {
-        /**
-         * @var String
-         */
+        static public string $mode = "sql";
+
         const LIKE 				= 	" LIKE ";
-        /**
-         * @var String
-         */
+
         const EQUAL				= 	" = ";
-        /**
-         * @string
-         */
+
         const NOT_EQUAL         =   " != ";
-        /**
-         * @var String
-         */
+
         const UPPER 			= 	" > ";
-        /**
-         * @var String
-         */
+
         const UPPER_EQUAL		=	" >= ";
-        /**
-         * @var String
-         */
+
         const LOWER 			= 	" < ";
-        /**
-         * @var String
-         */
+
         const LOWER_EQUAL		=	" <= ";
 
-        /**
-         * @var String
-         */
         const IS				=	" IS ";
-        /**
-         * @var String
-         */
+
         const IS_NOT			=	" IS NOT ";
-        /**
-         * @var String
-         */
+
         const JOIN				=	" JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_NATURAL		=	" NATURAL JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_INNER 		= 	" INNER JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_OUTER_FULL 	= 	" FULL OUTER JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_OUTER_LEFT 	= 	" LEFT OUTER JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_OUTER_RIGHT 	= 	" RIGHT OUTER JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_CROSS 		= 	" CROSS JOIN ";
-        /**
-         * @var String
-         */
+
         const JOIN_UNION 		= 	" UNION JOIN ";
-        /**
-         * @var String
-         */
+
         const IN                =   " IN ";
-        /**
-         * @var String
-         */
+
         const MATCH             =   " MATCH ";
 
-        /**
-         * @var array
-         */
-        static private $specials = array(
+        static private array $specials = array(
             "NOW()",
             "NULL"
         );
@@ -103,38 +63,36 @@ namespace core\db
          * @param  String $pQuery
          * @param  String $pHandler
          * @param  bool   $pRaw
-         * @return array|resource|null|false
+         * @return mixed
          */
-        static public function execute($pQuery, $pHandler = "default", $pRaw = false)
+        static public function execute(string $pQuery, string $pHandler = "default", bool $pRaw = false):mixed
         {
-            if(!is_string($pQuery))
-                return null;
             $dbHandler = DBManager::get($pHandler);
             if(!$dbHandler)
                 return false;
-            $raw = $pRaw||!preg_match("/^(select|show|describe|explain)/i", $pQuery, $matches);
+            $raw = $pRaw||!preg_match("/^(select|show|describe|explain)/i", $pQuery);
             return $dbHandler->execute($pQuery, $raw);
         }
 
         /**
          * Méthode de création d'une requête SQL SELECT
-         * @param String $pFields
-         * @param String $pTables
+         * @param string $pFields
+         * @param string $pTables
          * @return QuerySelect
          */
-        static public function select($pFields, $pTables)
+        static public function select(string $pFields, string $pTables):QuerySelect
         {
             return new QuerySelect($pFields, $pTables);
         }
 
         /**
          * @static
-         * @param $pTable
+         * @param string $pTable
          * @param null|QueryCondition $pCondition
          * @param String $pHandler
          * @return int
          */
-        static public function count($pTable, QueryCondition $pCondition = null, $pHandler = "default")
+        static public function count(string $pTable, QueryCondition $pCondition = null, string $pHandler = "default"):int
         {
             $q = Query::select("count(1) as nb", $pTable)->setCondition($pCondition)->execute($pHandler);
             return $q[0]["nb"];
@@ -144,7 +102,7 @@ namespace core\db
          * Méthode de création d'une condition SQL indépendante (instructions WHERE, ORDER BY, LIMIT...)
          * @return QueryCondition
          */
-        static public function condition()
+        static public function condition():QueryCondition
         {
             return new QueryCondition();
         }
@@ -154,7 +112,7 @@ namespace core\db
          * @param array $pValues
          * @return QueryInsert
          */
-        static public function insert($pValues)
+        static public function insert(array $pValues):QueryInsert
         {
             return new QueryInsert($pValues, QueryInsert::UNIQUE);
         }
@@ -164,7 +122,7 @@ namespace core\db
          * @param array $pValues
          * @return QueryInsert
          */
-        static public function insertMultiple($pValues)
+        static public function insertMultiple(array $pValues):QueryInsert
         {
             return new QueryInsert($pValues, QueryInsert::MULTIPLE);
         }
@@ -174,7 +132,7 @@ namespace core\db
          * @param array $pValues
          * @return QueryReplace
          */
-        static public function replace($pValues)
+        static public function replace(array $pValues):QueryReplace
         {
             return new QueryReplace($pValues, QueryInsert::UNIQUE);
         }
@@ -184,7 +142,7 @@ namespace core\db
          * @param array $pValues
          * @return QueryReplace
          */
-        static public function replaceMultiple($pValues)
+        static public function replaceMultiple(array $pValues):QueryReplace
         {
             return new QueryReplace($pValues, QueryInsert::MULTIPLE);
         }
@@ -193,7 +151,7 @@ namespace core\db
          * Méthode de création d'une requête DELETE
          * @return QueryDelete
          */
-        static public function delete()
+        static public function delete():QueryDelete
         {
             return new QueryDelete();
         }
@@ -203,27 +161,27 @@ namespace core\db
          * @param String $pTable
          * @return QueryUpdate
          */
-        static public function update($pTable)
+        static public function update(string $pTable):QueryUpdate
         {
             return new QueryUpdate($pTable);
         }
 
         /**
          * Méthode de création d'une requête DROP TABLE
-         * @param  $pTable
+         * @param string $pTable
          * @return QueryDrop
          */
-        static public function drop($pTable)
+        static public function drop(string $pTable):QueryDrop
         {
             return new QueryDrop($pTable);
         }
 
         /**
          * Méthode de création d'une requête TRUNCATE TABLE
-         * @param  $pTable
+         * @param string $pTable
          * @return QueryTruncate
          */
-        static public function truncate($pTable)
+        static public function truncate(string $pTable):QueryTruncate
         {
             return new QueryTruncate($pTable);
         }
@@ -235,48 +193,48 @@ namespace core\db
          * @param string $pCollation
          * @return QueryCreate
          */
-        static public function create($pTable, $pStorageEngine = "InnoDB", $pCollation = "latin1_swedish_ci")
+        static public function create(string $pTable, string $pStorageEngine = "InnoDB", string $pCollation = "latin1_swedish_ci"):QueryCreate
         {
             return new QueryCreate($pTable, $pStorageEngine, $pCollation);
         }
 
         /**
          * @static
-         * @param  $pTable
+         * @param string $pTable
          * @return QueryAlter
          */
-        static public function alter($pTable)
+        static public function alter(string $pTable):QueryAlter
         {
             return new QueryAlter($pTable);
         }
 
         /**
          * @static
-         * @var String $pHandler
+         * @var string $pHandler
          * @return string
          */
-        static public function getError($pHandler = "default")
+        static public function getError(string $pHandler = "default"):string
         {
             return DBManager::get($pHandler)->getError();
         }
 
         /**
          * @static
-         * @var String $pHandler
+         * @var string $pHandler
          * @return int
          */
-        static public function getErrorNumber($pHandler = "default")
+        static public function getErrorNumber(string $pHandler = "default"):int
         {
             return DBManager::get($pHandler)->getErrorNumber();
         }
 
         /**
          * Méthode d'échappement d'une valeur (simple quote, double quote...)
-         * @param String $pValue
-         * @param Boolean $escape
-         * @return String
+         * @param string $pValue
+         * @param bool $escape
+         * @return string
          */
-        static public function escapeValue($pValue, $escape = true)
+        static public function escapeValue(string $pValue, bool $escape = true):string
         {
             if (!$escape)
                 return $pValue;
@@ -285,24 +243,19 @@ namespace core\db
             }
             elseif(!in_array(strtoupper($pValue), self::$specials))
             {
-                switch(self::$mode)
-                {
-                    case "sqlite":
-                        return "'".\SQLite3::escapeString($pValue)."'";
-                    default:
-                        return "'".addslashes($pValue)."'";
-                }
+                return match (self::$mode) {
+                    "sqlite" => "'" . SQLite3::escapeString($pValue) . "'",
+                    default => "'" . addslashes($pValue) . "'",
+                };
             }
             else
                 return strtoupper($pValue);
         }
-
-        static public $mode = "sql";
     }
 
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
@@ -310,34 +263,25 @@ namespace core\db
     {
         /**
          * Nom de la table
-         * @var String
+         * @var string|null
          */
-        protected $table;
+        protected string|null $table;
 
 
-        /**
-         * @param string $pTable
-         */
-        public function __construct($pTable)
+        public function __construct(string $pTable = null)
         {
             $this->table = $pTable;
         }
 
-        /**
-         * @throws Exception
-         * @return string
-         */
-        public function get()
+
+        public function get():string
         {
-            throw new Exception("La méthode 'get' doit être surchargée.");
+            trigger_error("La méthode 'get' doit être surchargée.", E_USER_WARNING);
+            return "";
         }
 
-        /**
-         * @param String $pHandler
-         * @param bool   $pRaw
-         * @return array|resource
-         */
-        public function execute($pHandler = "default", $pRaw = false)
+
+        public function execute(string $pHandler = "default", bool $pRaw = false):mixed
         {
             return Query::execute($this->get(), $pHandler, $pRaw);
         }
@@ -345,125 +289,95 @@ namespace core\db
 
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
     class QueryCondition
     {
-        /**
-         * @var array
-         */
-        private $ands = array();
-        /**
-         * @var array
-         */
-        private $or = array();
-        /**
-         * @var array
-         */
-        private $havingAnds =array();
-        /**
-         * @var array
-         */
-        private $havingOr =array();
-        /**
-         * @var array
-         */
-        private $existAnds = array();
-        /**
-         * @var array
-         */
-        private $existOr = array();
-        /**
-         * @var String
-         */
-        private $order = "";
-        /**
-         * @var String
-         */
-        private $limit = "";
-        /**
-         * @var String
-         */
-        private $group = "";
+        private array $ands = [];
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryCondition
-         */
-        public function andExists(QuerySelect $pQuery)
+        private array $or = [];
+
+        private array $havingAnds =[];
+
+        private array $havingOr =[];
+
+        private array $existAnds = [];
+
+        private array $existOr = [];
+
+        private string $order = "";
+
+        private string $limit = "";
+
+        private string $group = "";
+
+
+        public function andExists(QuerySelect $pQuery):QueryCondition
         {
-            array_push($this->existAnds, "EXISTS (".$pQuery->get().")");
+            $this->existAnds[] = "EXISTS (" . $pQuery->get() . ")";
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryCondition
-         */
-        public function orExists(QuerySelect $pQuery)
+
+        public function orExists(QuerySelect $pQuery):QueryCondition
         {
-            array_push($this->existOr, "EXISTS (".$pQuery->get().")");
+            $this->existOr[] = "EXISTS (" . $pQuery->get() . ")";
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return void
-         */
-        public function andNotExists(QuerySelect $pQuery)
+
+        public function andNotExists(QuerySelect $pQuery):QueryCondition
         {
-            array_push($this->existAnds, "NOT EXISTS (".$pQuery->get().")");
+            $this->existAnds[] = "NOT EXISTS (" . $pQuery->get() . ")";
+            return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryCondition
-         */
-        public function orNotExists(QuerySelect $pQuery)
+
+        public function orNotExists(QuerySelect $pQuery):QueryCondition
         {
-            array_push($this->existOr, "NOT EXISTS (".$pQuery->get().")");
+            $this->existOr[] = "NOT EXISTS (" . $pQuery->get() . ")";
             return $this;
         }
 
         /**
          * Méthode d'ajout d'une condition 'OR' à l'instance de condition en cours
-         * @param $pField
-         * @param $pType
-         * @param $pValue
+         * @param string $pField
+         * @param string $pType
+         * @param string $pValue
          * @param bool $pEscape
          * @return $this
          */
-        public function orWhere	($pField, $pType, $pValue, $pEscape = true)
+        public function orWhere	(string $pField, string $pType, string $pValue, bool $pEscape = true):QueryCondition
         {
             if($pEscape)
                 $pValue = Query::escapeValue($pValue);
-            array_push($this->or, $pField.$pType.$pValue);
+            $this->or[] = $pField . $pType . $pValue;
             return $this;
         }
 
         /**
          * Méthode d'ajout d'une condition 'AND' à l'instance de condition en cours
-         * @param String $pField
-         * @param String $pType
-         * @param String $pValue
+         * @param string $pField
+         * @param string $pType
+         * @param string $pValue
          * @param bool   $pEscape
          * @return QueryCondition
          */
-        public function andWhere($pField, $pType, $pValue, $pEscape = true)
+        public function andWhere(string $pField, string $pType, string $pValue, bool $pEscape = true):QueryCondition
         {
             if($pEscape)
                 $pValue = Query::escapeValue($pValue);
             if ($pType == Query::MATCH)
-                array_push($this->ands, " MATCH(".$pField.") AGAINST (".$pValue.")");
+                $this->ands[] = " MATCH(" . $pField . ") AGAINST (" . $pValue . ")";
             else
-                array_push($this->ands, $pField.$pType.$pValue);
+                $this->ands[] = $pField . $pType . $pValue;
             return $this;
         }
 
 
-        public function andMatch($pField, $pValue)
+        public function andMatch(string $pField, string $pValue):QueryCondition
         {
             $temp = trim($pValue);
             if (empty($temp)) return $this;
@@ -479,30 +393,29 @@ namespace core\db
 
             if ($pValue[strlen($pValue)-1] != " ")
                 $against .= "*";
-            array_push($this->ands, " MATCH(".$pField.") AGAINST(".Query::escapeValue($against)." IN BOOLEAN MODE)");
+            $this->ands[] = " MATCH(" . $pField . ") AGAINST(" . Query::escapeValue($against) . " IN BOOLEAN MODE)";
             return $this;
         }
-
 
         /**
          * Méthode d'ajout d'un HAVING 'OR' à l'instance de condition en cours
          * @param String $pField
          * @return QueryCondition
          */
-        public function orHaving($pField)
+        public function orHaving(string $pField):QueryCondition
         {
-            array_push($this->havingOr, Query::escapeValue($pField));
+            $this->havingOr[] = Query::escapeValue($pField);
             return $this;
         }
 
         /**
          * Méthode d'ajout d'un HAVING 'AND' à l'instance de condition en cours
-         * @param String $pField
+         * @param string $pField
          * @return QueryCondition
          */
-        public function andHaving($pField)
+        public function andHaving(string $pField):QueryCondition
         {
-            array_push($this->havingAnds, Query::escapeValue($pField));
+            $this->havingAnds[] = Query::escapeValue($pField);
             return $this;
         }
 
@@ -511,7 +424,7 @@ namespace core\db
          * @param String $pField
          * @return QueryCondition
          */
-        public function groupBy($pField)
+        public function groupBy(string $pField):QueryCondition
         {
             $this->group = " GROUP BY ".$pField;
             return $this;
@@ -522,11 +435,11 @@ namespace core\db
          * @param QueryCondition $pCondition
          * @return QueryCondition
          */
-        public function andCondition(QueryCondition $pCondition)
+        public function andCondition(QueryCondition $pCondition):QueryCondition
         {
             $condition = $pCondition->getWhere();
             if(!empty($condition))
-                array_push($this->ands, "(".preg_replace("/^ WHERE /i","",$condition).")");
+                $this->ands[] = "(" . preg_replace("/^ WHERE /i", "", $condition) . ")";
             return $this;
         }
 
@@ -535,19 +448,19 @@ namespace core\db
          * @param QueryCondition $pCondition
          * @return QueryCondition
          */
-        public function orCondition(QueryCondition $pCondition)
+        public function orCondition(QueryCondition $pCondition):QueryCondition
         {
-            array_push($this->or, "(".preg_replace("/^ WHERE /i","",$pCondition->getWhere()).")");
+            $this->or[] = "(" . preg_replace("/^ WHERE /i", "", $pCondition->getWhere()) . ")";
             return $this;
         }
 
         /**
          * Méthode d'ajout d'un 'ORDER BY'
-         * @param String $pField
-         * @param String $pType		ASC|DESC
+         * @param string $pField
+         * @param string $pType		ASC|DESC
          * @return QueryCondition
          */
-        public function order($pField, $pType = "ASC")
+        public function order(string $pField, string $pType = "ASC"):QueryCondition
         {
             if($this->order=="")
                 $this->order = " ORDER BY ".$pField." ".$pType;
@@ -562,7 +475,7 @@ namespace core\db
          * @param Int $pNumber
          * @return QueryCondition
          */
-        public function limit($pFirst, $pNumber)
+        public function limit(int $pFirst,int  $pNumber):QueryCondition
         {
             $this->limit = " LIMIT ".$pFirst.",".$pNumber;
             return $this;
@@ -570,9 +483,9 @@ namespace core\db
 
         /**
          * Méthode de génération de la condition
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             return $this->getWhere().$this->group.$this->getHaving().$this->order.$this->limit;
         }
@@ -581,7 +494,7 @@ namespace core\db
          * Méthode de génération de la section WHERE de l'instance de la condition en cours
          * @return string
          */
-        public function getWhere()
+        public function getWhere():string
         {
             $where = "";
             $ands = implode(" AND ", $this->ands);
@@ -614,10 +527,8 @@ namespace core\db
             return $where;
         }
 
-        /**
-         * @return string
-         */
-        public function getHaving()
+
+        public function getHaving():string
         {
             $having = "";
             $ands = implode(" AND ", $this->havingAnds);
@@ -635,18 +546,16 @@ namespace core\db
         }
     }
 
+
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
     class QueryWithCondition extends BaseQuery
     {
-        /**
-         * @var QueryCondition
-         */
-        protected $condition;
+        protected QueryCondition|null $condition = null;
 
 
         /**
@@ -654,39 +563,28 @@ namespace core\db
          * @param QueryCondition $pConditionInstance
          * @return QueryWithCondition
          */
-        public function setCondition($pConditionInstance)
+        public function setCondition(QueryCondition $pConditionInstance):QueryWithCondition
         {
-            if(!$pConditionInstance instanceof QueryCondition)
-                return $this;
             $this->condition = $pConditionInstance;
             return $this;
         }
 
-        /**
-         * @param $pField
-         * @return QueryWithCondition
-         */
-        public function having($pField)
+
+        public function having(string $pField):QueryWithCondition
         {
             $this->getCondition()->andHaving($pField);
             return $this;
         }
 
-        /**
-         * @param $pField
-         * @return QueryWithCondition
-         */
-        public function andHaving($pField)
+
+        public function andHaving(string $pField):QueryWithCondition
         {
             $this->getCondition()->andHaving($pField);
             return $this;
         }
 
-        /**
-         * @param $pField
-         * @return QueryWithCondition
-         */
-        public function orHaving($pField)
+
+        public function orHaving(string $pField):QueryWithCondition
         {
             $this->getCondition()->orHaving($pField);
             return $this;
@@ -694,13 +592,13 @@ namespace core\db
 
         /**
          * Méthode d'ajout d'une condition 'WHERE' à la requête SELECT en cours
-         * @param String $pField
-         * @param String $pType
-         * @param String $pValue
+         * @param string $pField
+         * @param string $pType
+         * @param string $pValue
          * @param bool $pEscape
          * @return QueryWithCondition
          */
-        public function where($pField, $pType, $pValue, $pEscape = true)
+        public function where(string $pField, string $pType, string $pValue, bool $pEscape = true):QueryWithCondition
         {
             $this->getCondition()->andWhere($pField, $pType, $pValue, $pEscape);
             return $this;
@@ -708,13 +606,13 @@ namespace core\db
 
         /**
          * Méthode d'ajout d'une condition 'AND' à la requête SELECT en cours
-         * @param String $pField
-         * @param String $pType
-         * @param String $pValue
+         * @param string $pField
+         * @param string $pType
+         * @param string $pValue
          * @param bool $pEscape
          * @return QueryWithCondition
          */
-        public function andWhere($pField, $pType, $pValue, $pEscape = true)
+        public function andWhere(string $pField, string $pType, string $pValue, bool $pEscape = true):QueryWithCondition
         {
             $this->getCondition()->andWhere($pField, $pType, $pValue, $pEscape);
             return $this;
@@ -722,88 +620,70 @@ namespace core\db
 
         /**
          * Méthode d'ajout d'une condition 'OR' à la requête SELECT en cours
-         * @param String $pField
-         * @param String $pType
-         * @param String $pValue
+         * @param string $pField
+         * @param string $pType
+         * @param string $pValue
          * @return QueryWithCondition
          */
-        public function orWhere($pField, $pType, $pValue)
+        public function orWhere(string $pField, string $pType, string $pValue):QueryWithCondition
         {
             $this->getCondition()->orWhere($pField, $pType, $pValue);
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryWithCondition
-         */
-        public function andExists(QuerySelect $pQuery)
+
+        public function andExists(QuerySelect $pQuery):QueryWithCondition
         {
             $this->getCondition()->andExists($pQuery);
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryWithCondition
-         */
-        public function orExists(QuerySelect $pQuery)
+
+        public function orExists(QuerySelect $pQuery):QueryWithCondition
         {
             $this->getCondition()->orExists($pQuery);
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryWithCondition
-         */
-        public function andNotExists(QuerySelect $pQuery)
+
+        public function andNotExists(QuerySelect $pQuery):QueryWithCondition
         {
             $this->getCondition()->andNotExists($pQuery);
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QueryWithCondition
-         */
-        public function orNotExists(QuerySelect $pQuery)
+
+        public function orNotExists(QuerySelect $pQuery):QueryWithCondition
         {
             $this->getCondition()->orNotExists($pQuery);
             return $this;
         }
-
 
         /**
          * Méthode d'ajout d'une condition imbriquée dans la condition de la requête en cours
          * @param QueryCondition $pCondition
          * @return QueryWithCondition
          */
-        public function andCondition(QueryCondition $pCondition)
+        public function andCondition(QueryCondition $pCondition):QueryWithCondition
         {
             $this->getCondition()->andCondition($pCondition);
             return $this;
         }
 
 
-        /**
-         * @param QueryCondition $pCondition
-         * @return QueryWithCondition
-         */
-        public function orCondition(QueryCondition $pCondition)
+        public function orCondition(QueryCondition $pCondition):QueryWithCondition
         {
             $this->getCondition()->orCondition($pCondition);
             return $this;
         }
 
-
         /**
          * Méthode d'ajout d'un 'ORDER BY'
-         * @param String $pField
-         * @param String $pType		ASC|DESC
+         * @param string $pField
+         * @param string $pType		ASC|DESC
          * @return QueryWithCondition
          */
-        public function order($pField, $pType = "ASC")
+        public function order(string $pField, string $pType = "ASC"):QueryWithCondition
         {
             $this->getCondition()->order($pField, $pType);
             return $this;
@@ -816,79 +696,58 @@ namespace core\db
          * @param Int $pNumber
          * @return QueryWithCondition
          */
-        public function limit($pFirst, $pNumber)
+        public function limit(int $pFirst, int $pNumber):QueryWithCondition
         {
             $this->getCondition()->limit($pFirst, $pNumber);
             return $this;
         }
 
-
         /**
          * Méthode d'ajout d'un 'GROUP BY'
-         * @param String $pField
+         * @param string $pField
          * @return QueryWithCondition
          */
-        public function groupBy($pField)
+        public function groupBy(string $pField):QueryWithCondition
         {
             $this->getCondition()->groupBy($pField);
             return $this;
         }
 
 
-        /**
-         * @return QueryCondition
-         */
-        protected function getCondition()
+        protected function getCondition():QueryCondition
         {
-            if(!$this->condition)
+            if(is_null($this->condition))
                 $this->condition = Query::condition();
             return $this->condition;
         }
     }
 
+
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
     class QuerySelect extends QueryWithCondition
     {
-        /**
-         * @var array
-         */
-        private $tables = array();
-        /**
-         * @var array
-         */
-        private $fields = array();
-        /**
-         * @var String
-         */
-        private $joins = "";
+        private array $tables = [];
 
-        /**
-         * @var QuerySelect[]
-         */
-        private $query_union;
+        private array $fields = [];
 
-        /**
-         * Constructor
-         * @param String $pFields
-         * @param String $pTables
-         */
-        public function __construct($pFields, $pTables)
+        private string $joins = "";
+
+        private array $query_union;
+
+
+        public function __construct(string $pFields, string $pTables)
         {
+            parent::__construct();
             $this->addFrom($pFields, $pTables);
         }
 
-        /**
-         * @param $pTable
-         * @param string $pType
-         * @param string $pOn
-         * @return QuerySelect
-         */
-        public function join($pTable, $pType = " NATURAL JOIN ", $pOn = "")
+
+        public function join(string $pTable, string $pType = " NATURAL JOIN ", string $pOn = ""):QuerySelect
         {
             if(!empty($pOn))
                 $pOn = "ON ".$pOn;
@@ -898,44 +757,41 @@ namespace core\db
 
         /**
          * Méthode d'ajout d'une table et de champs au SELECT en cours
-         * @param String $pFields
-         * @param String $pTables
+         * @param string $pFields
+         * @param string $pTables
          * @return QuerySelect
          */
-        public function addFrom($pFields, $pTables)
+        public function addFrom(string $pFields, string $pTables):QuerySelect
         {
             if(!in_array($pTables, $this->tables))
-                array_push($this->tables, $pTables);
+                $this->tables[] = $pTables;
             if(!in_array($pFields, $this->fields))
-                array_push($this->fields, $pFields);
+                $this->fields[] = $pFields;
             return $this;
         }
 
-        /**
-         * @param QuerySelect $pQuery
-         * @return QuerySelect
-         */
-        public function union(QuerySelect $pQuery)
+
+        public function union(QuerySelect $pQuery):QuerySelect
         {
             if(!isset($this->query_union))
-                $this->query_union = array();
+                $this->query_union = [];
             $this->query_union[] = $pQuery;
             return $this;
         }
 
         /**
          * Méthode de génération de la requête
-         * @param Boolean $pSemicolon
-         * @return String
+         * @param bool $pSemicolon
+         * @return string
          */
-        public function get($pSemicolon = true)
+        public function get(bool $pSemicolon = true):string
         {
             $field = implode(",", $this->fields);
             $table = implode(",", $this->tables);
             $joins = $this->joins." ";
             $condition = $this->getCondition()->get();
             $union = "";
-            if(isset($this->query_union)&&!empty($this->query_union))
+            if(!empty($this->query_union))
             {
                 foreach($this->query_union as $q)
                     $union .= " UNION ".preg_replace("/;$/", "", $q->get());
@@ -945,12 +801,8 @@ namespace core\db
             return $str;
         }
 
-        /**
-         * @param string $pHandler
-         * @param bool   $pRaw
-         * @return array|resource
-         */
-        public function execute($pHandler = "default", $pRaw = false)
+
+        public function execute(string $pHandler = "default", bool $pRaw = false):mixed
         {
             $result = Query::execute($this->get(), $pHandler, $pRaw);
             if (Configuration::$global_explainOnSelect === true)
@@ -963,15 +815,15 @@ namespace core\db
          * @param string $pHandler
          * @return array|resource
          */
-        public function explain($pHandler = "default")
+        public function explain(string $pHandler = "default"):mixed
         {
             $query = $this->get();
             $result = Query::execute("EXPLAIN ".$query, $pHandler);
             $useKey = true;
             $useTemporary = false;
             $useFileSort = false;
-            $tableWithNoIndex = array();
-            $errors = array();
+            $tableWithNoIndex = [];
+            $errors = [];
             if (is_array($result))
                 foreach($result as $row)
                 {
@@ -1011,9 +863,10 @@ namespace core\db
         }
     }
 
+
     /**
      * @Author Alain LEE - alee@cbi-multimedia.com
-     * @version 0.1
+     * @version .2
      * @package db
      * @subpackage query
      */
@@ -1021,18 +874,19 @@ namespace core\db
     {
         /**
          * Méthode de génération de la requête
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             $values = implode(",", $this->values);
             return 'REPLACE INTO '.$this->table.' '.$this->fields.' VALUES '.$values.';';
         }
     }
 
+
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
@@ -1042,7 +896,7 @@ namespace core\db
          * Tableau des valeurs à mettre-à-jour
          * @var array
          */
-        private $values = array();
+        private array $values = [];
 
         /**
          * Méthode de définition des champs à mettre-à-jour
@@ -1050,18 +904,18 @@ namespace core\db
          * @param bool $pEscape
          * @return QueryUpdate
          */
-        public function values($pValues, $pEscape = true)
+        public function values(array $pValues, bool $pEscape = true):QueryUpdate
         {
             foreach($pValues as $field=>$value)
-                array_push($this->values, $field."=".Query::escapeValue($value, $pEscape));
+                $this->values[] = $field . "=" . Query::escapeValue($value, $pEscape);
             return $this;
         }
 
         /**
          * Méthode de génération de la méthode
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             $values = implode(",", $this->values);
             $condition = $this->getCondition()->get();
@@ -1069,41 +923,34 @@ namespace core\db
         }
     }
 
+
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
     class QueryInsert extends BaseQuery
     {
-        /**
-         * @var String
-         */
         const UNIQUE = "UNIQUE";
-        /**
-         * @var String
-         */
+
         const MULTIPLE = "MULTIPLE";
 
         /**
          * Chaine de caract&egrave;res des champs de la table à remplir
          * @var String
          */
-        protected $fields = "";
+        protected string $fields = "";
         /**
          * Tableau de chaines de caract&egrave;res des valeurs à insérer
          * @var array
          */
-        protected $values = array();
+        protected array $values = [];
 
-        /**
-         * Constructor
-         * @param array $pValues
-         * @param String $pType
-         */
-        public function __construct($pValues, $pType = "")
+
+        public function __construct(array $pValues, string $pType = "")
         {
+            parent::__construct();
             switch($pType)
             {
                 case QueryInsert::MULTIPLE:
@@ -1123,11 +970,9 @@ namespace core\db
          * @param array $pTuple
          * @return void
          */
-        private function setFields($pTuple)
+        private function setFields(array $pTuple):void
         {
-            $f = array();
-            foreach($pTuple as $field=>$value)
-                array_push($f, $field);
+            $f = array_keys($pTuple);
             $this->fields = "(".implode(",", $f).")";
         }
 
@@ -1136,22 +981,22 @@ namespace core\db
          * @param array $pTuples
          * @return void
          */
-        private function setValues($pTuples)
+        private function setValues(array $pTuples):void
         {
-            $this->values = array();
+            $this->values = [];
             for($i = 0, $max = count($pTuples); $i<$max; $i++)
             {
                 $pTuples[$i] = array_map("core\\db\\Query::escapeValue", $pTuples[$i]);
-                array_push($this->values, "(".implode(",", $pTuples[$i]).")");
+                $this->values[] = "(" . implode(",", $pTuples[$i]) . ")";
             }
         }
 
         /**
          * Méthode de définition du nom de la table dans laquelle insérer les valeurs
-         * @param String $pTable
+         * @param string $pTable
          * @return QueryInsert
          */
-        public function into($pTable)
+        public function into(string $pTable):QueryInsert
         {
             $this->table = $pTable;
             return $this;
@@ -1159,35 +1004,30 @@ namespace core\db
 
         /**
          * Méthode de génération de la requête
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             $values = implode(",", $this->values);
             return "INSERT INTO ".$this->table." ".$this->fields." VALUES ".$values.";";
         }
     }
 
+
     /**
      * @author Arnaud NICOLAS <arno06@gmail.com>
-     * @version .1
+     * @version .2
      * @package db
      * @subpackage query
      */
     class QueryDelete extends QueryWithCondition
     {
-
-        /**
-         * Constructor
-         */
-        public function __construct(){}
-
         /**
          * Méthode de définition de la table à cibler pour la suppression
-         * @param String $pTable
+         * @param string $pTable
          * @return QueryDelete
          */
-        public function from($pTable)
+        public function from(string $pTable):QueryDelete
         {
             $this->table = $pTable;
             return $this;
@@ -1195,12 +1035,12 @@ namespace core\db
 
         /**
          * Méthode de génération de la requête
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             $condition = $this->getCondition()->get();
-            return "DELETE FROM `".$this->table."`".$condition.";";
+            return "DELETE " . " FROM `".$this->table."`".$condition.";";
         }
     }
 
@@ -1209,9 +1049,9 @@ namespace core\db
     {
         /**
          * Méthode de génération de la requête
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             return "TRUNCATE TABLE '".$this->table."';";
         }
@@ -1222,32 +1062,27 @@ namespace core\db
     {
         /**
          * Méthode de génération de la requête
-         * @return String
+         * @return string
          */
-        public function get()
+        public function get():string
         {
             return "DROP TABLE `".$this->table."';";
         }
     }
 
+
     class QueryCreate extends QueryStructure
     {
-        /**
-         * @param string $pTable
-         * @param $pStorageEngine
-         * @param $pCollation
-         */
-        public function __construct($pTable, $pStorageEngine, $pCollation)
+
+        public function __construct(string $pTable, string $pStorageEngine, string $pCollation)
         {
             parent::__construct($pTable);
             $this->storage_engine = $pStorageEngine;
             $this->collation = $pCollation;
         }
 
-        /**
-         * @return string
-         */
-        public function get()
+
+        public function get():string
         {
             $query = "CREATE TABLE IF NOT EXISTS `".$this->table."` (";
             if(!empty($this->primary))
@@ -1262,21 +1097,16 @@ namespace core\db
         }
     }
 
+
     class QueryAlter extends QueryStructure
     {
-        /**
-         * @var string
-         */
-        private $change_fields = "";
+        private string $change_fields = "";
+
+        private array $removed_fields = [];
 
         /**
-         * @var array
-         */
-        private $removed_fields = [];
-
-        /**
-         * @param $pName
-         * @param $pType
+         * @param string $pName
+         * @param string $pType
          * @param string $pSize
          * @param string $pDefaultValue
          * @param bool $pNull
@@ -1284,10 +1114,10 @@ namespace core\db
          * @param string $pIndex
          * @param string $pComments
          * @param string $pWhere
-         * @return $this|QueryStructure
+         * @return $this
          * @throws Exception
          */
-        public function addField($pName, $pType, $pSize = "", $pDefaultValue = "", $pNull = false, $pAI = false, $pIndex = "", $pComments = "", $pWhere = "")
+        public function addField(string $pName, string $pType, string $pSize = "", string $pDefaultValue = "", bool $pNull = false, bool $pAI = false, string $pIndex = "", string $pComments = "", string $pWhere = ""):QueryAlter
         {
             if(!empty($this->change_fields))
                 throw new Exception("Impossible de faire appel à la commande SQL ADD lorsque la commande CHANGE est définie");
@@ -1296,8 +1126,8 @@ namespace core\db
         }
 
         /**
-         * @param $pName
-         * @param $pType
+         * @param string $pName
+         * @param string $pType
          * @param string $pSize
          * @param string $pDefaultValue
          * @param bool $pNull
@@ -1307,7 +1137,7 @@ namespace core\db
          * @return $this
          * @throws Exception
          */
-        public function changeField($pName, $pType, $pSize = "", $pDefaultValue = "", $pNull = false, $pAI = false, $pIndex = "", $pComments = "")
+        public function changeField(string $pName, string $pType, string $pSize = "", string $pDefaultValue = "", bool $pNull = false, bool $pAI = false, string $pIndex = "", string $pComments = ""):QueryAlter
         {
             if(!empty($this->change_fields))
                 throw new Exception("Impossible de faire appel à la commande SQL CHANGE sur plusieurs champs simultamément");
@@ -1317,19 +1147,15 @@ namespace core\db
             return $this;
         }
 
-        /**
-         * @param $pName
-         * @return $this
-         */
-        public function removeField($pName){
+
+        public function removeField(string $pName):QueryAlter
+        {
             $this->removed_fields[] = "DROP COLUMN ".$pName;
             return $this;
         }
 
-        /**
-         * @return string
-         */
-        public function get()
+
+        public function get():string
         {
             $add = "";
             if(!empty($this->add_fields))
@@ -1347,34 +1173,19 @@ namespace core\db
 
     class QueryStructure extends BaseQuery
     {
-        /**
-         * @var array
-         */
-        protected $add_fields = array();
+        protected array $add_fields = [];
+
+        protected string $storage_engine = "";
+
+        protected string $collation = "";
+
+        protected array $primary = [];
+
+        protected bool $hasAI = false;
 
         /**
-         * @var string
-         */
-        protected $storage_engine = "";
-
-        /**
-         * @var string
-         */
-        protected $collation = "";
-
-        /**
-         * @var array
-         */
-        protected $primary = array();
-
-        /**
-         * @var bool
-         */
-        protected $hasAI = false;
-
-        /**
-         * @param $pName
-         * @param $pType
+         * @param string $pName
+         * @param string $pType
          * @param string $pSize
          * @param string $pDefaultValue
          * @param bool $pNull
@@ -1382,18 +1193,18 @@ namespace core\db
          * @param string $pIndex
          * @param string $pComments
          * @param string $pWhere
-         * @return QueryStructure
+         * @return $this
+         * @throws Exception
          */
-        public function addField($pName, $pType, $pSize = "", $pDefaultValue = "", $pNull = false, $pAI = false, $pIndex = "", $pComments = "", $pWhere = "")
+        public function addField(string $pName, string $pType, string $pSize = "", string $pDefaultValue = "", bool $pNull = false, bool $pAI = false, string $pIndex = "", string $pComments = "", string $pWhere = ""):QueryStructure
         {
             $this->add_fields[] = $this->setupField($pName, $pType, $pSize, $pDefaultValue, $pNull, $pAI, $pIndex, $pComments, $pWhere);
             return $this;
         }
 
         /**
-         * @throws Exception
-         * @param $pName
-         * @param $pType
+         * @param string $pName
+         * @param string $pType
          * @param string $pSize
          * @param string $pDefaultValue
          * @param bool $pNull
@@ -1402,11 +1213,12 @@ namespace core\db
          * @param string $pComments
          * @param string $pWhere
          * @return string
+         * @throws Exception
          */
-        protected function setupField($pName, $pType, $pSize = "", $pDefaultValue = "", $pNull = false, $pAI = false, $pIndex = "", $pComments = "", $pWhere = "")
+        protected function setupField(string $pName, string $pType, string $pSize = "", string $pDefaultValue = "", bool $pNull = false, bool $pAI = false, string $pIndex = "", string $pComments = "", string $pWhere = ""):string
         {
             $field_prop = array("`".$pName."`");
-            if(preg_match('/(varchar)$/i', $pType) &&(empty($pSize) || !$pSize))
+            if(preg_match('/(varchar)$/i', $pType) &&(empty($pSize)))
                 throw new Exception("Le type 'varchar' requiert la définition d'une taille de champ.");
             if(preg_match("/(int|varchar)$/i", $pType) && !preg_match('/\([0-9]+\)/', $pType))
             {

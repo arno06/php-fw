@@ -1,20 +1,21 @@
 <?php
 namespace core\application
 {
-	/**
+
+    use core\application\routing\RoutingHandler;
+    use JetBrains\PhpStorm\NoReturn;
+
+    /**
 	 * Class Go
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.0
+	 * @version 1.1
 	 * @package application
 	 */
 	class Go
 	{
-		/**
-		 * @static
-		 * @return void
-		 */
-		static public function to404()
+        #[NoReturn]
+		static public function to404():void
 		{
             $defaultController = Core::$application->getModule()->defaultController;
 			$controller = new $defaultController();
@@ -25,36 +26,12 @@ namespace core\application
 		}
 
 
-		/**
-		 * @static
-		 * @param string $pController
-		 * @param string $pAction
-		 * @param array $pParams
-		 * @param string $pLangue
-		 * @param int $pCode
-		 * @return void
-		 */
-		static public function to($pController = "", $pAction = "", $pParams = array(), $pLangue = "", $pCode = 301)
+        #[NoReturn]
+		static public function to(string $pController = "", string $pAction = "", array $pParams = array(), string $pLangue = "", int $pCode = 301):void
 		{
 			$rewriteURL = Configuration::$server_url;
-			$rewriteURL .= Core::rewriteURL($pController, $pAction, $pParams, $pLangue);
+			$rewriteURL .= RoutingHandler::rewrite($pController, $pAction, $pParams, $pLangue);
 			Header::location($rewriteURL, $pCode);
-		}
-
-
-		/**
-		 * @static
-         * @param string $pModule
-		 * @param string $pController
-		 * @param string $pAction
-		 * @param array $pParams
-		 * @return void
-		 */
-		static public function toModule($pModule = 'front', $pController = "", $pAction = "", $pParams = array())
-		{
-			$rewriteURL = Configuration::$server_url.$pModule."/";
-			$rewriteURL .= Core::rewriteURL($pController, $pAction, $pParams);
-			Header::location($rewriteURL);
 		}
 	}
 }

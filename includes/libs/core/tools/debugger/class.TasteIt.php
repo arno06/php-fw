@@ -1,21 +1,21 @@
 <?php
 namespace core\tools\debugger
 {
-
-    use core\application\Core;
     use core\system\Image;
 	use core\db\Query;
+    use JetBrains\PhpStorm\NoReturn;
 
 
-	class TasteIt
+    class TasteIt
 	{
 
-		static public function clock()
+        #[NoReturn]
+		static public function clock():void
 		{
 			$o = array("x"=>100, "y"=>100);
 			$p = 30;
 			$img = new Image(200, 220, Image::PNG, 4);
-			$img->setLineStyle(0,0,0,1);
+			$img->setLineStyle();
 			$img->beginFill(225, 225, 225);
 			$img->drawCircle($o["x"],$o["y"],99);
 			$img->endFill();
@@ -30,7 +30,7 @@ namespace core\tools\debugger
 				$img->lineTo($o["x"]+cos($r) * 98, $o["y"]+sin($r) * 98);
 			}
 
-			$img->setLineStyle(0,0,0,1);
+			$img->setLineStyle();
 			for($i = 0, $max = 60, $p = 6; $i<$max;$i++)
 			{
 				$d = $p*$i;
@@ -57,7 +57,7 @@ namespace core\tools\debugger
 
 			$d = ($s * 6) - 90;
 			$r = $d * (M_PI/180);
-			$img->setLineStyle(0,0,0,1);
+			$img->setLineStyle();
 			$img->moveTo($o["x"], $o["y"]);
 			$img->lineTo($o["x"]+cos($r) * 75, $o["y"]+sin($r) * 75);
 
@@ -66,10 +66,10 @@ namespace core\tools\debugger
 			$img->endFill();
 
 			$img->render();
-            Core::endApplication();
 		}
 
-		static public function graph()
+        #[NoReturn]
+		static public function graph():void
 		{
 			$data = array(10, 5, 5, 1, 3, 14, 9, 5, 6, 10,10,9,10,13,12,5);
 			$maxY = 15;
@@ -86,7 +86,7 @@ namespace core\tools\debugger
 			$img = new Image($width, $height, Image::PNG, 4);
 
 			$pas = $rheight/$rows;
-			$img->setLineStyle(200,200,200,1);
+			$img->setLineStyle(200,200,200);
 			for($i = 1; $i<$rows; $i++)
 			{
 				$img->moveTo($mx, $my+($pas*$i));
@@ -121,10 +121,10 @@ namespace core\tools\debugger
 			$img->endFill();
 
 			$img->render();
-            Core::endApplication();
 		}
 
-		static public function sample()
+        #[NoReturn]
+		static public function sample():void
 		{
 			$i = new Image(200, 200, Image::PNG, 2);
 			/**
@@ -158,27 +158,34 @@ namespace core\tools\debugger
 			$i->render();
 		}
 
-		static public function debugger()
+
+		static public function debugger():void
 		{
+            track("debugger");
 			trace("premiere action trace");
 
-			trigger_error("Une notice trigger par le code", E_USER_NOTICE);
+			trigger_error("Une notice trigger par le code");
 
+            track("boucle for");
 			for($i = 0;$i<20;$i++)
 			{
 				trigger_error("Un warning trigger &agrave; chaque itération", E_USER_WARNING);
 				if($i%3 == 0 )
 					trace("i : ".$i);
 			}
+            track("boucle for");
 
 			trace("derni&egrave;re action trace");
 
+            track("query");
 			Query::select("*", "ma_table")
 				->join("mon_autre_table")
 				->andWhere("un_champ", Query::EQUAL, "une valeur")
 				->limit(0, 1)
 				->groupBy("some_id")
 				->execute();
+            track("query");
+            track("debugger");
 		}
 	}
 }

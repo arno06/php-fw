@@ -5,21 +5,22 @@ namespace app\main\controllers\back
     use core\application\Application;
     use core\application\Autoload;
     use core\application\DefaultController;
-	use core\application\InterfaceController;
 	use core\application\Go;
 	use core\application\Core;
-	use core\tools\Menu;
+    use core\tools\Menu;
 	use core\tools\form\Form;
 	use core\utils\Logs;
+    use JetBrains\PhpStorm\NoReturn;
 
-	class index extends DefaultController implements InterfaceController
+    class index extends DefaultController
 	{
 		public function __construct()
 		{
             Autoload::addComponent("Backoffice");
 		}
 
-		public function index()
+
+		public function index():void
 		{
             $authHandler = Application::getInstance()->authenticationHandler;
             if(!call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
@@ -28,7 +29,8 @@ namespace app\main\controllers\back
 			$menu->redirectToDefaultItem();
 		}
 
-		public function login()
+
+		public function login():void
 		{
             $authHandler = Application::getInstance()->authenticationHandler;
 			if(call_user_func_array(array($authHandler, 'is'), array($authHandler::ADMIN)))
@@ -54,7 +56,8 @@ namespace app\main\controllers\back
 			$this->addForm("login", $form);
 		}
 
-		public function logout()
+        #[NoReturn]
+		public function logout():void
 		{
             $authHandler = Application::getInstance()->authenticationHandler;
             call_user_func_array(array($authHandler, 'unsetUserSession'), array());

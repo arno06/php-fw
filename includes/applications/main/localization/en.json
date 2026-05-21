@@ -5,6 +5,19 @@
         }
     }
 }, "terms": {
+    "public": {
+      "captcha": {
+        "loading":"Verification in progress...",
+        "status_verified":"Verification complete.",
+        "too_many_attempts":"You have submitted too many incorrect answers.<br/>Please wait %x",
+        "wrong_answer":"The submitted solution is incorrect"
+      }
+    },
+    "captcha": {
+      "icons": {
+        "question": "Which icon is <u>the least</u> represented:"
+      }
+    },
     "global": {
         "forms": {
             "inputRequire": "Mandatory field",

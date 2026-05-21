@@ -9,7 +9,7 @@ namespace PHPSTORM_META{
     registerArgumentsSet('QueryJoinTypes', \core\db\Query::JOIN_OUTER_LEFT, \core\db\Query::JOIN, \core\db\Query::JOIN_CROSS, \core\db\Query::JOIN_LEFT, \core\db\Query::JOIN_OUTER_RIGHT,\core\db\Query::JOIN_OUTER_FULL,\core\db\Query::JOIN_INNER,\core\db\Query::JOIN_UNION,\core\db\Query::JOIN_NATURAL);
     expectedArguments(\core\db\QuerySelect::join(), 1, argumentsSet('QueryJoinTypes'));
 
-    /*CL*/registerArgumentsSet('ComponentsList', "Autocomplete","Backoffice","Debugger","Form","M4Tween","Request","Uploader","VIDAL","WebCPicker");/*CL*/
+    /*CL*/registerArgumentsSet('ComponentsList', "Autocomplete","Backoffice","Captcha","Debugger","Form","M4Tween","Request","Uploader","WebCPicker");/*CL*/
     expectedArguments(\core\application\Autoload::addComponent(), 0, argumentsSet('ComponentsList'));
 
 
@@ -26,6 +26,8 @@ namespace PHPSTORM_META{
 
     exitPoint(\trigger_error(ANY_ARGUMENT, 256));
     exitPoint(\core\application\Header::location());
+    exitPoint(\core\application\Go::to404());
+    exitPoint(\core\application\Go::to());
     exitPoint(\core\application\Header::handleOptionsRequest());
     exitPoint(\core\application\Core::performResponse());
     exitPoint(\core\application\Core::endApplication());

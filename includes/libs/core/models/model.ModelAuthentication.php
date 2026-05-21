@@ -15,16 +15,19 @@ namespace core\models
      */
     class ModelAuthentication extends BaseModel
     {
-        static private $instance;
+        static private ModelAuthentication|null $instance = null;
 
-        static public $data;
+        static public array $data;
+
 
         public function __construct()
         {
             parent::__construct(sprintf(Configuration::$authentication_tableName,Core::$application), Configuration::$authentication_tableId);
         }
 
-        static public function checkLoginAndHash($pLogin, $pHash){
+
+        static public function checkLoginAndHash(string $pLogin, string $pHash):bool
+        {
             if(empty($pLogin)||empty($pHash))
                 return false;
 
@@ -41,7 +44,8 @@ namespace core\models
             return false;
         }
 
-        static public function isUser($pLogin, $pMdp)
+
+        static public function isUser(string $pLogin, string $pMdp):bool
         {
             if(empty($pLogin)||empty($pMdp))
                 return false;
@@ -59,7 +63,9 @@ namespace core\models
             return false;
         }
 
-        public function createUser($pLogin, $pPassword, $pPermissions = 1){
+
+        public function createUser(string $pLogin, string $pPassword, int $pPermissions = 1):mixed
+        {
             $data = array(Configuration::$authentication_fieldLogin=>$pLogin,
                 Configuration::$authentication_fieldPassword=>password_hash($pPassword, PASSWORD_BCRYPT, array("cost"=>10)),
                 Configuration::$authentication_fieldPermissions=>$pPermissions,
@@ -67,10 +73,8 @@ namespace core\models
             return $this->insert($data);
         }
 
-        /**
-         * @return ModelAuthentication
-         */
-        static public function getInstance()
+
+        static public function getInstance():ModelAuthentication
         {
             if(!self::$instance)
                 self::$instance = new ModelAuthentication();

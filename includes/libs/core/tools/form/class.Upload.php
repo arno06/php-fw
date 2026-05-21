@@ -5,7 +5,8 @@ namespace core\tools\form
 	use core\system\File;
 	use core\system\Image;
 	use core\system\Folder;
-	use \Exception;
+	use Exception;
+
 	/**
 	 * Classe de gestion des uploads
 	 * Gestion du redimensionnement et des miniatures si le fichier est une image
@@ -22,74 +23,68 @@ namespace core\tools\form
 		 * $_FILES du fichier &agrave; uploader
 		 * @var array
 		 */
-		private $fileData;
+		private array $fileData;
 
 		/**
 		 * Nouveau nom du fichier
-		 * @var String
+		 * @var string
 		 */
-		private $fileName;
+		private string $fileName;
 
 		/**
 		 * Type du fichier &agrave; uploader
-		 * @var String
+		 * @var string
 		 */
-		private $fileType;
+		private string $fileType;
 
 		/**
 		 * Dossier cible de l'upload
-		 * @var String
+		 * @var string
 		 */
-		private $folder;
+		private string $folder;
 
 		/**
 		 * Nouvelles dimensions de l'image uploadée
 		 * @var array
 		 */
-		private $newSize;
+		private array $newSize = [];
 
 		/**
 		 * Tableau des miniatures
 		 * @var	array
 		 */
-		private $miniatures = array();
+		private array $miniatures = [];
 
 		/**
 		 * Url relative du fichier, concaténation du dossier, du nom et du type du fichier
-		 * @var String
+		 * @var string
 		 */
-		public $pathFile;
+		public string $pathFile;
 
 		/**
 		 * Variable permettant de savoir si l'upload est effectif ou non
-		 * @var	Boolean
+		 * @var	bool
 		 */
-		public $isUpload = false;
+		public bool $isUpload = false;
 
 		/**
 		 * Model Upload permettant de gérer directement sauvegarder l'ensemble des fichiers en bases
 		 * @var ModelUpload
 		 */
-		public $model_upload;
+		public ModelUpload $model_upload;
 
 		/**
 		 * Id de l'upload en base
 		 * @var int
 		 */
-		public $id_upload;
+		public int $id_upload;
 
 
-		/**
-		 * Constructor
-		 * @param array $pFile					$_FILES cible
-		 * @param String $pFolder				Dossier cible
-		 * @param String $pFileName				Nouveau nom du fichier
-		 */
-		public function __construct(array $pFile, $pFolder = "/", $pFileName = "")
+		public function __construct(array $pFile, string $pFolder = "/", string $pFileName = "")
 		{
 			$this->folder = $pFolder;
 			$this->fileData = $pFile;
-			$this->fileName = File::sanitizeFileName($pFileName?$pFileName:preg_replace("/(\.[a-z0-9]{2,4})$/i","",$pFile["name"]));
+			$this->fileName = File::sanitizeFileName($pFileName?:preg_replace("/(\.[a-z0-9]{2,4})$/i","",$pFile["name"]));
 			$this->fileType = $this->getMimeType();
 			$p = $this->fileName.".".$this->fileType;
 			$f = $this->fileName;
@@ -104,14 +99,13 @@ namespace core\tools\form
 			$this->model_upload = new ModelUpload();
 		}
 
-
 		/**
 		 * Méthode d'envoi de déclenchement des actions d'uploads, redimensionnement...
 		 * @throws Exception
 		 * @param bool $pCreateFolder
 		 * @return bool
 		 */
-		public function send($pCreateFolder = false)
+		public function send(bool $pCreateFolder = false):bool
 		{
 			if ($pCreateFolder && !is_dir($this->folder))
 				Folder::create($this->folder);
@@ -122,7 +116,7 @@ namespace core\tools\form
 			if(!move_uploaded_file($this->fileData["tmp_name"], $this->pathFile))
 				throw new Exception("Upload impossible : le dossier cible n'existe pas");
 			chmod($this->pathFile, 0666);
-			if(is_array($this->newSize) && count($this->newSize) == 2)
+			if(count($this->newSize) == 2)
 			{
 				if(!Image::resize($this->pathFile, $this->newSize[0], $this->newSize[1]))
 					throw new Exception("Upload effectué : redimensionnement impossible");
@@ -144,13 +138,12 @@ namespace core\tools\form
 			return $this->isUpload;
 		}
 
-
 		/**
 		 * Méthode permettant d'annuler l'upload
 		 * Supprime le fichier principal et les fichiers secondaires (miniatures)
 		 * @return void
 		 */
-		public function cancelUpload()
+		public function cancelUpload():void
 		{
 			if($this->isUpload)
 				$this->model_upload->deleteById($this->id_upload);
@@ -159,13 +152,12 @@ namespace core\tools\form
 				File::delete($this->miniatures[$i]["pathFile"]);
 		}
 
-
 		/**
 		 * Méthode permettant de renommer le fichier principal
-		 * @param String $pNewName				nouveau de du fichier (sans dossier ni extension)
+		 * @param string $pNewName nouveau de du fichier (sans dossier ni extension)
 		 * @return void
 		 */
-		public function renameFile($pNewName)
+		public function renameFile(string $pNewName):void
 		{
 			File::rename($this->pathFile, $this->folder.$pNewName.".".$this->fileType);
 			$this->fileName = $pNewName;
@@ -173,12 +165,11 @@ namespace core\tools\form
 			$this->model_upload->updateById($this->id_upload, array("path_upload"=>$this->pathFile));
 		}
 
-
 		/**
-		 * @param  $pNewName
+		 * @param string $pNewName
 		 * @return void
 		 */
-		public function renameFolder($pNewName)
+		public function renameFolder(string $pNewName):void
 		{
 			File::rename($this->pathFile, $pNewName.$this->fileName.".".$this->fileType);
 			$this->folder = $pNewName;
@@ -186,41 +177,22 @@ namespace core\tools\form
 			$this->model_upload->updateById($this->id_upload, array("path_upload"=>$this->pathFile));
 		}
 
-
 		/**
 		 * Définie les nouvelles dimensions de l'image uploadée
-		 * @param Number $pWidth				Largeur
-		 * @param Number $pHeight				Hauteur
+		 * @param int $pWidth Largeur
+		 * @param int $pHeight Hauteur
 		 * @return void
 		 */
-		public function resizeImage($pWidth, $pHeight)
+		public function resizeImage(int $pWidth, int $pHeight):void
 		{
 			$this->newSize = array($pWidth, $pHeight);
 		}
 
-
-		/**
-		 * Méthode permettant d'ajouter une nouvelle miniature dans la liste de traitement
-		 * @deprecated
-		 * @param  $pName
-		 * @param  $pFolder
-		 * @param  $pWidth
-		 * @param  $pHeight
-		 * @return void
-		 */
-		public function addMiniature($pName, $pFolder, $pWidth, $pHeight)
-		{
-			array_push($this->miniatures, array("pathFile"=>$pFolder.$pName.".".$this->fileType, "width"=>$pWidth, "height"=>$pHeight));
-			if($this->isUpload)
-				Image::createCopy($this->pathFile, $pFolder.$pName.".".$this->fileType, $pWidth, $pHeight);
-		}
-
-
 		/**
 		 * Permet de récupérer le mimeType en fonction du nom du fichier &agrave; uploader
-		 * @return String
+		 * @return string
 		 */
-		private function getMimeType()
+		private function getMimeType():string
 		{
 			if(!isset($this->fileData["name"])||empty($this->fileData["name"]))
 				return "";
@@ -229,13 +201,12 @@ namespace core\tools\form
 			return $extract[1];
 		}
 
-
 		/**
 		 * Méthode permettant de vérifier si le fichier principal correpond &agrave; un mimeType particulier
-		 * @param String $pExtension				Extensions autorisées ("pdf" ou "jpg|gif|png"...)
-		 * @return boolean
+		 * @param string $pExtension				Extensions autorisées ("pdf" ou "jpg|gif|png"...)
+		 * @return bool
 		 */
-		public function isMimeType($pExtension)
+		public function isMimeType(string $pExtension):bool
 		{
 			if($pExtension == "*")
 				$pExtension = ".".$pExtension;

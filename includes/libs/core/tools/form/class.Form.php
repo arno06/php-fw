@@ -1,15 +1,17 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 namespace core\tools\form
 {
-
     use core\application\Application;
     use core\application\Core;
-	use core\data\SimpleJSON;
+    use core\application\routing\RoutingHandler;
+    use core\data\SimpleJSON;
 	use core\application\Dictionary;
 	use core\application\Autoload;
 	use core\db\Query;
     use core\models\ModelUpload;
-    use \Exception;
+    use core\tools\captcha\Captcha;
+    use Exception;
 
 	/**
 	 * Classe de gestion des formulaires (création / vérification des données)
@@ -50,159 +52,136 @@ namespace core\tools\form
 		 * Expression régulière pour une chaine de caractére alpha numérique
 		 * @var String
 		 */
-		static public $regExp_AlphaNumeric= '/^[0-9a-z\_\-]+$/i';
+		static public string $regExp_AlphaNumeric= '/^[0-9a-z\_\-]+$/i';
 
-		static public $regExp_Password= '/^[0-9a-z]{6,}$/i';
+		static public string $regExp_Password= '/^.{6,}$/i';
 
 		/**
 		 * Expression régulière de mail - PhpMailer
 		 * @var String
 		 */
-		static public $regExp_Mail = '/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!\.)){0,61}[a-zA-Z0-9_-]?\.)+[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!$)){0,61}[a-zA-Z0-9_]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/';
+		static public string $regExp_Mail = '/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!\.)){0,61}[a-zA-Z0-9_-]?\.)+[a-zA-Z0-9_](?:[a-zA-Z0-9_\-](?!$)){0,61}[a-zA-Z0-9_]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/';
 
 		/**
 		 * Expression régulière pour un chiffre/nombre
 		 * @var String
 		 */
-		static public $regExp_Numeric = '/^[0-9]+$/';
+		static public string $regExp_Numeric = '/^[0-9]+$/';
 
 		/**
 		 * @var string
 		 */
-		static public $regExp_Date = '/^((19|20)[0-9]{2})\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/';
+		static public string $regExp_Date = '/^((19|20)[0-9]{2})\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$/';
 
 		/**
 		 * Expression régulière pour du texte (autorise tout type de caractére)
 		 * @var String
 		 */
-		static public $regExp_Text = '/.{1,}/';
+		static public string $regExp_Text = '/.{1,}/';
 
 		/**
 		 * Expression régulière d'un url http://www.domain.ext/
 		 * @var String
 		 */
-		static public $regExp_Url = '/^http\:\/\/www\.[a-z0-9\_\-\?\&]\.[a-z]{2,3}\/$/';
+		static public string $regExp_Url = '/^http\:\/\/www\.[a-z0-9\_\-\?\&]\.[a-z]{2,3}\/$/';
 
 		/**
 		 * Expression régulière des chaines de caractéres interdisant le <html>
 		 * @var String
 		 */
-		static public $regExp_TextNoHtml = '/^[^\<\>]{1,}$/i';
+		static public string $regExp_TextNoHtml = '/^[^\<\>]{1,}$/i';
 
         /**
          * @var string
          */
-		static public $regExp_Hexa = '/^[0-9a-f]{6}$/i';
+		static public string $regExp_Hexa = '/^[0-9a-f]{6}$/i';
 
 		/**
 		 * Variable contenant la concaténation des erreurs relevées lors de la vérification du formulaire
 		 * @var String
 		 */
-		private $error = "";
+		private string $error = "";
 
 		/**
 		 * Données du formulaire, parsées du fichier JSON
 		 * @var array
 		 */
-		private $data = array();
+		private array $data = array();
 
-		/**
-		 * @var bool
-		 */
-		private $dataCleaned = false;
+		private bool $dataCleaned = false;
 
 		/**
 		 * Nom du formulaire JSON
 		 * @var String
 		 */
-		public $name = "";
+		public string $name = "";
 
 		/**
 		 * Tableau des fichiers uploadés
 		 * @var array
 		 */
-		private $uploads = array();
+		private array $uploads = array();
 
 		/**
 		 * Variable permettant de savoir si le traitement du formulaire en cours est valide ou non
 		 * @var Boolean
 		 */
-		private $isValid = false;
+		private bool $isValid = false;
 
-		/**
-		 * @var bool
-		 */
-		protected $hasUpload = false;
+		protected bool $hasUpload = false;
 
-		/**
-		 * @var bool
-		 */
-		protected $hasDatePicker = false;
+		protected bool $hasDatePicker = false;
 
-		/**
-		 * @var bool
-		 */
-		protected $hasColorPicker = false;
+		protected bool $hasColorPicker = false;
 
-		/**
-		 * @var int
-		 */
-		protected $countMendatory = 0;
+		protected int $countMendatory = 0;
 
 		/**
 		 * Tableau des champs "input type file" dont le type de fichier est incorrect
 		 * @var array
 		 */
-		private $uploadsFailMimeType = array();
+		private array $uploadsFailMimeType = array();
 
 		/**
 		 * Tableau des champs "input type file" dont l'upload est impossible
 		 * @var array
 		 */
-		private $uploadsSendFail = array();
+		private array $uploadsSendFail = array();
 
 		/**
 		 * Tableau des champs du formulaire dont la valeur est incorrecte (Expression régulière non vérifiée par exemple)
 		 * @var array
 		 */
-		private $inputsIncorrect = array();
+		private array $inputsIncorrect = array();
 
 		/**
 		 * @var array
 		 */
-		private $inputsWithAlternative = array();
+		private array $inputsWithAlternative = array();
 
 		/**
 		 * Tableau des champs du formulaire dont la valeur du champ de confirmation n'est pas bonne
 		 * @var array
 		 */
-		private $inputsWithConfirm = array();
+		private array $inputsWithConfirm = array();
 
 		/**
 		 * Tableau des champs obligatoires du formulaire dont les valeurs ne sont pas valides (vide ou expression régulière non vérifiée)
 		 * @var	array
 		 */
-		private $inputsRequire = array();
+		private array $inputsRequire = array();
 
-		/**
-		 * @var array
-		 */
-		private $files;
-
-		/**
-		 * @var array
-		 */
-		private $post;
+		private array $post;
 
 
 		/**
 		 * Constructor
 		 * Récupére et parse le fichier JSON de configuration du formulaire
-		 * @param  $pName
+		 * @param string $pName
 		 * @param bool $pReal
 		 * @throws Exception
 		 */
-		public function __construct($pName, $pReal = true)
+		public function __construct(string $pName, bool $pReal = true)
 		{
 			$this->name = $pName;
 			if(!$pReal)
@@ -215,7 +194,7 @@ namespace core\tools\form
 			}
 			catch (Exception $e)
 			{
-				throw new Exception("Le formulaire <b>".$pName."</b> est introuvable");
+				throw new Exception("Le formulaire <b>".$pName."</b> est introuvable (".$e->getMessage().")");
 			}
 			if(!$this->data)
 				throw new Exception("Impossible de parser le fichier de déclaration du formulaire <b>".$pName."</b>, veuillez vérifier le formatage des données (guillements, virgules, accents...).");
@@ -224,24 +203,22 @@ namespace core\tools\form
 		/**
 		 * Méthode permettant de modifier la valeur d'une propriete d'un des champs définit dans le formulaire
 		 * @param string $pName
-		 * @param string $pPropery
+		 * @param string $pProperty
 		 * @param mixed $pValue
 		 * @return bool
 		 */
-		public function setProperty($pName, $pPropery, $pValue)
+		public function setProperty(string $pName, string $pProperty, mixed $pValue):bool
 		{
 			if(!isset($this->data[$pName]))
 				return false;
 			if(!isset($this->data[$pName]["attributes"]))
 				$this->data[$pName]["attributes"] = array();
-			$this->data[$pName]["attributes"][$pPropery] = $pValue;
+			$this->data[$pName]["attributes"][$pProperty] = $pValue;
 			return true;
 		}
 
-		/**
-		 *
-		 */
-		private function cleanData()
+
+		private function cleanData():void
 		{
 			if($this->dataCleaned)
 				return;
@@ -260,9 +237,7 @@ namespace core\tools\form
 					"fileType"=>"txt|rtf|pdf|doc|docx|xls|xlsx|csv|ppt|pptx"
 				),
 				self::TAG_CAPTCHA=>array(
-					"attributes"=>array(
-                        "length"=>5
-                    )
+					"attributes"=>array()
 				),
 				self::TAG_SELECT=>array(
 					"parameters"=>array()
@@ -286,19 +261,18 @@ namespace core\tools\form
 				}
 				if($parseLabels&&!empty($input["label"]))
 					$input["label"] = Dictionary::term($input["label"]);
-                else if(!$parseLabels && empty($input['label']) && isset($input['attributes']) && isset($input['attributes']['placeholder']))
+                else if(!$parseLabels && empty($input['label']) && isset($input['attributes']['placeholder']))
                     $input['errorLabel'] = $input['attributes']['placeholder'];
 			}
 		}
-
 
 		/**
 		 * Méthode de validation des données attendues dans le formulaire
 		 * Upload les fichiers
 		 * Définit les erreurs en fonction de la nécessité des différents champs
-		 * @return Boolean
+		 * @return bool
 		 */
-		public function isValid()
+		public function isValid():bool
 		{
 			$this->cleanData();
 			$this->error = "";
@@ -310,33 +284,30 @@ namespace core\tools\form
 			return $this->isValid;
 		}
 
-
 		/**
 		 * Méthode de d'exécution des uploads si le formulaire présente des inputs type FILE
 		 * @return void
 		 */
-		private function performUploads()
+		private function performUploads():void
 		{
-			$this->uploadsFailMimeType = array();
-			$this->uploadsSendFail = array();
-			$this->uploads = array();
+			$this->uploadsFailMimeType = [];
+			$this->uploadsSendFail = [];
+			$this->uploads = [];
 			if(!isset($_FILES[$this->name]))
 				return;
 			$tmp = $_FILES[$this->name];
-			$this->files = array();
+			$files = [];
 			foreach($tmp["name"] as $name=>$value)
-				$this->files[$name] = array();
-			foreach($this->files as $name=>$value)
 			{
-				$file = array();
+				$file = [];
 				$file["name"] = $tmp["name"][$name];
 				$file["type"] = $tmp["type"][$name];
 				$file["tmp_name"] = $tmp["tmp_name"][$name];
 				$file["error"] = $tmp["error"][$name];
 				$file["size"] = $tmp["size"][$name];
-				$this->files[$name] = $file;
+				$files[$name] = $file;
 			}
-			foreach($this->files as $name=>$data)
+			foreach($files as $name=>$data)
 			{
 				if(isset($this->post[$name])&&!empty($this->post[$name]))
 					continue;
@@ -361,7 +332,7 @@ namespace core\tools\form
 				{
 					$up->send(true);
 				}
-				catch(Exception $e)
+				catch(Exception)
 				{
 					$this->uploadsSendFail[] = $name;
 					continue;
@@ -372,44 +343,38 @@ namespace core\tools\form
 			}
 		}
 
-
 		/**
 		 * Méthode de traitement du formulaire si les données $this->post existantes
 		 * @return void
 		 */
-		private function checkInputs()
+		private function checkInputs():void
 		{
 			$this->isValid = true;
-			$this->inputsWithAlternative = array();
-			$this->inputsWithConfirm = array();
-			$this->inputsRequire = array();
-			$this->inputsIncorrect = array();
+			$this->inputsWithAlternative = [];
+			$this->inputsWithConfirm = [];
+			$this->inputsRequire = [];
+			$this->inputsIncorrect = [];
 
 			foreach($this->data as $name=>&$data)
 			{
 				if($data["tag"] == Form::TAG_CAPTCHA)
 				{
-                    $attr = $data["attributes"];
 					$data["label"] = "Captcha";
-					$c = new Captcha($attr["length"], $name);
 					if(!isset($this->post[$name]) || empty($this->post[$name]))
 					{
 						unset($this->post[$name]);
 						$this->inputsRequire[] = $name;
 						$this->isValid = false;
+                        continue;
 					}
-					else if($c->getValue() != $this->post[$name])
+                    $c = new Captcha($this->post[$name]);
+					if(!$c->verified)
 					{
-						unset($this->post[$name]);
 						$this->inputsIncorrect[]= $name;
 						$this->isValid = false;
 					}
-					else
-					{
-						unset($this->post[$name]);
-						$c->unsetSessionVar();
-					}
-					continue;
+                    unset($this->post[$name]);
+                    continue;
 				}
 				if(is_array($data["inputModifiers"]))
 					$this->applyModifiers($data["inputModifiers"], $name);
@@ -430,7 +395,7 @@ namespace core\tools\form
 				{
 					if(!isset($this->post[$name]))
 					{
-						$this->post[$name] = array();
+						$this->post[$name] = [];
 					}
 				}
 				if($data["tag"]==self::TAG_UPLOAD&&$data["require"])
@@ -536,15 +501,9 @@ namespace core\tools\form
 			}
 		}
 
-		/**
-		 * @param array $pModifiers
-		 * @param string $pName
-		 * @return void
-		 */
-		protected function applyModifiers($pModifiers, $pName)
+
+		protected function applyModifiers(array $pModifiers, string $pName):void
 		{
-			if(!is_array($pModifiers))
-				return;
 			for($i = 0, $max = count($pModifiers);$i<$max;$i++)
 			{
 				$this->post[$pName] = call_user_func($pModifiers[$i], $this->post[$pName]);
@@ -556,13 +515,13 @@ namespace core\tools\form
 		 * Cette expression régulière peut se présenter sous deux formats :
 		 * 					- Nom d'une expression disponible de base. Voir les propriétés statics Form::$regExp_NOM
 		 * 					- Une expression régulière directement spécifiée dans le JSON, celle-ci devra étre déclarée de la mnaiére suivante : custom:/[votre expression]/
-		 * @param String $pRegExp		Valeur de l'expression régulière telle qu'elle est déclarée dans le JSON
-		 * @return String
+		 * @param string $pRegExp		Valeur de l'expression régulière telle qu'elle est déclarée dans le JSON
+		 * @return string
 		 */
-		protected function getRegExp($pRegExp)
+		protected function getRegExp(string $pRegExp):string
 		{
-			if(preg_match("/^(custom\:)/", $pRegExp, $extract, PREG_OFFSET_CAPTURE))
-				return preg_replace("/^(custom\:)/", "", $pRegExp);
+			if(preg_match("/^(custom:)/", $pRegExp, $extract, PREG_OFFSET_CAPTURE))
+				return preg_replace("/^(custom:)/", "", $pRegExp);
 			$regExp = "regExp_".$pRegExp;
 			if(isset(self::$$regExp))
 				return self::$$regExp;
@@ -573,15 +532,13 @@ namespace core\tools\form
 		 * Méthode de récupération des valeurs du formulaires
 		 * @return array
 		 */
-		public function getValues()
+		public function getValues():array
 		{
 			return $this->post;
 		}
 
-		/**
-		 * @return array
-		 */
-		public function toArray()
+
+		public function toArray():array
 		{
 			return $this->data;
 		}
@@ -591,7 +548,7 @@ namespace core\tools\form
 		 * Ecrit sur la propriété public $error de l'objet Form
 		 * @return string
 		 */
-		public function getError()
+		public function getError():string
 		{
 			if(!isset($this->post))
 				return "";
@@ -610,11 +567,11 @@ namespace core\tools\form
 		 * Récupére le message adéquate dans le Dictionnaire en fonction du nombre de champs
 		 * Renvoie le message d'erreur pour le tableau en cours
 		 * @param array	 $pArray		Tableau de champs invalides
-		 * @param String $pLibelle		Identification du message au singulier (1 seul champ invalide)
-		 * @param String $pLibelles		Identification du message au pluriel
-		 * @return String
+		 * @param string $pLibelle		Identification du message au singulier (1 seul champ invalide)
+		 * @param string $pLibelles		Identification du message au pluriel
+		 * @return string
 		 */
-		private function getErrorFromArray($pArray, $pLibelle, $pLibelles)
+		private function getErrorFromArray(array $pArray, string $pLibelle, string $pLibelles):string
 		{
 			$nb = count($pArray);
 			if(!$nb)
@@ -628,7 +585,7 @@ namespace core\tools\form
 				if(!is_array($pArray[$i]))
 					$error .= "<b>".(isset($this->data[$pArray[$i]]["errorLabel"])&&!empty($this->data[$pArray[$i]]["errorLabel"])?$this->data[$pArray[$i]]["errorLabel"]:$this->data[$pArray[$i]]["label"])."</b>";
 				else
-					$error .= "<b>".(isset($this->data[$pArray[$i][0]]["errorLabel"])&&!empty($this->data[$pArray[$i][0]]["errorLabel"])?$this->data[$pArray[$i][0]]["errorLabel"]:$this->data[$pArray[$i][0]]["label"])."</b> &amp; <b>".(isset($this->data[$pArray[$i][1]]["errorLabel"]) ? $this->data[$pArray[$i][1]]["errorLabel"] : $this->data[$pArray[$i][1]]["label"])."</b>";
+					$error .= "<b>".(isset($this->data[$pArray[$i][0]]["errorLabel"])&&!empty($this->data[$pArray[$i][0]]["errorLabel"])?$this->data[$pArray[$i][0]]["errorLabel"]:$this->data[$pArray[$i][0]]["label"])."</b> &amp; <b>".($this->data[$pArray[$i][1]]["errorLabel"] ?? $this->data[$pArray[$i][1]]["label"])."</b>";
 			}
 			if($nb==1)
 			{
@@ -643,25 +600,24 @@ namespace core\tools\form
 			return "<p>".sprintf($format, $error)."</p>";
 		}
 
-
 		/**
 		 * Méthode de renommage des fichiers uploadés en fonction de l'id de l'entrée enregistrée
 		 * Renvoi le tableau associatif des nouveaux de fichiers pour l'update de la base
-         * @param string|int $pId
+         * @param string|int|null $pId
 		 * @return array
 		 */
-		public function setUploadFileName($pId = null)
+		public function setUploadFileName(string|int $pId = null):array
 		{
-            foreach($this->data as $name=>&$inp)
+            foreach($this->data as $name=>$inp)
             {
                 if(isset($inp['tag']) && $inp['tag'] == self::TAG_UPLOAD && isset($this->post[$name]) && !empty($this->post[$name]))
                 {
-                    if((!isset($inp['fileName'])) || (!preg_match('/(\{id\})/', $inp['fileName'])))
+                    if((!isset($inp['fileName'])) || (!preg_match('/(\{id})/', $inp['fileName'])))
                         continue;
                     $folderName = self::PATH_TO_UPLOAD_FOLDER;
                     if(isset($inp['folder']))
                         $folderName .= $inp['folder'];
-                    $fileName = preg_replace("/(\{id\})/",$pId, $inp["fileName"]);
+                    $fileName = preg_replace("/(\{id})/",$pId, $inp["fileName"]);
                     $newPath = $folderName.$fileName;
                     $id_upload = $this->post[$name];
                     $m = new ModelUpload();
@@ -680,25 +636,24 @@ namespace core\tools\form
 				    $pId = $up->id_upload;
 				if($this->data[$name]["fileName"])
 				{
-					$fileName = preg_replace("/(\{id\})/",$pId,$this->data[$name]["fileName"]);
+					$fileName = preg_replace("/(\{id})/",$pId,$this->data[$name]["fileName"]);
 					$up->renameFile($fileName);
 				}
-				if(preg_match("/(\{id\})/",$this->data[$name]["folder"]))
+				if(preg_match("/(\{id})/",$this->data[$name]["folder"]))
 				{
-					$folderName = self::PATH_TO_UPLOAD_FOLDER.preg_replace("/(\{id\})/",$pId,$this->data[$name]["folder"]);
+					$folderName = self::PATH_TO_UPLOAD_FOLDER.preg_replace("/(\{id})/",$pId,$this->data[$name]["folder"]);
 					$up->renameFolder($folderName);
 				}
 			}
 			return $newFileName;
 		}
 
-
 		/**
 		 * Méthode permettant d'injecter des valeurs dans le formulaire
 		 * @param array $pValues				Tableau associatif des valeurs é injecter array(nomDuChamp=>valeur);
 		 * @return void
 		 */
-		public function injectValues(array $pValues)
+		public function injectValues(array $pValues):void
 		{
 			if(empty($pValues))
 				return;
@@ -726,7 +681,7 @@ namespace core\tools\form
 		 * Méthode de pré-traitement du formulaire avant envoi &agrave; la vue (parsing des libellés, des types de balises, définition des js/css requis)
 		 * @return void
 		 */
-		public function prepareToView()
+		public function prepareToView():void
 		{
 			$this->cleanData();
 			if(isset($this->post))
@@ -737,6 +692,9 @@ namespace core\tools\form
 			{
 				switch($data["tag"])
 				{
+                    case self::TAG_CAPTCHA:
+                        Autoload::addComponent("Captcha");
+                        break;
 					case self::TAG_RICHEDITOR:
 						trace("you must handle richeditor");
 						break;
@@ -828,10 +786,8 @@ namespace core\tools\form
 			}
 		}
 
-        /**
-         * @param array|null $pParams
-         */
-		public function getValue(array $pParams = null)
+
+		public function getValue(array $pParams = null):void
 		{
 			$name = "";
 			$toVar = false;
@@ -844,10 +800,8 @@ namespace core\tools\form
 			}
 		}
 
-        /**
-         * @param array|null $pParams
-         */
-		public function isChecked(array $pParams = null)
+
+		public function isChecked(array $pParams = null):void
 		{
 			$name = "";
 			$toVar = false;
@@ -860,10 +814,8 @@ namespace core\tools\form
 			}
 		}
 
-        /**
-         * @param array|null $pParams
-         */
-		public function getOptions(array $pParams = null)
+
+		public function getOptions(array $pParams = null):void
 		{
 			$name = "";
 			$toVar = false;
@@ -876,10 +828,8 @@ namespace core\tools\form
 			}
 		}
 
-        /**
-         * @param array|null $pParams
-         */
-		public function getLabel(array $pParams = null)
+
+		public function getLabel(array $pParams = null):void
 		{
 			$name = "";
 			$toVar = false;
@@ -893,12 +843,7 @@ namespace core\tools\form
 		}
 
 
-		/**
-         * @param $pParams
-         * @param $pReturn
-		 * @return string|void
-		 */
-		public function display(array $pParams = null, $pReturn = false)
+		public function display(array $pParams = null, bool $pReturn = false):string|bool
 		{
 			$noForm = false;
 			$noMandatory = false;
@@ -926,7 +871,7 @@ namespace core\tools\form
 			{
                 if(empty($url))
                 {
-                    $url = Core::rewriteURL($controller, $action, $pParams, Application::getInstance()->currentLanguage);
+                    $url = RoutingHandler::rewrite($controller, $action, $pParams, Application::getInstance()->currentLanguage);
                 }
                 else
                 {
@@ -991,24 +936,23 @@ namespace core\tools\form
             return true;
 		}
 
-
 		/**
 		 * Méthode utilitaire permettant de vérifier si une chaine de caractéres correspond é l'expression régulière numérique
-		 * @param String $pVar				Valeur é tester
-		 * @return Boolean
+		 * @param string $pVar				Valeur é tester
+		 * @return bool|int
 		 */
-		static public function isNumeric($pVar)
+		static public function isNumeric(string $pVar):bool|int
 		{
-			return preg_match(self::$regExp_Numeric, $pVar, $matches);
+			return preg_match(self::$regExp_Numeric, $pVar);
 		}
 
 		/**
 		 * @static
 		 * http://www.regular-expressions.info/dates.html
-		 * @param $pVar
+		 * @param string $pVar
 		 * @return Boolean
 		 */
-		static public function isDate($pVar)
+		static public function isDate(string $pVar):bool
 		{
 			if(!preg_match(self::$regExp_Date, $pVar, $matches))
 				return false;
@@ -1023,47 +967,43 @@ namespace core\tools\form
 			return !($d == 29 && $m == 2 && !($y % 4 == 0  && ($y % 100 != 0 || $y % 400 != 0)));
 		}
 
-
 		/**
 		 * Méthode de desactivation d'un input dans le formulaire en cours
-		 * @param String $pName
+		 * @param string $pName
 		 * @return void
 		 */
-		public function unsetInput($pName)
+		public function unsetInput(string $pName):void
 		{
 			if(!isset($this->data[$pName]))
 				return;
 			unset($this->data[$pName]);
 		}
 
-
 		/**
 		 * Méthode de définition d'un input dans le formulaire en cours
-		 * @param String $pName			Nom souhaité
+		 * @param string $pName			Nom souhaité
 		 * @param array $pDetails		Tableau des données propriétés de l'input
 		 * @return void
 		 */
-		public function setInput($pName, $pDetails)
+		public function setInput(string $pName, array $pDetails):void
 		{
 			$this->data[$pName] = $pDetails;
 		}
 
 		/**
 		 * Méthode de récupération d'un input du formulaire en cours
-		 * @param String $pName
-		 * @return array
+		 * @param string $pName
+		 * @return array|null
 		 */
-		public function getInput($pName)
+		public function getInput(string $pName):array|null
 		{
-			if(!isset($this->data) || empty($this->data) || !isset($this->data[$pName]) || empty($this->data[$pName]))
+			if(empty($this->data) || !isset($this->data[$pName]) || empty($this->data[$pName]))
 				return null;
 			return $this->data[$pName];
 		}
 
-		/**
-		 * @return array
-		 */
-		public function getInputs()
+
+		public function getInputs():array
 		{
 			return $this->data;
 		}

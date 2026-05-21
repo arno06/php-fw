@@ -1,7 +1,10 @@
 <?php
 namespace core\application
 {
-	/**
+
+    use JetBrains\PhpStorm\NoReturn;
+
+    /**
 	 * Class Header
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
@@ -10,14 +13,14 @@ namespace core\application
 	 */
 	class Header
 	{
-        static private $pool = array();
+        static private array $pool = array();
 
         /**
          * Méthode de gestion systématique des headers HTTP de cache
          * @param string $pETag     jeton
          * @param int $pDuration    Durée du cache
          */
-        static public function handleCache($pETag, $pDuration)
+        static public function handleCache(string $pETag, int $pDuration):void
         {
             self::$pool["Cache-Control"] = "max-age=".$pDuration.", public";
             self::$pool["ETag"] = $pETag;
@@ -45,7 +48,7 @@ namespace core\application
         /**
          * Méthode de définition des différents header en fonction du pool prédéfinit
          */
-        static private function write()
+        static private function write():void
         {
             foreach(self::$pool as $n=>$v)
             {
@@ -66,14 +69,17 @@ namespace core\application
          * @param array $pMethods liste des méthodes HTTP autorisées
          * @param array $pHeaders liste des headers autorisés
          */
-        static public function handleOptionsRequest($pDomain = array("*"), $pMethods = array("GET"), $pHeaders = array('Content-Type')){
+        #[NoReturn]
+        static public function handleOptionsRequest(array $pDomain = array("*"), array $pMethods = array("GET"), array $pHeaders = array('Content-Type')):void
+        {
             self::allowOrigin($pDomain);
             header('Access-Control-Allow-Methods: '.implode(", ", $pMethods));
             header('Access-Control-Allow-Headers: '.implode(", ", $pHeaders));
             Core::endApplication();
         }
 
-        static public function allowOrigin($pDomain = array('*')){
+        static public function allowOrigin(array $pDomain = array('*')):void
+        {
             header('Access-Control-Allow-Origin: '.implode(", ", $pDomain));
         }
 
@@ -81,8 +87,10 @@ namespace core\application
 		 * Se charge d'effectuer une redirection HTTP
 		 * @param string $pURL	Url cible de la redirection
 		 * @param int $pCode	Code HTTP à envoyer par défaut 301
+         * @return void
 		 */
-		static public function location($pURL ,$pCode = 301)
+        #[NoReturn]
+		static public function location(string $pURL , int $pCode = 301):void
 		{
 			header("Location:".$pURL, true, $pCode);
             Core::endApplication();
@@ -92,26 +100,23 @@ namespace core\application
 		 * Modifie le MIME Type présent dans l'entête HTTP de la réponse
 		 * @param string $pValue	ex : text/html, application/xml...
 		 * @param string|bool $pCharset	Définit le charset à spécifier
+         * @return void
 		 */
-		static public function contentType($pValue, $pCharset = false)
+		static public function contentType(string $pValue, string|bool $pCharset = false):void
 		{
 			if(!$pCharset)
 				$pCharset = Configuration::$global_encoding;
 			header("Content-Type: ".$pValue."; charset=".$pCharset);
 		}
 
-        /**
-         * @param string $pValue
-         */
-        static public function contentEncoding($pValue)
+
+        static public function contentEncoding(string$pValue):void
         {
             header("Content-Encoding: ".$pValue);
         }
 
-        /**
-         * @param int $pValue
-         */
-        static public function contentLength($pValue)
+
+        static public function contentLength(int $pValue):void
         {
             header("Content-Length: ".$pValue);
         }
@@ -119,16 +124,15 @@ namespace core\application
 		/**
 		 * Modifie le status de l'entête HTTP de la réponse
 		 * @param string $pValue
+         * @return void
 		 */
-		static public function status($pValue)
+		static public function status(string $pValue):void
 		{
 			header("status: ".$pValue);
 		}
 
-		/**
-		 * @param string $pValue
-		 */
-		static public function http($pValue)
+
+		static public function http(string $pValue):void
 		{
 			header("HTTP/".$pValue);
 		}

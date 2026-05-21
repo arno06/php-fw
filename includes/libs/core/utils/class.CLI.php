@@ -3,18 +3,25 @@ namespace core\utils
 {
 
     use core\application\Core;
+    use JetBrains\PhpStorm\NoReturn;
 
     abstract class CLI
     {
-
         const RED = '0;31';
+
         const GREEN = '0;32';
+
         const YELLOW = '1;33';
+
         const BLUE = '0;34';
+
         const WHITE = '1;37';
+
         const RESET = '39';
 
-        static public function delay($pSeconds){
+
+        static public function delay(int $pSeconds):void
+        {
             for($i = $pSeconds; $i>0; $i--){
                 self::resetLine()->out("Starting in ".(CLIUtils::formatTime($i)));
                 sleep(1);
@@ -22,65 +29,84 @@ namespace core\utils
             self::resetLine();
         }
 
-        static public function progressBar(){
+
+        static public function progressBar():CLIProgressBar
+        {
             return new CLIProgressBar();
         }
 
-        static public function newLine(){
+
+        static public function newLine():CLILine
+        {
             return new CLILine();
         }
 
-        static public function resetLine(){
+
+        static public function resetLine():CLILine
+        {
             return new CLILine("\033[2K\r");
         }
 
-        static public function exit($pExitCode = 0){
+        #[NoReturn]
+        static public function exit(int $pExitCode = 0):void
+        {
             echo "\r\n";
             Core::endApplication($pExitCode);
         }
 
-        /**
-         * @return bool
-         */
-        static public function isCurrentContext():bool{
+
+        static public function isCurrentContext():bool
+        {
             return PHP_SAPI == "cli";
         }
     }
 
     class CLILine
     {
-
-        public function __construct($pInit = ""){
+        public function __construct(string $pInit = ""){
             echo $pInit;
         }
 
-        public function setTextColor($pColor){
+
+        public function setTextColor(string $pColor):CLILine
+        {
             echo "\e[".$pColor."m";
             return $this;
         }
 
-        public function resetTextColor(){
+
+        public function resetTextColor():CLILine
+        {
             return $this->setTextColor(CLI::RESET);
         }
 
-        public function out($pString){
+
+        public function out(string $pString):CLILine
+        {
             echo $pString;
             return $this;
         }
 
-        public function endOfLine(){
+
+        public function endOfLine():void
+        {
             echo "\r\n";
         }
     }
 
     class CLIProgressBar
     {
-        private $steps;
-        public function __construct($pSteps = 20){
+        private int $steps;
+
+
+        public function __construct(int $pSteps = 20)
+        {
             $this->steps = $pSteps;
         }
 
-        public function update($pProgress, $pMessageBefore = "", $pMessageAfter = ""){
+
+        public function update(float $pProgress, string $pMessageBefore = "", string $pMessageAfter = ""):void
+        {
             $out = "[";
             for($i = 0; $i<$this->steps; $i++){
                 $percent = round($i/$this->steps * 100);
@@ -91,8 +117,10 @@ namespace core\utils
         }
     }
 
-    abstract class CLIUtils{
-        static public function formatTime($pSec){
+    abstract class CLIUtils
+    {
+        static public function formatTime(int $pSec):string
+        {
             $remaining = $pSec;
             $precision = "";
             $unit = "s";

@@ -1,8 +1,7 @@
 <?php
 namespace core\system
 {
-    use \Iterator;
-    use ReturnTypeWillChange;
+    use Iterator;
 
     /**
      * Class FileIterator
@@ -11,13 +10,15 @@ namespace core\system
      */
     class FileIterator implements Iterator
     {
-        private $resource;
-        private $iteration;
-        private $line;
+        private mixed $resource;
 
-        private $file;
+        private int $iteration;
 
-        public function __construct($pFile)
+        private mixed $line;
+
+        private string $file;
+
+        public function __construct(string $pFile)
         {
             $this->file = $pFile;
             $this->rewind();
@@ -52,7 +53,7 @@ namespace core\system
          * @link http://php.net/manual/en/iterator.key.php
          * @return mixed scalar on success, or null on failure.
          */
-        public function key():mixed
+        public function key():int
         {
             return $this->iteration;
         }

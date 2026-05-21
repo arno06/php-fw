@@ -12,7 +12,9 @@ namespace core\tools\debugger
 	use core\application\Autoload;
 	use core\application\Header;
     use core\utils\OPCacheHelper;
-    use \Exception;
+    use Exception;
+    use TypeError;
+    use Error;
 
 	/**
 	 * Class Debugger - Permet de centraliser les éventuelles "sorties" permettant de debugger l'application
@@ -37,47 +39,29 @@ namespace core\tools\debugger
 
 		/**
 		 * Temps nécessaire à l'excecution de l'ensemble de l'application
-		 * @var number
+		 * @var float
 		 */
-		private $timeToGenerate;
+		private float $timeToGenerate;
 
-		/**
-		 * @var Number
-		 */
-		private $memUsage;
+		private string $memUsage;
 
 		/**
 		 * Variable permettant de définir si le debugger est ouvert par défault ou non
-		 * @var Boolean
+		 * @var bool
 		 */
-		static private $open = false;
+		static private bool $open = false;
 
-		/**
-		 * @var string
-		 */
-		static private $state = "odd";
+		static private string $state = "odd";
 
-		/**
-		 * @var string
-		 */
-		private $consoles = "";
+		private string $consoles = "";
 
-        /**
-         * @var array
-         */
-        private $tracked = array();
+        private array $tracked = array();
 
-        /**
-         * @var FGTrack
-         */
-        private $startedTrack = null;
+        private FGTrack|null $startedTrack = null;
 
-        private $totalTracks = 0;
+        private int $totalTracks = 0;
 
-		/**
-		 * @var array
-		 */
-		private $count = array(
+		private array $count = array(
 			"trace"=>0,
 			"notice"=>0,
 			"warning"=>0,
@@ -89,20 +73,10 @@ namespace core\tools\debugger
 			"cookie"=>0
 		);
 
-        /**
-         * @var bool
-         */
-        private $activated = true;
+        private bool $activated = true;
 
-		/**
-		 * @static
-		 * @param $pClass
-		 * @param $pMessage
-		 * @param $pFile
-		 * @param $pLine
-		 * @return void
-		 */
-		static private function addToConsole($pClass, $pMessage, $pFile, $pLine)
+
+		static private function addToConsole(string $pClass, string $pMessage, string $pFile, string $pLine):void
 		{
             /** @var Debugger $i */
             $i = self::getInstance();
@@ -123,16 +97,13 @@ namespace core\tools\debugger
                     $element = $element->parent;
                 }
                 $context = ' data-context="'.implode("|", $hashes).'"';
-            };
-            $i->consoles .= "<tr class='".$pClass."'".$context."><td class='date'>".(gmdate("H:i:s", $time[0] + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
+            }
+            $i->consoles .= "<tr class='".$pClass."'".$context."><td class='date'>".(gmdate("H:i:s", intval($time[0]) + $decalage).",".$time[1])."</td><td class='".$pClass."'>&nbsp;&nbsp;</td><td class='message'>".$pMessage."</td><td class='file'>".$pFile.":".$pLine."</td></tr>";
 		}
 
 
-        /**
-         * @param string $pId
-         * @return void
-         */
-        static public function track($pId){
+        static public function track(string $pId):void
+        {
             /** @var Debugger $instance */
             $instance = self::getInstance();
             if(!$instance->activated)
@@ -150,6 +121,7 @@ namespace core\tools\debugger
                     }
                     $parent = $instance->startedTrack->parent;
                     $instance->startedTrack->parent = null;
+                    unset($instance->startedTrack->parent);
                     $instance->startedTrack = $parent;
                 }else{
                     $newInstance = new FGTrack($pId);
@@ -163,11 +135,11 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode d'ajout d'une sortie à la variable dédiée à cet effet
-		 * @param string $pString					Chaine de caractère à afficher
+		 * @param mixed $pString					Chaine de caractère à afficher
 		 * @param bool $pOpen [optional]			Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
-		static public function trace($pString, $pOpen = false)
+		static public function trace(mixed $pString, bool $pOpen = false):void
 		{
             /** @var Debugger $instance */
             $instance = self::getInstance();
@@ -177,8 +149,10 @@ namespace core\tools\debugger
 				self::$open = true;
 			if(is_bool($pString))
 				$pString = $pString ? "true":"false";
-			if(empty($pString))
-				$pString = '<i>Debugger::trace("");</i>';
+			else{
+                if(empty($pString))
+                    $pString = '<i>Debugger::trace("");</i>';
+            }
 			$context = debug_backtrace();
 			$indice = 0;
 			for($i=0, $max = count($context);$i<$max;$i++)
@@ -199,23 +173,18 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode permettant d'ajouter le contenu d'un tableau à la liste de sortie du Debugger
-		 * @param array	 	$pArray					Tableau dont on souhaite afficher le contenu
-		 * @param Boolean	$pOpen [optional]		Définit si le debugger est ouvert par défault
+		 * @param array $pArray Tableau dont on souhaite afficher le contenu
+		 * @param bool $pOpen [optional] Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
-		static public function traceR($pArray, $pOpen = false)
+		static public function traceR(array $pArray, bool $pOpen = false):void
 		{
 			$string = "<pre>".print_r($pArray,true)."</pre>";
 			self::trace($string,$pOpen);
 		}
 
-		/**
-		 * @static
-		 * @param $pQuery
-		 * @param $pSource
-		 * @param $pDb
-		 */
-		static public function query($pQuery, $pSource, $pDb)
+
+		static public function query(string $pQuery, string $pSource, string $pDb):void
 		{
 			self::addToConsole("query", $pQuery, $pSource, $pDb);
 		}
@@ -225,12 +194,12 @@ namespace core\tools\debugger
 		 * Méthode d'affichage du debugger
 		 * @param bool $pDisplay
 		 * @param bool $pError
-		 * @return string
+		 * @return bool|string
 		 */
-		public function render($pDisplay = true, $pError = false)
+		public function render(bool $pDisplay = true, bool $pError = false):bool|string
 		{
             if(!$this->activated)
-                return null;
+                return false;
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
             $ctx->assign('is_error', $pError);
             $ctx->assign('dir_to_components', Core::$path_to_components);
@@ -242,13 +211,10 @@ namespace core\tools\debugger
 		}
 
 
-		/**
-		 * @return array
-		 */
-		public function getGlobalVars()
+		public function getGlobalVars():array
 		{
-			$this->setTimeToGenerate(INIT_TIME, microtime(true));
-			$this->setMemoryUsage(INIT_MEMORY, memory_get_usage(MEMORY_REAL_USAGE));
+			$this->setTimeToGenerate(microtime(true));
+			$this->setMemoryUsage(memory_get_usage(MEMORY_REAL_USAGE));
 			$this->count["get"] = count($_GET);
 			$this->count["post"] = count($_POST);
 			$this->count["cookie"] = count($_COOKIE);
@@ -277,29 +243,25 @@ namespace core\tools\debugger
 
 		/**
 		 * Méthode de définition du temps nécessaire à l'excecution de l'application
-		 * @param string $pStartTime		Microtime de début
-		 * @param string $pEndTime          Microtime de fin
+         * @param float $pEndTime          Microtime de fin
 		 * @return void
 		 */
-		private function setTimeToGenerate($pStartTime, $pEndTime)
+		private function setTimeToGenerate(float $pEndTime):void
 		{
-			if(!$pEndTime)
+            if(!$pEndTime)
 				$pEndTime = microtime(true);
-			$this->timeToGenerate = ($pEndTime - $pStartTime);
+			$this->timeToGenerate = ($pEndTime - INIT_TIME);
 		}
 
-		/**
-		 * @param $pStartMem
-		 * @param $pEndMem
-		 */
-		private function setMemoryUsage($pStartMem, $pEndMem)
+
+		private function setMemoryUsage(int $pEndMem):void
 		{
-			$mem = $pEndMem - $pStartMem;
+            $mem = $pEndMem - INIT_MEMORY;
 			$this->memUsage = self::formatMemory($mem);
 		}
 
 
-        static public function formatMemory($pValue, $pPrecision = 2)
+        static public function formatMemory(int $pValue, int $pPrecision = 2):String
         {
             $units = array("octet", "ko", "Mo", "Go");
             $i = 0;
@@ -313,14 +275,14 @@ namespace core\tools\debugger
 		/**
 		 * Gestionnaire des erreurs de scripts Php
 		 * Peut stopper l'application en cas d'erreur bloquante
-		 * @param Number $pErrorLevel						Niveau d'erreur
+		 * @param int $pErrorLevel						Niveau d'erreur
 		 * @param string $pErrorMessage						Message renvoyé
 		 * @param string $pErrorFile						Adresse du fichier qui a déclenché l'erreur
-		 * @param Number $pErrorLine						Ligne où se trouve l'erreur
-		 * @param string $pErrorContext						Contexte - Déprécié en PHP 8
+		 * @param int $pErrorLine						Ligne où se trouve l'erreur
+		 * @param string|null $pErrorContext						Contexte - Déprécié en PHP 8
 		 * @return void
 		 */
-		static public function errorHandler($pErrorLevel, $pErrorMessage, $pErrorFile, $pErrorLine, $pErrorContext = null)
+		static public function errorHandler(int $pErrorLevel, string $pErrorMessage, string $pErrorFile, int $pErrorLine, string $pErrorContext = null):void
 		{
 			$stopApplication = false;
 			switch($pErrorLevel)
@@ -347,8 +309,8 @@ namespace core\tools\debugger
 			}
 			$pErrorFile = pathinfo($pErrorFile);
 			$pErrorFile = $pErrorFile["basename"];
-			if(preg_match('/href=/', $pErrorMessage, $matches))
-				$pErrorMessage = preg_replace('/href=\'([a-z\.\-\_]*)\'/', 'href=\'http://www.php.net/$1\' target=\'_blank\'', $pErrorMessage);
+			if(str_contains($pErrorMessage, "href="))
+				$pErrorMessage = preg_replace('/href=\'([a-z.\-_]*)\'/', 'href=\'https://www.php.net/$1\' target=\'_blank\'', $pErrorMessage);
 			self::addToConsole($type, $pErrorMessage, $pErrorFile, $pErrorLine);
 			if($stopApplication)
 			{
@@ -373,19 +335,16 @@ namespace core\tools\debugger
 
 		/**
 		 * Gestionnaire d'exceptions soulevées lors de l'exécution du script
-		 * @param Exception $pException
+		 * @param Exception|TypeError|Error $pException
 		 * @return void
 		 */
-		static public function exceptionHandler($pException)
+		static public function exceptionHandler(Exception|TypeError|Error $pException):void
 		{
 			self::errorHandler(self::E_USER_EXCEPTION, $pException->getMessage(), $pException->getFile(), $pException->getLine(), $pException->getFile());
 		}
 
-		/**
-		 * @static
-		 * @return void
-		 */
-		static public function prepare()
+
+		static public function prepare():void
 		{
             if(CLI::isCurrentContext()||Core::isBot()){
                 self::getInstance()->deactivate();
@@ -394,23 +353,20 @@ namespace core\tools\debugger
 			Autoload::addComponent("Debugger");
 		}
 
-        public function activate(){
+
+        public function activate():void
+        {
             $this->activated = true;
         }
 
-        public function deactivate(){
+
+        public function deactivate():void
+        {
             $this->activated = false;
         }
 
-		/**
-		 * Construct
-		 * @param $pInstance	PrivateClass
-		 */
-		public function __construct($pInstance)
-		{
-			if(!$pInstance instanceOf PrivateClass)
-				trigger_error("Il est interdit d'instancier un objet de type <i>Singleton</i> - Merci d'utiliser la méthode static <i>".__CLASS__."::getInstance()</i>", E_USER_ERROR);
-		}
+
+		public function __construct(PrivateClass $pInstance){}
 
 		/**
 		 * ToString()
@@ -424,28 +380,31 @@ namespace core\tools\debugger
 
 
     class FGTrack{
-        public $id;
-        public $hash;
-        public $parent = null;
-        public $children = [];
-        public $startTime = null;
-        public $endTime = null;
-        public $startMemory = null;
-        public $endMemory = null;
+        public string $id;
+        public string $hash;
+        public FGTrack|null $parent = null;
+        public array $children = [];
+        public float|null $startTime = null;
+        public float|null $endTime = null;
+        public int|null $startMemory = null;
+        public int|null $endMemory = null;
 
-        public function __construct($pId){
+        public function __construct(string $pId)
+        {
             $this->id = $pId;
             $this->hash = md5($this->id);
             $this->startTime = microtime(true);
             $this->startMemory = memory_get_usage(true);
         }
 
-        public function end(){
+        public function end():void
+        {
             $this->endTime = microtime(true);
             $this->endMemory = memory_get_usage(true);
         }
 
-        public function __toString(){
+        public function __toString()
+        {
             return $this->id."<br/>execution time: <b>".(round($this->endTime - $this->startTime, 3))."sec</b><br/>memory usage: <b>".(Debugger::formatMemory($this->endMemory-$this->startMemory))."</b>";
         }
     }
@@ -455,17 +414,17 @@ namespace
 {
 	use core\tools\debugger\Debugger;
 
-	function trace($pString, $pOpen = false)
+	function trace(string $pString, bool $pOpen = false):void
 	{
 		Debugger::trace($pString, $pOpen);
 	}
 
-	function trace_r($pArray, $pOpen = false)
+	function trace_r(mixed $pArray, bool $pOpen = false):void
 	{
 		Debugger::traceR($pArray, $pOpen);
 	}
 
-    function track($pId)
+    function track(string $pId):void
     {
         Debugger::track($pId);
     }

@@ -1,9 +1,12 @@
 <?php
 namespace core\application
 {
-	use core\tools\form\Form;
+
+    use core\application\authentication\AuthenticationHandler;
+    use core\tools\form\Form;
     use core\application\event\EventDispatcher;
     use core\tools\template\Template;
+    use JetBrains\PhpStorm\NoReturn;
 
     /**
 	 * Controller de base
@@ -19,59 +22,51 @@ namespace core\application
 		 * Tableau associatif des données qu'on souhaite envoyer &agrave; la vue.
 		 * @var array
 		 */
-		private $content = array();
+		private array $content = array();
 
 
 		/**
 		 * Tableau associatif des données contenues entre les Balises Head de la vue.
 		 * @var array
 		 */
-		private $head = array("title"=>"", "description"=>"");
+		private array $head = array("title"=>"", "description"=>"");
 
 
 		/**
 		 * Tableau associatif des formulaires qu'on souhaite envoyer &agrave; la vue.
 		 * @var array
 		 */
-		private $forms = array();
+		private array $forms = array();
 
 
 		/**
 		 * Nom de la vue (template) qu'on souhaite afficher
-		 * @var String
+		 * @var string
 		 */
-		private $template = "";
+		private string $template = "";
 
 
-		/**
-		 * @static
-		 * @param  $pControllerName
-		 * @param  $pActionName
-		 * @param  $pUrl
-		 * @return bool
-		 */
-		static public function isFromDB($pControllerName, $pActionName, $pUrl)
+		static public function isFromDB(string $pControllerName, string $pActionName, string $pUrl):bool
 		{
 			/** MUST BE OVERRIDEN */
 			return false;
 		}
 
-
 		/**
 		 * Méthode static d'initialisation des données avant l'envoi &agrave; la vue dans le cas de contenu dynamique
 		 * @return void
 		 */
-		public function prepareFromDB()
+        #[NoReturn]
+		public function prepareFromDB():void
 		{
 			/** MUST BE OVERRIDEN */
 			Go::to404();
 		}
 
-
         /**
          * Méthode par défaut de page introuvable
          */
-        public function notFound()
+        public function notFound():void
         {
             if(get_called_class() != __CLASS__)
             {
@@ -86,7 +81,7 @@ namespace core\application
 		 * @param bool $pDisplay
 		 * @return string
 		 */
-		public function render($pDisplay = true)
+		public function render(bool $pDisplay = true):string
 		{
             $props = get_class_vars('core\application\Configuration');
             $conf = array();
@@ -110,12 +105,12 @@ namespace core\application
 		}
 
 
-		/**
-		 * @return array
-		 */
-		public function getGlobalVars()
+		public function getGlobalVars():array
 		{
 			$is = array();
+            /**
+             * @var AuthenticationHandler $authHandler
+             */
             $authHandler = Application::getInstance()->authenticationHandler;
             foreach($authHandler::$permissions as $name=>$value)
                 $is[$name] = $authHandler::$data&&$authHandler::is($name);
@@ -127,77 +122,52 @@ namespace core\application
 				"forms"=>$this->forms,
 				"content"=>$this->content,
 				"user_is"=>$is,
-				"controller"=>preg_replace("/\_/", "-", Core::$controller),
-				"action"=>preg_replace("/\_/", "-", Core::$action)
+				"controller"=>preg_replace("/_/", "-", Core::$controller),
+				"action"=>preg_replace("/_/", "-", Core::$action)
 			);
 		}
 
-
-		/**
-		 * Méthode d'ajout de script &agrave; la vue.
-		 * @param String $pScript				Nom du fichier JS
-		 * @return void
-		 */
-		protected function addScript($pScript)
-		{
-			Autoload::addScript($pScript);
-		}
-
-
-		/**
-		 * Méthode d'ajout de feuille de style &agrave; la vue
-		 * @param String $pStyle				Nom du fichier CSS
-		 * @return void
-		 */
-		protected function addStyle($pStyle)
-		{
-			Autoload::addStyle($pStyle);
-		}
-
-
 		/**
 		 * Méthode d'ajout d'une variable de contenu envoyé &agrave; la vue
-		 * @param String $pTemplateVar				Nom d'acc&egrave;s &agrave; la variable
+		 * @param string $pTemplateVar				Nom d'acc&egrave;s &agrave; la variable
 		 * @param mixed $pContent					Valeur de la variable acc&egrave;s tout type (String, Object, array, int...)
 		 * @return void
 		 */
-		protected function addContent($pTemplateVar, $pContent)
+		protected function addContent(string $pTemplateVar, mixed $pContent):void
 		{
 			$this->content[$pTemplateVar]=$pContent;
 		}
 
 		/**
 		 * Méthode de récupération du contenu d'une variable
-		 * @param String $pTemplateVar
+		 * @param string $pTemplateVar
 		 * @return mixed
 		 */
-		protected function getContent($pTemplateVar)
+		protected function getContent(string $pTemplateVar):mixed
 		{
 			if(!isset($this->content[$pTemplateVar]))
 				return "";
 			return $this->content[$pTemplateVar];
 		}
 
-
 		/**
 		 * Méthode d'ajout d'un formulaire envoyé &agrave; la vue
-		 * @param String $pName				Nom d'acc&egrave;s au formulaire
+		 * @param string $pName Nom d'acc&egrave;s au formulaire
 		 * @param Form $pForm
 		 * @return void
 		 */
-		protected function addForm($pName, Form &$pForm)
+		protected function addForm(string $pName, Form $pForm):void
 		{
 			$pForm->prepareToView();
 			$this->forms[$pName] = $pForm;
 		}
 
-
 		/**
 		 * Méthode de définition de la valeur pour la balise Title contenue entre les balises Head de la vue
-		 * @param String $pTitle				SEO : 5 mots de longueur moyenne pour 70 caract&egrave;res espace compris
+		 * @param String $pTitle SEO : 5 mots de longueur moyenne pour 70 caract&egrave;res espace compris
 		 * @return void
 		 */
-		public function setTitle($pTitle)
+		public function setTitle(string $pTitle):void
 		{
 			$this->head['title'] = $pTitle;
 		}
@@ -205,22 +175,16 @@ namespace core\application
 
 		/**
 		 * Méthode définition de la valeur pour la balise Meta - description - contenue entre les balises Head de la vue
-		 * @param String $pDescription				SEO : 150 caract&egrave;res espace compris
+		 * @param string $pDescription				SEO : 150 caract&egrave;res espace compris
 		 * @return void
 		 */
-		public function setDescription($pDescription)
+		public function setDescription(string $pDescription):void
 		{
 			$this->head['description'] = $pDescription;
 		}
 
 
-		/**
-		 * @param $pFolder
-		 * @param $pName
-		 * @param string $pFile
-		 * @return void
-		 */
-		public function setTemplate($pFolder, $pName, $pFile = "")
+		public function setTemplate(string|null $pFolder, string|null $pName, string $pFile = ""):void
 		{
 			if(!empty($pFile))
 				$this->template = $pFile;
@@ -228,10 +192,7 @@ namespace core\application
 				$this->template = $pFolder."/".$pName.".tpl";
 		}
 
-		/**
-		 * Destructor
-		 * @return void
-		 */
+
 		public function __destruct()
 		{
 			unset($this->forms);

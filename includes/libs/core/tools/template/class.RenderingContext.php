@@ -12,50 +12,30 @@ namespace core\tools\template
      */
     class RenderingContext
     {
-        /**
-         * @var string
-         */
-        private $file;
+        private string|null $file;
 
-        /**
-         * @var array
-         */
-        private $data;
+        private array $data;
 
-        /**
-         * @var string
-         */
-        private $templateDir;
+        private string $templateDir;
 
-        /**
-         * @var string
-         */
-        private $cacheDir;
+        private string $cacheDir;
 
-        /**
-         * RenderingContext constructor.
-         * @param null $pFile
-         */
-        public function __construct($pFile = null)
+
+        public function __construct(string $pFile = null)
         {
             $this->file = $pFile;
             $this->data = array();
         }
 
-        /**
-         * @param $pTemplateDir
-         * @param $pCacheDir
-         */
-        public function prepare($pTemplateDir, $pCacheDir)
+
+        public function prepare(string $pTemplateDir, string $pCacheDir):void
         {
             $this->templateDir = $pTemplateDir;
             $this->cacheDir = $pCacheDir;
         }
 
-        /**
-         * @param string $pFile
-         */
-        public function setFile($pFile)
+
+        public function setFile(string $pFile):void
         {
             $this->file = $pFile;
         }
@@ -66,21 +46,17 @@ namespace core\tools\template
          * @param string $pName
          * @param mixed $pValue
          */
-        public function assign($pName, &$pValue)
+        public function assign(string $pName, mixed &$pValue):void
         {
             $this->data[$pName] = $pValue;
         }
 
 
-        /**
-         * @param string $pName
-         * @param array $pExtra
-         */
-        public function includeTpl($pName, $pExtra = array())
+        public function includeTpl(string $pName, array $pExtra = array()):void
         {
             $tpl = new Template(array_merge($this->data, $pExtra));
             $tpl->setup($this->templateDir, $this->cacheDir);
-            $tpl->render($pName, true);
+            $tpl->render($pName);
         }
 
         /**
@@ -89,7 +65,7 @@ namespace core\tools\template
          * @param bool $pEcho           Default "true", définit si on affiche le résultat
          * @return null|string
          */
-        public function implode($pSeparator, $pData, $pEcho = true)
+        public function implode(string $pSeparator, array $pData, bool$pEcho = true):string|null
         {
             $res = implode($pSeparator, $pData);
             if($pEcho)
@@ -105,17 +81,13 @@ namespace core\tools\template
          * Méthode de définition du tableau de données
          * @param array $pData
          */
-        public function setData(array $pData)
+        public function setData(array $pData):void
         {
             $this->data = $pData;
         }
 
-        /**
-         * @param string $pName
-         * @param array $pModifiers
-         * @return mixed
-         */
-        public function get($pName, $pModifiers = array())
+
+        public function get(string $pName, array $pModifiers = array()):mixed
         {
             $value = Stack::get($pName, $this->data);
             if($value&&!empty($pModifiers))
@@ -130,16 +102,8 @@ namespace core\tools\template
         }
 
 
-        /**
-         * @param bool $pDisplay
-         * @return bool|string
-         */
-        public function render($pDisplay)
+        public function render(bool $pDisplay):bool|string
         {
-            if(!file_exists($this->file)){
-                trigger_error("Template file '".$this->file."' not found", E_USER_ERROR);
-                return;
-            }
             ob_start();
             include($this->file);
             $rendering = ob_get_contents();

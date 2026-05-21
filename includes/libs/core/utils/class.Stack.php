@@ -20,11 +20,11 @@ namespace core\utils
 		 * @param array $pStack
 		 * @return mixed
 		 */
-		static public function get($pId, &$pStack)
+		static public function get(string $pId, array $pStack):mixed
 		{
 			$value = $pStack;
 			$keys = explode(".", $pId);
-			foreach($keys as &$k)
+			foreach($keys as $k)
 			{
 				if(!isset($value[$k]))
 					return null;

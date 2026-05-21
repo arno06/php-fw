@@ -6,34 +6,35 @@ namespace core\utils {
     use core\data\SimpleXML;
     use core\tools\debugger\Debugger;
     use core\tools\Request;
+    use SimpleXMLElement;
+    use Exception;
 
     class RestHelper
     {
         const HTTP_GET = "GET";
+
         const HTTP_POST = "POST";
+
         const HTTP_DELETE = "DELETE";
+
         const HTTP_PATCH = "PATCH";
+
         const HTTP_PUT = "PUT";
 
         const FORMAT_XML = "xml";
+
         const FORMAT_JSON = "json";
+
         const FORMAT_RAW = "raw";
 
-        static private $runtime_cache = array();
+        static private array $runtime_cache = array();
 
-        static public $use_cache = true;
+        static public bool $use_cache = true;
 
-        static public $debug_track = true;
+        static public bool $debug_track = true;
 
-        /**
-         * @param string $pUrl
-         * @param string $pMethod
-         * @param array $pParams
-         * @param string $pFormat
-         * @param array $pHeaders
-         * @return array|bool|\SimpleXMLElement|string
-         */
-        static public function request($pUrl, $pMethod = self::HTTP_GET, array $pParams = array(), $pFormat = self::FORMAT_XML, array $pHeaders = array())
+
+        static public function request(string $pUrl, string $pMethod = self::HTTP_GET, array $pParams = array(), string $pFormat = self::FORMAT_XML, array $pHeaders = array()):array|bool|SimpleXMLElement|string
         {
 
             if($pMethod == self::HTTP_GET&&!empty($pParams)){
@@ -70,7 +71,7 @@ namespace core\utils {
             {
                 $d = $r->execute();
             }
-            catch(\Exception $e)
+            catch(Exception $e)
             {
                 trace_r($e->getMessage());
                 $d = false;

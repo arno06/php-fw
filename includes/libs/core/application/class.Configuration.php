@@ -98,7 +98,7 @@ namespace core\application
 
 		static public string $authentication_fieldPermissions = "permissions_user";
 
-        static private array $_extra;
+        static private array $_extra = [];
 
 
         static public function setExtra(array $pExtra):void

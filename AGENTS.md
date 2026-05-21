@@ -20,7 +20,7 @@ To maintain consistency and readability across the codebase, we adhere to the fo
  * Methods and functions parameters must start with a "p" prefix. For example, instead of `function calculateArea(radius)`, use `function calculateArea(pRadius)`.
  * Use camelCase for variable and function names. For example, instead of `let user_name = "John"`, use `let userName = "John"`.
  * Always use namespaces for classes (e.g., `core\application\Autoload`).
- * Name files according to their class/type (e.g., `class.Foo.php`, `controller.Bar.php`).
+ * Name files according to their class/type (e.g., `class.Foo.php`, `controller.Bar.php`, `model.ModelFooBar.php`).
  * Any new JS/CSS component must be referenced in `includes/components/manifest.json` and loaded via `Autoload::addComponent($pComponentName)`.
 
 ## Architecture Patterns

@@ -5,7 +5,7 @@ namespace core\application
 	 * Class Autoload
 	 *
 	 * @author Arnaud NICOLAS <arno06@gmail.com>
-	 * @version 1.1
+	 * @version 2.0
 	 * @package core\application
 	 */
 	class Autoload extends Singleton
@@ -63,9 +63,9 @@ namespace core\application
 				case 'core':
 					$path = self::$folder.self::FOLDER_CORE.implode('/', $packages).'/'.$type.'.'.$className.'.php';
 					break;
-				case 'lib':
-					$path = self::$folder.'/includes/libs/'.implode('/', $packages).'/'.$type.'.'.$className.'.php';
-					break;
+                case 'lib':
+                    $path = self::$folder.'/includes/libs/'.implode('/', $packages).'/'.$type.'.'.$className.'.php';
+                    break;
 				case 'app':
 					$appName = array_shift($packages);
 					$target = array_shift($packages);
@@ -73,8 +73,11 @@ namespace core\application
 					if(!empty($packages))
 						$package = implode('/', $packages).'/';
 					$path = self::$folder.'/includes/applications/'.$appName.'/'.$target.'/'.$package.$type.'.'.$className.'.php';
-
 					break;
+                default:
+                    $parts = explode('\\', $pClassName);
+                    $path = self::$folder.'/includes/libs/'.implode('/', $parts).'.php';
+                    break;
 			}
 
 			if(!empty($path) && file_exists($path))
@@ -82,17 +85,7 @@ namespace core\application
 				require_once($path);
 				return true;
 			}
-
-			switch($type)
-			{
-				case 'interface':
-					trigger_error('Impossible de charger l\'interface <b>'.$pClassName.'</b>.', E_USER_ERROR);
-				case 'model':
-					trigger_error('Impossible de charger le model <b>'.$pClassName.'</b>.', E_USER_ERROR);
-				default:
-				case 'class':
-					trigger_error('Impossible de charger la classe <b>'.$pClassName.'</b>.', E_USER_ERROR);
-			}
+            return false;
 		}
 
 		/**

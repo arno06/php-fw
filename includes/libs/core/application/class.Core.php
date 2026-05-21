@@ -181,6 +181,12 @@ namespace core\application {
             }
 
             Configuration::fromEnvVars();
+            $autloads = Configuration::extra("autoloaders");
+            if (is_array($autloads)) {
+                foreach ($autloads as $autoload) {
+                    include_once(getcwd()."/".$autoload);
+                }
+            }
         }
 
         /**

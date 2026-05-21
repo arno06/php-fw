@@ -9,7 +9,7 @@ This project is a modular PHP framework using an MVC architecture with multi-app
 - **Routing**: Routing rules are defined in `src/routing_rules.json` for each application. Default application is `main`, default module is `front`.
 - **Views & Templates**: Template files (`.tpl`) are in `{app}/modules/{module}/views/{controller}/{action}.tpl`. A custom template engine with PHP context variables is used. Controllers populate template variables via `$this->addContent($pKey, $pValue)`.
 - **Components**: JS/CSS components are declared in `includes/components/manifest.json` and loaded via `core\application\Autoload::addComponent($pComponentName)`.
-- **CLI**: The entry point for CLI usage is `cli/cli.php` (runs the framework in CLI context). Use `core\utils\CLI::isCurrentContext()` to detect CLI execution.
+- **CLI**: The template script for CLI usage is `cli/cli.php`. Use `core\utils\CLI::isCurrentContext()` to detect CLI execution.
 - **Debugger**: Use `trace($pString, $pOpen)`, `trace_r($pObject, $pOpen)`, and `track($pId)` for debugging (see also `includes/components/debugger/`).
 - **Events**: The framework uses `core\application\event\EventDispatcher` for event-driven architecture. Controllers extend `EventDispatcher` and can dispatch/listen to events.
 
@@ -32,7 +32,7 @@ To maintain consistency and readability across the codebase, we adhere to the fo
 - Controllers must declare an action method for each route (e.g., `public function index()`, `public function byId()`)
 
 ### Models
-- Models are located in `{app}/models/` and should extend `core\application\BaseModel`
+- Models are located in `{app}/models/` and should extend `core\application\BaseModel` if data source is a database table
 - Specify table name and primary key in constructor: `parent::__construct('table_name', 'id_field')`
 - Implement `core\models\InterfaceBackModel` for backoffice CRUD models
 - Models use the `core\db\Query` builder for database operations across different handlers (e.g., `$handler="default"`)
@@ -40,7 +40,6 @@ To maintain consistency and readability across the codebase, we adhere to the fo
 ### Views & Template System
 - Views are located in `{app}/modules/{module}/views/{controller}/{action}.tpl` (or `{controller}.tpl` for the default `index` action)
 - The custom template engine processes PHP context variables and supports: `{if}...{/if}`, `{foreach}...{/foreach}`, `{include file="..."}`, and direct PHP execution in safe mode
-- Template variables are assigned before rendering by the controller via `DefaultController::render()`
 - Built-in template context includes: `$configuration`, `$forms`, `$content`, `$global` (GET/POST data)
 
 ### Authentication & Authorization
@@ -52,8 +51,7 @@ To maintain consistency and readability across the codebase, we adhere to the fo
 ### Database & Query Builder
 - Multiple database connections are managed via `core\db\DBManager` with handlers identified by name (e.g., `"default"`, `"vidalid"`)
 - Use `core\db\Query` static methods for building queries: `Query::select(...)->where(...)->andWhere(...)->execute($pHandler)`
-- Supported HTTP verbs in routing: `GET`, `POST`, `DELETE`, `*` (wildcard), or combined `GET|POST`
-- Query conditions use constants: `Query::EQUAL`, `Query::IN`, `Query::LIKE`, etc.
+- Query conditions use constants: `Query::EQUAL`, `Query::IN`, `Query::LIKE`, etc for value comparisons
 
 ### Utilities & Helpers
 - **File Operations**: `core\system\File` (create, delete, append, read), `core\system\Folder` (read directory), `core\system\Image` (resize, convert)

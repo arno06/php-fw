@@ -104,9 +104,6 @@ namespace core\tools\template
 
         public function render(bool $pDisplay):bool|string
         {
-            if(!file_exists($this->file)){
-                trigger_error("Template file '".$this->file."' not found", E_USER_ERROR);
-            }
             ob_start();
             include($this->file);
             $rendering = ob_get_contents();

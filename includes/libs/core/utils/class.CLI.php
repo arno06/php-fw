@@ -11,13 +11,19 @@ namespace core\utils
 
         const GREEN = '0;32';
 
-        const YELLOW = '1;33';
+        const YELLOW = '0;33';
+
+        const LIGHT_YELLOW = '0;93';
 
         const BLUE = '0;34';
 
-        const WHITE = '1;37';
+        const WHITE = '0;97';
 
         const RESET = '39';
+
+        const RESET_ALL = "\e[0m";
+
+        const BOLD = "\e[1m";
 
 
         static public function delay(int $pSeconds):void
@@ -35,6 +41,20 @@ namespace core\utils
             return new CLIProgressBar();
         }
 
+        static public function enrichedOutput(string $pString):void
+        {
+            if(empty($pString)){
+                return;
+            }
+            $pString = strip_tags($pString);
+            $lines = explode("\n", $pString);
+            foreach($lines as $line){
+                $line = preg_replace('/\*([^*]+)\*/', CLI::BOLD."$1".CLI::RESET_ALL, $line);
+                CLI::newLine()->out($line)
+                    ->resetTextColor()
+                    ->endOfLine();
+            }
+        }
 
         static public function newLine():CLILine
         {
@@ -74,6 +94,17 @@ namespace core\utils
             return $this;
         }
 
+        public function setBold():CLILine
+        {
+            echo CLI::BOLD;
+            return $this;
+        }
+
+        public function resetAll():CLILine
+        {
+            echo CLI::RESET_ALL;
+            return $this;
+        }
 
         public function resetTextColor():CLILine
         {

@@ -73,7 +73,7 @@ namespace core\utils {
             }
             catch(Exception $e)
             {
-                trace_r($e->getMessage());
+                trace($e->getMessage());
                 $d = false;
             }
 

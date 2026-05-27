@@ -15,7 +15,7 @@ namespace core\utils
 
     class InteroperableObject
     {
-        public function parse(mixed $pRaw = null, array $pParams = null, string $pQueryString = null):mixed
+        public function parse(mixed $pRaw = null, array|null $pParams = null, string|null $pQueryString = null):mixed
         {
             if(is_null($pRaw)&&is_null($pParams)&&is_null($pQueryString)){
                 return null;
@@ -44,7 +44,7 @@ namespace core\utils
                 preg_match_all('/{([a-z.0-9]+)}/', $api, $matches);
 
                 foreach($matches[1] as $match){
-                    $api = str_replace("{".$match."}", Configuration::extra($match), $api);
+                    $api = str_replace("{".$match."}", Configuration::extra($match)??"", $api);
                 }
 
                 if(!is_null($pQueryString)){

@@ -21,7 +21,7 @@ namespace core\tools\template
         private string $cacheDir;
 
 
-        public function __construct(string $pFile = null)
+        public function __construct(string|null $pFile = null)
         {
             $this->file = $pFile;
             $this->data = array();

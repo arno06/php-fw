@@ -61,6 +61,8 @@ namespace core\tools\debugger
 
         private int $totalTracks = 0;
 
+        private string $title = '';
+
 		private array $count = array(
 			"trace"=>0,
 			"notice"=>0,
@@ -82,6 +84,26 @@ namespace core\tools\debugger
             $i = self::getInstance();
             if(!$i->activated)
                 return;
+            if(CLI::isCurrentContext()){
+                $line = CLI::newLine()->out("\r\n");
+                $color = match($pClass){
+                    "error"=>CLI::RED,
+                    "warning"=>CLI::YELLOW,
+                    "notice"=>CLI::LIGHT_YELLOW,
+                    default=>null
+                };
+                if(!is_null($color)){
+                    $line->setTextColor($color)->out($pClass." ")->resetAll();
+                }
+
+                $line->out($pFile.":".$pLine)->endOfLine();
+                $pMessage = str_replace("\n", "\n   ", $pMessage);
+                CLI::enrichedOutput(" ".$pMessage);
+                CLI::newLine()->endOfLine();
+                return;
+            }
+            $pMessage = preg_replace("/\*([^*]+)\*/", "<b>$1</b>", $pMessage);
+            $pMessage = str_replace("\n", "<br/>&nbsp;&nbsp;", $pMessage);
 			$time = explode(".", microtime(true));
 			if (!isset($time[1])) $time[1] = "000";
 			$decalage = (60 * 60) * ((date("I") == 0) ?1:2);
@@ -203,6 +225,7 @@ namespace core\tools\debugger
             $ctx = new RenderingContext("includes/libs/core/tools/debugger/templates/template.debugger.php");
             $ctx->assign('is_error', $pError);
             $ctx->assign('dir_to_components', Core::$path_to_components);
+            $ctx->assign('title', $this->title);
             $ctx->assign('server_url', Configuration::$server_url);
 			$globalVars = $this->getGlobalVars();
 			foreach($globalVars as $n=>&$v)
@@ -320,14 +343,13 @@ namespace core\tools\debugger
 				}
                 $exitCode = 0;
                 if(!CLI::isCurrentContext()){
+                    self::getInstance()->title = 'Une erreur est apparue !';
                     Header::contentType("text/html", Configuration::$global_encoding);
                     self::$open = true;
                     self::getInstance()->render(true, true);
+                    self::getInstance()->deactivate();
                 }else{
                     $exitCode = 1;
-                    CLI::newLine()->out("\r\n")
-                        ->setTextColor(CLI::RED)->out("Error (".$pErrorLevel.")")
-                        ->resetTextColor()->out(" - ".$pErrorFile.":".$pErrorLine." - ".$pErrorMessage)->endOfLine();
                 }
                 Core::endApplication($exitCode);
 			}
@@ -405,7 +427,9 @@ namespace core\tools\debugger
 
         public function __toString()
         {
-            return $this->id."<br/>execution time: <b>".(round($this->endTime - $this->startTime, 3))."sec</b><br/>memory usage: <b>".(Debugger::formatMemory($this->endMemory-$this->startMemory))."</b>";
+            $executionTime = round($this->endTime - $this->startTime, 3);
+            $memoryUsage = Debugger::formatMemory($this->endMemory-$this->startMemory);
+            return $this->id."\nexecution time: *".($executionTime)."sec*\nmemory usage: *".($memoryUsage)."*";
         }
     }
 }

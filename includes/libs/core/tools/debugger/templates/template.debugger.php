@@ -4,7 +4,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <base href="<?php echo $this->get('server_url'); ?>"/>
-		<title>Une erreur est apparue !</title>
+		<title><?php echo $this->get('title'); ?></title>
 		<script type="text/javascript" src="<?php echo $this->get('dir_to_components')?>/debugger/Debugger.js"></script>
         <script type="text/javascript">Debugger.error = true;</script>
 		<style><!--@import URL("<?php echo $this->get('dir_to_components')?>/debugger/Debugger.css");--></style>

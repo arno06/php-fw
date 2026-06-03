@@ -199,7 +199,7 @@ namespace core\tools\debugger
 		 * @param bool $pOpen [optional] Définit si le debugger est ouvert par défault
 		 * @return void
 		 */
-		static public function traceR(array $pArray, bool $pOpen = false):void
+		static public function traceR(mixed $pArray, bool $pOpen = false):void
 		{
 			$string = "<pre>".print_r($pArray,true)."</pre>";
 			self::trace($string,$pOpen);

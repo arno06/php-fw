@@ -75,18 +75,19 @@ namespace core\tools\debugger
                 $this->tests[] = $methodName;
                 $this->currentTest = $methodName;
                 track($reflection->name."->".$methodName);
-                $this->$methodName();
+                try{
+                    $this->$methodName();
+                }
+                catch(\Throwable $e){
+                    $error = "An error occured in test \"".$reflection->name."->".$methodName."\"\n".$e->getFile().":".$e->getLine()."\n".$e->getMessage();
+                    $this->failed[] = $error;
+                    trigger_error($error, E_USER_WARNING);
+                }
                 track($reflection->name."->".$methodName);
             }
             track($reflection->name);
 
-            $totalTest = count($this->tests);
-            $totalAssertions = count($this->assertions);
-            $totalFailed = count($this->failed);
-
-            $percentSuccess = round((($totalAssertions - $totalFailed) / $totalAssertions)*100);
-
-            $color = $percentSuccess == 100 ? "green":"red";
+            list($totalTest, $totalAssertions, $totalFailed, $percentSuccess) = $this->getResults();
 
             $message = <<<MESS
 $reflection->name's results
@@ -97,6 +98,16 @@ Failed: *$totalFailed*
 *$percentSuccess % successful*
 MESS;
             trace($message);
+        }
+
+        public function getResults():array
+        {
+            $totalTest = count($this->tests);
+            $totalAssertions = count($this->assertions);
+            $totalFailed = count($this->failed);
+
+            $percentSuccess = $totalAssertions>0?round((($totalAssertions - $totalFailed) / $totalAssertions)*100):0;
+            return [$totalTest, $totalAssertions, $totalFailed, $percentSuccess];
         }
     }
 }

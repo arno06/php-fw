@@ -15,7 +15,7 @@ namespace core\utils
 
     class InteroperableObject
     {
-        public function parse(mixed $pRaw = null, array|null $pParams = null, string|null $pQueryString = null):mixed
+        public function parse(mixed $pRaw = null, mixed $pParams = null, string|null $pQueryString = null):mixed
         {
             if(is_null($pRaw)&&is_null($pParams)&&is_null($pQueryString)){
                 return null;
@@ -25,6 +25,9 @@ namespace core\utils
 
             $allProps = $definition["props"];
             $format = $definition["format"];
+            $method = $definition["method"] ?? RestHelper::HTTP_GET;
+            $header = $definition["header"] ?? '';
+            $params= $method!=RestHelper::HTTP_GET ? $pParams: [];
 
             $pathThis = false;
 
@@ -57,7 +60,12 @@ namespace core\utils
                 }
                 $pathThis = $definition["this"];
 
-                $pRaw = RestHelper::request($api, RestHelper::HTTP_GET, array(), $format);
+                $pRaw = RestHelper::request($api, $method, $params, $format, explode(';',$header));
+
+                if(!$pRaw){
+                    trigger_error("*InteropableObject* invalid call result", E_USER_WARNING);
+                    return null;
+                }
             }
 
             $raw = $pRaw;
@@ -113,6 +121,9 @@ namespace core\utils
             if($isArray){
                 $pType = str_replace('[]', '', $pType);
                 $values = array();
+                if(!is_array($pData)){
+                    $pData = [$pData];
+                }
                 foreach($pData as $re){
                     $values[] = self::extractValue($pType, $re);
                 }
@@ -132,6 +143,7 @@ namespace core\utils
                 case "string":
                     $val = strval($pSource);
                     break;
+                case 'DateTime':
                 case '\DateTime':
                     try{
                         $val = new DateTime(strval($pSource));
@@ -183,6 +195,14 @@ namespace core\utils
             $format = PHPDocHelpers::extractDocVar("format", $classComments);
             if(!$format){
                 $format = "json";
+            }
+            $method = PHPDocHelpers::extractDocVar("method", $classComments);
+            if(!$method){
+                $method = "GET";
+            }
+            $header = PHPDocHelpers::extractDocVar("header", $classComments);
+            if(!$header){
+                $header = "";
             }
 
             $props = [];
@@ -256,6 +276,8 @@ namespace core\utils
                 "api"=>PHPDocHelpers::extractDocVar('api', $classComments),
                 "this"=>PHPDocHelpers::extractDocVar('this', $classComments),
                 "format"=>$format,
+                "header"=>$header,
+                "method"=>$method,
                 "props"=>$props,
                 "defaultExtract"=>$extracts["path"]
             );

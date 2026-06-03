@@ -34,10 +34,10 @@ namespace core\utils {
         static public bool $debug_track = true;
 
 
-        static public function request(string $pUrl, string $pMethod = self::HTTP_GET, array $pParams = array(), string $pFormat = self::FORMAT_XML, array $pHeaders = array()):array|bool|SimpleXMLElement|string
+        static public function request(string $pUrl, string $pMethod = self::HTTP_GET, array|string $pParams = array(), string $pFormat = self::FORMAT_XML, array $pHeaders = array()):array|bool|SimpleXMLElement|string
         {
 
-            if($pMethod == self::HTTP_GET&&!empty($pParams)){
+            if($pMethod == self::HTTP_GET&&!empty($pParams)&&is_array($pParams)){
                 $pUrl .= '?'.http_build_query($pParams);
             }
 
@@ -52,7 +52,6 @@ namespace core\utils {
             $r->setOption(CURLOPT_ENCODING, 'gzip');
             $r->setOption(CURLOPT_TIMEOUT, 10);
             $r->setOption(CURLOPT_CONNECTTIMEOUT, 5);
-            $r->setMethod($pMethod);
             $r->setOption(CURLOPT_SSL_VERIFYPEER, false);
             $r->setOption(CURLOPT_HTTPHEADER, $pHeaders);
 
@@ -62,10 +61,14 @@ namespace core\utils {
                     case self::HTTP_PATCH:
                     case self::HTTP_PUT:
                     case self::HTTP_DELETE:
-                        $r->setDataPost(http_build_query($pParams));
+                        if(!is_string($pParams)){
+                            $pParams = http_build_query($pParams);
+                        }
+                        $r->setDataPost($pParams);
                         break;
                 }
             }
+            $r->setMethod($pMethod);
 
             try
             {
@@ -105,7 +108,7 @@ namespace core\utils {
             if(self::$debug_track){
                 Debugger::track($id);
             }
-            if(self::$use_cache){
+            if(self::$use_cache && $pMethod == self::HTTP_GET){
                 self::$runtime_cache[md5($pUrl)] = $result;
             }
             return $result;

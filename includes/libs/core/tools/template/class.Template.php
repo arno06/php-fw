@@ -90,7 +90,7 @@ namespace core\tools\template
         );
 
 
-        public function __construct(array $pDefaultData = null)
+        public function __construct(array|null $pDefaultData = null)
         {
             $this->context = new RenderingContext();
             if(!is_null($pDefaultData))
@@ -99,7 +99,9 @@ namespace core\tools\template
             }
             /** @var Application $app */
             $app = Application::getInstance();
-            $this->setup($app->getTemplatesPath(), $app->getTemplatesCachePath());
+            if(!empty($app->__toString())){
+                $this->setup($app->getTemplatesPath(), $app->getTemplatesCachePath());
+            }
         }
 
 

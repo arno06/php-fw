@@ -27,7 +27,7 @@ namespace core\application
 		 * Définit si Query génère automatiquement des requêtes Explain sur les Select
 		 * @var bool
 		 */
-		static public bool $global_explainOnSelect = true;
+		static public bool $global_explainOnSelect = false;
 
         /**
 		 * Définit l'email de contact du site

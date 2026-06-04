@@ -2,6 +2,9 @@
 namespace core\tools\debugger
 {
 
+    use core\data\SimpleJSON;
+    use core\system\File;
+    use core\tools\docs\PHPDocHelpers;
     use core\utils\CLI;
     use ReflectionClass;
 
@@ -69,6 +72,18 @@ namespace core\tools\debugger
             for($i = 0; $i<count($methods); $i++){
                 $method = $methods[$i];
                 $methodName = $method->name;
+                $mockup = PHPDocHelpers::extractDocVar("mockup", $method->getDocComment());
+                $params = [];
+                if(!empty($mockup) && file_exists($mockup)){
+                    $rawData = File::read($mockup);
+                    $parts = explode(".", $mockup);
+                    $extension = array_pop($parts);
+                    $params[] = match($extension){
+                        "json"=>SimpleJSON::decode($rawData),
+                        "xml"=>simplexml_load_string($rawData),
+                        default=>$rawData
+                    };
+                }
                 if(!str_starts_with($methodName, "test") || (!is_null($pMethods) && !in_array($methodName, $pMethods))){
                     continue;
                 }
@@ -76,7 +91,7 @@ namespace core\tools\debugger
                 $this->currentTest = $methodName;
                 track($reflection->name."->".$methodName);
                 try{
-                    $this->$methodName();
+                    call_user_func_array(array($this, $methodName), $params);
                 }
                 catch(\Throwable $e){
                     $error = "An error occured in test \"".$reflection->name."->".$methodName."\"\n".$e->getFile().":".$e->getLine()."\n".$e->getMessage();
@@ -97,7 +112,11 @@ Failed: *$totalFailed*
 
 *$percentSuccess % successful*
 MESS;
-            trace($message);
+            if($totalFailed>0){
+                trigger_error($message, E_USER_WARNING);
+            }else{
+                trace($message);
+            }
         }
 
         public function getResults():array
@@ -106,7 +125,7 @@ MESS;
             $totalAssertions = count($this->assertions);
             $totalFailed = count($this->failed);
 
-            $percentSuccess = $totalAssertions>0?round((($totalAssertions - $totalFailed) / $totalAssertions)*100):0;
+            $percentSuccess = $totalAssertions>0?floor((($totalAssertions - $totalFailed) / $totalAssertions)*100):0;
             return [$totalTest, $totalAssertions, $totalFailed, $percentSuccess];
         }
     }

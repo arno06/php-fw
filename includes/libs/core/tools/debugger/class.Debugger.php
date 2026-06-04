@@ -211,6 +211,10 @@ namespace core\tools\debugger
 			self::addToConsole("query", $pQuery, $pSource, $pDb);
 		}
 
+        public function setTitle(string $pTitle):void
+        {
+            $this->title = $pTitle;
+        }
 
 		/**
 		 * Méthode d'affichage du debugger
